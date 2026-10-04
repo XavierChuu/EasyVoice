@@ -1,0 +1,16 @@
+appId: app.easyvoice.desktop
+productName: EasyVoice
+directories:
+  output: release
+files:
+  - dist/**
+  - dist-electron/**
+  - package.json
+win:
+  target: nsis
+mac:
+  target: dmg
+  category: public.app-category.music
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

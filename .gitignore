@@ -38,3 +38,5 @@ spikes/data/
 *.safetensors
 *.index
 *.onnx
+dist-electron/
+release/

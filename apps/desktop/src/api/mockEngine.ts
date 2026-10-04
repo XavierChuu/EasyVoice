@@ -1,0 +1,580 @@
+// Mock engine: giả lập engine Python (JobQueue, ModelManager, real-time) để dựng và test UI trước Phase 1.
+// Quy tắc mô phỏng theo spec: mỗi lúc 1 job GPU nặng; real-time giữ GPU độc quyền; hủy train = dừng và giữ
+// checkpoint để resume.
+
+import { normalizePreview } from '../lib/normalize';
+import { osName, platform } from '../lib/platform';
+import { slugify, splitSentences } from '../lib/text';
+import type { EngineClient } from './engine';
+import {
+  EngineError,
+  type AudioDevice, type DatasetFile, type DictEntry, type EngineEvent, type ExportOptions, type FileRef,
+  type ImportInspection, type Job, type ModelInfo, type Profile, type RealtimeConfig, type RealtimeStats,
+  type RefAnalysis, type StsRequest, type StsStage, type SystemInfo, type TrainPreset, type TrainStage,
+  type TtsRequest, type VoiceLang,
+} from './types';
+
+const TICK_MS = 120;
+const HEAVY: Job['kind'][] = ['tts', 'sts', 'train'];
+const EPOCHS: Record<TrainPreset, number> = { fast: 100, balanced: 200, thorough: 400 };
+const MODELS_KEY = 'ev.mock.models';
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+const daysAgo = (d: number) => new Date(Date.now() - d * 86400_000).toISOString();
+
+export function trainStage(p: number): TrainStage {
+  return p < 0.15 ? 'preprocess' : p < 0.3 ? 'extract' : p < 0.92 ? 'train' : 'index';
+}
+
+const MODEL_CATALOG: Omit<ModelInfo, 'installed'>[] = [
+  { id: 'f5-vi', name: 'F5-TTS Vietnamese', role: 'Text to Speech', group: 'tts', sizeMb: 1350, license: 'CC-BY-NC-4.0', commercial: false, required: true },
+  { id: 'vocos', name: 'Vocos mel 24 kHz', role: 'Vocoder', group: 'tts', sizeMb: 52, license: 'MIT', commercial: true, required: true },
+  { id: 'whisper-small', name: 'Whisper small (faster-whisper)', role: 'Transcript', group: 'tts', sizeMb: 470, license: 'MIT', commercial: true, required: false },
+  { id: 'contentvec', name: 'ContentVec base', role: 'Voice Changer · encoder', group: 'sts', sizeMb: 360, license: 'MIT', commercial: true, required: true },
+  { id: 'rmvpe', name: 'RMVPE', role: 'Voice Changer · pitch', group: 'sts', sizeMb: 173, license: 'MIT', commercial: true, required: true },
+  { id: 'rvc-pretrained', name: 'RVC v2 pretrained 40k', role: 'Voice training', group: 'sts', sizeMb: 110, license: 'MIT', commercial: true, required: false },
+  { id: 'demucs', name: 'Demucs htdemucs', role: 'Music separation', group: 'common', sizeMb: 320, license: 'MIT', commercial: true, required: false },
+];
+
+function loadInstalled(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(MODELS_KEY) ?? '[]') as string[]);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveInstalled(ids: Set<string>) {
+  try {
+    localStorage.setItem(MODELS_KEY, JSON.stringify([...ids]));
+  } catch {
+    /* private mode */
+  }
+}
+
+async function decodeDuration(ref: FileRef): Promise<{ durationSec: number; sampleRate: number; channels: number } | null> {
+  if (!ref.file || ref.size > 80e6) return null;
+  try {
+    const ctx = new AudioContext();
+    const buf = await ctx.decodeAudioData(await ref.file.arrayBuffer());
+    void ctx.close();
+    return { durationSec: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels };
+  } catch {
+    return null;
+  }
+}
+
+function estimateDuration(ref: FileRef): number {
+  const ext = ref.name.split('.').pop()?.toLowerCase() ?? '';
+  const bytesPerSec = ext === 'wav' ? 96_000 : ext === 'flac' ? 60_000 : 16_000;
+  return ref.size / bytesPerSec;
+}
+
+export class MockEngine implements EngineClient {
+  readonly mode = 'mock' as const;
+  private listeners = new Set<(ev: EngineEvent) => void>();
+  private voices: Profile[];
+  private jobs = new Map<string, Job>();
+  private queue: string[] = [];
+  private presetOf = new Map<string, TrainPreset>();
+  private stsStages = new Map<string, StsStage[]>();
+  private imports = new Map<string, ImportInspection>();
+  private installed = loadInstalled();
+  private rt: { cfg: RealtimeConfig | null; stats: RealtimeStats } = {
+    cfg: null,
+    stats: { running: false, inDb: -120, outDb: -120, latencyMs: 0, underrun: false, underruns: 0 },
+  };
+  private ticks = 0;
+
+  constructor() {
+    this.voices = [
+      { id: 'p1', name: 'My Voice', language: 'vi', createdAt: daysAgo(2), capabilities: ['tts', 'sts'], trainJobId: null, imported: false, hasRef: true, sampleRate: 40000 },
+      { id: 'p2', name: 'Warm Newsreader', language: 'vi', createdAt: daysAgo(6), capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true },
+      { id: 'p3', name: 'Narrator EN', language: 'en', createdAt: daysAgo(13), capabilities: ['tts', 'sts'], trainJobId: null, imported: false, hasRef: true, sampleRate: 40000 },
+      { id: 'p4', name: 'Cartoon Character', language: 'vi', createdAt: daysAgo(0), capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true },
+    ];
+    const train = this.newJob('train', 'Cartoon Character', 'p4');
+    train.progress = 0.62;
+    train.totalEpochs = EPOCHS.balanced;
+    train.log.push('Dataset: 3 files · 17:57 total · 16:40 clean', 'Preprocess done · 412 segments', 'Features extracted (ContentVec + RMVPE)');
+    this.presetOf.set(train.id, 'balanced');
+    this.voices[3].trainJobId = train.id;
+    this.enqueue(train);
+    setInterval(() => this.tick(), TICK_MS);
+  }
+
+  // ---------- events ----------
+  subscribe(cb: (ev: EngineEvent) => void) {
+    this.listeners.add(cb);
+    return () => this.listeners.delete(cb);
+  }
+
+  private emit(ev: EngineEvent) {
+    for (const l of this.listeners) l(ev);
+  }
+
+  private emitVoices() {
+    this.emit({ type: 'voices', voices: this.voices.map((v) => ({ ...v, capabilities: [...v.capabilities] })) });
+  }
+
+  private emitJob(job: Job) {
+    this.emit({ type: 'job', job: { ...job, log: [...job.log], sentences: job.sentences?.map((s) => ({ ...s })) } });
+  }
+
+  // ---------- jobs ----------
+  private newJob(kind: Job['kind'], label: string, profileId?: string): Job {
+    const job: Job = { id: uid('j'), kind, status: 'queued', progress: 0, label, profileId, log: [] };
+    this.jobs.set(job.id, job);
+    return job;
+  }
+
+  private running(): Job | undefined {
+    return [...this.jobs.values()].find((j) => HEAVY.includes(j.kind) && j.status === 'running');
+  }
+
+  private enqueue(job: Job) {
+    job.status = 'queued';
+    this.queue.push(job.id);
+    this.schedule();
+    this.emitJob(job);
+  }
+
+  private schedule() {
+    const cur = this.running();
+    if (!cur && !this.rt.stats.running && this.queue.length) {
+      const next = this.jobs.get(this.queue.shift()!);
+      if (next) {
+        next.status = 'running';
+        next.waitingFor = undefined;
+        this.emitJob(next);
+      }
+    }
+    const holder = this.running()?.label ?? (this.rt.stats.running ? 'Real-time' : undefined);
+    for (const id of this.queue) {
+      const j = this.jobs.get(id);
+      if (j && j.waitingFor !== holder) {
+        j.waitingFor = holder;
+        this.emitJob(j);
+      }
+    }
+  }
+
+  private finish(job: Job, status: Job['status']) {
+    job.status = status;
+    if (status === 'done') job.progress = 1;
+    this.emitJob(job);
+    this.schedule();
+  }
+
+  private tick() {
+    this.ticks++;
+    const job = this.running();
+    if (job) {
+      if (job.kind === 'train') this.tickTrain(job);
+      else if (job.kind === 'tts') this.tickTts(job);
+      else if (job.kind === 'sts') this.tickSts(job);
+    }
+    for (const j of this.jobs.values()) if (j.kind === 'download' && j.status === 'running') this.tickDownload(j);
+    if (this.rt.stats.running) this.tickRealtime();
+    if (this.ticks % 8 === 0) void this.system().then((system) => this.emit({ type: 'system', system }));
+  }
+
+  private tickTrain(job: Job) {
+    const before = trainStage(job.progress);
+    job.progress = Math.min(1, job.progress + 0.003);
+    const stage = trainStage(job.progress);
+    job.stage = stage;
+    const total = job.totalEpochs ?? 200;
+    if (stage === 'train') {
+      const epoch = Math.max(1, Math.round(((job.progress - 0.3) / 0.62) * total));
+      if (epoch !== job.epoch && epoch % 10 === 0) job.log.push(`epoch ${epoch}/${total} · loss_mel ${(28 - epoch / total * 9).toFixed(2)} · checkpoint saved`);
+      job.epoch = epoch;
+    }
+    if (stage !== before) {
+      const msg: Record<TrainStage, string> = {
+        preprocess: 'Preprocess: convert, separate vocals, denoise, slice',
+        extract: 'Preprocess done · extracting features (ContentVec + RMVPE)',
+        train: `Training · preset ${this.presetOf.get(job.id) ?? 'balanced'} · ${total} epochs`,
+        index: 'Training done · building faiss index + preview',
+      };
+      job.log.push(msg[stage]);
+    }
+    if (job.progress >= 1) {
+      job.log.push('Done · model.safetensors + model.index');
+      const v = this.voices.find((p) => p.id === job.profileId);
+      if (v) {
+        if (!v.capabilities.includes('sts')) v.capabilities.push('sts');
+        v.trainJobId = null;
+        v.sampleRate = 40000;
+        this.emitVoices();
+      }
+      this.finish(job, 'done');
+      return;
+    }
+    this.emitJob(job);
+  }
+
+  private tickTts(job: Job) {
+    const list = job.sentences ?? [];
+    const cur = list.find((s) => s.status === 'redo' || s.status === 'rendering') ?? list.find((s) => s.status === 'queued');
+    if (!cur) {
+      job.outputDurationSec = list.reduce((a, s) => a + (s.durationSec ?? 0), 0);
+      this.finish(job, 'done');
+      return;
+    }
+    if (cur.status === 'queued') cur.status = 'rendering';
+    cur.progress = Math.min(1, cur.progress + 0.12);
+    if (cur.progress >= 1) {
+      cur.status = 'done';
+      cur.durationSec = Math.max(0.6, cur.text.length / 14);
+    }
+    job.progress = list.filter((s) => s.status === 'done').length / list.length;
+    this.emitJob(job);
+  }
+
+  private tickSts(job: Job) {
+    job.progress = Math.min(1, job.progress + 0.012);
+    const stages = this.stsStages.get(job.id) ?? [];
+    job.stage = stages[Math.min(stages.length - 1, Math.floor(job.progress * stages.length))];
+    if (job.progress >= 1) {
+      job.outputPath = job.label.replace(/\.[^.]+$/, '') + '-converted.wav';
+      this.finish(job, 'done');
+      return;
+    }
+    this.emitJob(job);
+  }
+
+  private tickDownload(job: Job) {
+    job.progress = Math.min(1, job.progress + 0.01);
+    if (job.progress >= 1) {
+      for (const m of MODEL_CATALOG) if (job.label.split(',').includes(m.id)) this.installed.add(m.id);
+      saveInstalled(this.installed);
+      job.status = 'done';
+    }
+    this.emitJob(job);
+  }
+
+  private tickRealtime() {
+    const cfg = this.rt.cfg!;
+    const quiet = Math.random() < 0.2;
+    const lvl = quiet ? Math.random() * 12 : 35 + Math.random() * 60;
+    const toDb = (l: number) => (l <= 0.5 ? -120 : 20 * Math.log10(l / 100));
+    const inDb = toDb(lvl);
+    const gated = inDb < cfg.gateDb;
+    const outLvl = gated ? 0 : Math.max(0, Math.min(100, lvl - 6 + Math.random() * 8));
+    const underrun = cfg.blockMs <= 100 && Math.random() < 0.1;
+    this.rt.stats = {
+      running: true,
+      inDb,
+      outDb: toDb(outLvl),
+      latencyMs: Math.round(cfg.blockMs + 90 + Math.random() * 25),
+      underrun,
+      underruns: this.rt.stats.underruns + (underrun ? 1 : 0),
+    };
+    this.emit({ type: 'realtime', stats: { ...this.rt.stats } });
+  }
+
+  // ---------- system ----------
+  async system(): Promise<SystemInfo> {
+    let vram = 1.2;
+    const cur = this.running();
+    if (cur?.kind === 'train') vram += 4.6;
+    if (cur?.kind === 'tts') vram += 3.1;
+    if (cur?.kind === 'sts') vram += 2.8;
+    if (this.rt.stats.running) vram += 2.4;
+    const mac = osName() === 'mac';
+    return {
+      appVersion: '0.1.0',
+      gpu: mac ? 'Apple M2 Pro' : 'RTX 3060',
+      device: mac ? 'mps' : 'cuda:0',
+      vramTotalGb: mac ? 16 : 12,
+      vramUsedGb: Math.min(vram, 11.6),
+      diskFreeGb: 184,
+      driverOk: true,
+      models: MODEL_CATALOG.map((m) => ({ ...m, installed: this.installed.has(m.id) })),
+    };
+  }
+
+  async downloadModels(ids: string[]) {
+    const job = this.newJob('download', ids.join(','));
+    job.status = 'running';
+    this.emitJob(job);
+    return job.id;
+  }
+
+  // ---------- voices ----------
+  async listVoices() {
+    return this.voices.map((v) => ({ ...v }));
+  }
+
+  async analyzeRef(file: FileRef): Promise<RefAnalysis> {
+    await sleep(400);
+    const d = (await decodeDuration(file)) ?? { durationSec: 8.4, sampleRate: 48000, channels: 1 };
+    const warnings: RefAnalysis['warnings'] = [];
+    if (d.durationSec < 5) warnings.push('too_short');
+    if (d.durationSec > 12) warnings.push('too_long');
+    if (/music|nhac|song/i.test(file.name)) warnings.push('music');
+    return {
+      ...d,
+      checks: [
+        { key: 'trim', ok: true },
+        { key: 'loudness', ok: true },
+        { key: 'music', ok: !warnings.includes('music') },
+      ],
+      warnings,
+    };
+  }
+
+  async analyzeDataset(files: FileRef[]): Promise<DatasetFile[]> {
+    const out: DatasetFile[] = [];
+    for (const ref of files) out.push({ ref, durationSec: (await decodeDuration(ref))?.durationSec ?? estimateDuration(ref) });
+    return out;
+  }
+
+  async transcribe(_file: FileRef, lang: VoiceLang) {
+    await sleep(1200);
+    return lang === 'vi'
+      ? 'Xin chào mọi người, hôm nay mình sẽ hướng dẫn một công thức rất đơn giản.'
+      : 'Hi everyone, today I will show you a really simple recipe.';
+  }
+
+  async createQuickVoice(input: { name: string; language: VoiceLang; file: FileRef; transcript: string }) {
+    await sleep(800);
+    const p: Profile = {
+      id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(),
+      capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true,
+    };
+    this.voices.unshift(p);
+    this.emitVoices();
+    return { ...p };
+  }
+
+  async startTraining(input: { name: string; language: VoiceLang; files: FileRef[]; separate: boolean; preset: TrainPreset }) {
+    await sleep(300);
+    const p: Profile = {
+      id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(),
+      capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true,
+    };
+    const job = this.newJob('train', input.name, p.id);
+    job.totalEpochs = EPOCHS[input.preset];
+    job.log.push(
+      `Dataset: ${input.files.length} files${input.separate ? ' · music separation + denoise on' : ''}`,
+      'Auto-selected a clean 9.2 s reference clip + Whisper transcript for Text to Speech',
+    );
+    this.presetOf.set(job.id, input.preset);
+    p.trainJobId = job.id;
+    this.voices.unshift(p);
+    this.emitVoices();
+    this.enqueue(job);
+    return { ...p };
+  }
+
+  async renameVoice(id: string, name: string) {
+    const v = this.voices.find((p) => p.id === id);
+    if (v) v.name = name;
+    this.emitVoices();
+  }
+
+  async deleteVoice(id: string) {
+    const v = this.voices.find((p) => p.id === id);
+    if (v?.trainJobId) {
+      const job = this.jobs.get(v.trainJobId);
+      if (job) {
+        this.queue = this.queue.filter((q) => q !== job.id);
+        this.finish(job, 'cancelled');
+      }
+    }
+    this.voices = this.voices.filter((p) => p.id !== id);
+    this.emitVoices();
+  }
+
+  async previewVoice() {
+    return 4;
+  }
+
+  // ---------- import / export ----------
+  async inspectImport(files: FileRef[]): Promise<ImportInspection> {
+    await sleep(700);
+    const token = uid('imp');
+    const evoice = files.find((f) => /\.evoice$/i.test(f.name));
+    const pth = files.find((f) => /\.pth$/i.test(f.name));
+    const index = files.find((f) => /\.index$/i.test(f.name));
+    let ins: ImportInspection;
+    if (evoice) {
+      ins = {
+        token, kind: 'evoice', fileLabel: evoice.name, blocked: false,
+        checks: [
+          { key: 'format', value: 'EVOICE v1' }, { key: 'checksums', value: '6/6 match' },
+          { key: 'model', value: 'safetensors · weights only' }, { key: 'appVersion', value: '≥ 0.1.0 · OK' },
+        ],
+        suggestedName: evoice.name.replace(/\.evoice$/i, '').replace(/[-_]+/g, ' '),
+        author: 'minh.voice', language: 'vi', license: 'personal', capabilities: ['tts', 'sts'],
+        createdAt: '2026-09-30', sampleRate: 40000,
+      };
+    } else if (pth) {
+      const unsafe = /unsafe|free_voice_pack/i.test(pth.name);
+      ins = unsafe
+        ? {
+          token, kind: 'rvc', fileLabel: pth.name, blocked: true,
+          checks: [
+            { key: 'format', value: 'PyTorch pickle' },
+            { key: 'safeLoad', value: 'FAILED · code objects found', bad: true },
+            { key: 'result', value: 'BLOCKED', bad: true },
+          ],
+          suggestedName: '', author: '', language: 'unknown', license: 'unknown', capabilities: [], sampleRate: 0,
+        }
+        : {
+          token, kind: 'rvc', fileLabel: [pth.name, index?.name].filter(Boolean).join(' + '), blocked: false,
+          checks: [
+            { key: 'format', value: 'RVC v2 · 40 kHz' },
+            { key: 'safeLoad', value: 'weights_only · isolated process · OK' },
+            { key: 'convert', value: '.pth → .safetensors' },
+            index ? { key: 'index', value: 'faiss IVF512 · OK' } : { key: 'index', value: 'missing · lower similarity', bad: true },
+          ],
+          suggestedName: pth.name.replace(/\.pth$/i, ''), author: 'unknown', language: 'unknown', license: 'unknown',
+          capabilities: ['sts'], sampleRate: 40000,
+        };
+    } else {
+      throw new EngineError('BAD_FILE');
+    }
+    this.imports.set(token, ins);
+    return ins;
+  }
+
+  async importVoice(token: string, name: string) {
+    const ins = this.imports.get(token);
+    if (!ins || ins.blocked) throw new EngineError('UNSAFE_MODEL');
+    await sleep(600);
+    const p: Profile = {
+      id: uid('p'), name, language: ins.language, createdAt: new Date().toISOString(),
+      capabilities: [...ins.capabilities], trainJobId: null, imported: true, author: ins.author,
+      license: ins.license, hasRef: ins.capabilities.includes('tts'), sampleRate: ins.sampleRate,
+    };
+    this.voices.unshift(p);
+    this.emitVoices();
+    return { ...p };
+  }
+
+  estimateExport(_id: string, opts: { includeModel: boolean; includeRef: boolean }) {
+    return (opts.includeModel ? 142.6 : 0) + (opts.includeRef ? 1.6 : 0) + 0.4;
+  }
+
+  async exportVoice(id: string, opts: ExportOptions) {
+    await sleep(900);
+    const v = this.voices.find((p) => p.id === id);
+    const { downloads } = await platform.appPaths();
+    return { path: `${downloads}/${slugify(v?.name ?? 'voice')}.evoice`, sizeMb: this.estimateExport(id, opts) };
+  }
+
+  // ---------- TTS ----------
+  normalizePreview(text: string, lang: VoiceLang, dict: DictEntry[]) {
+    return normalizePreview(text, lang, dict);
+  }
+
+  private assertGpuFree() {
+    if (this.rt.stats.running) throw new EngineError('GPU_BUSY_REALTIME');
+  }
+
+  async startTts(req: TtsRequest) {
+    this.assertGpuFree();
+    const v = this.voices.find((p) => p.id === req.profileId);
+    const job = this.newJob('tts', v?.name ?? 'TTS', req.profileId);
+    job.sentences = splitSentences(req.text).map((text, index) => ({ index, text, status: 'queued', progress: 0 }));
+    this.enqueue(job);
+    return job.id;
+  }
+
+  async redoSentence(jobId: string, index: number) {
+    this.assertGpuFree();
+    const job = this.jobs.get(jobId);
+    const s = job?.sentences?.[index];
+    if (!job || !s) return;
+    s.status = 'redo';
+    s.progress = 0;
+    if (job.status === 'done' || job.status === 'cancelled') this.enqueue(job);
+    else this.emitJob(job);
+  }
+
+  async exportTts(jobId: string, format: 'wav' | 'mp3' | 'flac' | 'srt') {
+    await sleep(500);
+    const { downloads } = await platform.appPaths();
+    return `${downloads}/easyvoice-tts-${jobId.slice(-6)}.${format}`;
+  }
+
+  // ---------- STS ----------
+  async startSts(req: StsRequest) {
+    this.assertGpuFree();
+    const job = this.newJob('sts', req.file.name, req.profileId);
+    this.stsStages.set(job.id, req.separate ? ['demux', 'separate', 'convert', 'remix'] : ['demux', 'prep', 'convert', 'join']);
+    this.enqueue(job);
+    return job.id;
+  }
+
+  async exportSts(jobId: string) {
+    await sleep(500);
+    const job = this.jobs.get(jobId);
+    const { downloads } = await platform.appPaths();
+    return `${downloads}/${job?.outputPath ?? 'converted.wav'}`;
+  }
+
+  // ---------- jobs control ----------
+  async cancelJob(id: string) {
+    const job = this.jobs.get(id);
+    if (!job) return;
+    this.queue = this.queue.filter((q) => q !== id);
+    if (job.kind === 'train') {
+      if (job.epoch) job.log.push(`Paused · checkpoint kept at epoch ${job.epoch}`);
+      else job.log.push('Paused');
+      this.finish(job, 'paused');
+    } else {
+      this.finish(job, 'cancelled');
+    }
+  }
+
+  async resumeJob(id: string) {
+    const job = this.jobs.get(id);
+    if (!job || job.status !== 'paused') return;
+    job.log.push(job.epoch ? `Resuming from checkpoint · epoch ${job.epoch}` : 'Resuming');
+    this.enqueue(job);
+  }
+
+  // ---------- real-time ----------
+  async audioDevices(): Promise<{ inputs: AudioDevice[]; outputs: AudioDevice[] }> {
+    const mac = osName() === 'mac';
+    return {
+      inputs: [
+        { id: 'in-usb', name: 'USB Podcast Mic', virtual: false },
+        { id: 'in-builtin', name: mac ? 'MacBook Pro Microphone' : 'Built-in Microphone', virtual: false },
+      ],
+      outputs: [
+        { id: 'out-spk', name: mac ? 'MacBook Pro Speakers' : 'Speakers (Realtek)', virtual: false },
+        mac
+          ? { id: 'out-bh', name: 'BlackHole 2ch', virtual: true }
+          : { id: 'out-cable', name: 'CABLE Input (VB-Audio)', virtual: true },
+      ],
+    };
+  }
+
+  async startRealtime(cfg: RealtimeConfig) {
+    const v = this.voices.find((p) => p.id === cfg.profileId);
+    if (!v || !v.capabilities.includes('sts') || v.trainJobId) throw new EngineError('NO_STS_VOICE');
+    const cur = this.running();
+    if (cur) throw new EngineError('GPU_BUSY_JOB', cur.label);
+    await sleep(300);
+    this.rt.cfg = { ...cfg };
+    this.rt.stats = { running: true, inDb: -120, outDb: -120, latencyMs: 0, underrun: false, underruns: 0 };
+    this.schedule();
+  }
+
+  async updateRealtime(patch: Partial<Pick<RealtimeConfig, 'pitch' | 'gateDb'>>) {
+    if (this.rt.cfg) this.rt.cfg = { ...this.rt.cfg, ...patch };
+  }
+
+  async stopRealtime() {
+    this.rt.cfg = null;
+    this.rt.stats = { running: false, inDb: -120, outDb: -120, latencyMs: 0, underrun: false, underruns: 0 };
+    this.emit({ type: 'realtime', stats: { ...this.rt.stats } });
+    this.schedule();
+  }
+}
