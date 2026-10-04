@@ -1,5 +1,7 @@
 # Câu hỏi còn mở
 
+Đề xuất cho từng câu: xem `docs/adr/0001-de-xuat-ky-thuat.md`.
+
 ## Từ spec (mục 10)
 - [ ] App miễn phí hay bán? (ảnh hưởng chọn model, xem mục 9)
 - [ ] Dùng checkpoint F5-TTS tiếng Việt nào?
@@ -16,4 +18,4 @@
 - [ ] **Encoder nội dung:** dùng ContentVec dạng `transformers` (không cần fairseq) thay cho `hubert_base.pt` của RVC gốc —
       Phase 0 cần nghe so sánh để xác nhận chất lượng tương đương.
 - [ ] Spec ghi "Python 3.10 hoặc 3.11"; spike dùng **3.11** + torch 2.8. Chốt lại sau Phase 0.
-- [ ] File `EasyVoice UI mẫu.html`: là thiết kế chốt cho Phase 2/5 hay chỉ tham khảo?
+- [x] File `EasyVoice UI mẫu.html` là thiết kế đã chốt (xác nhận Oct 2026).

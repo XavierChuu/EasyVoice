@@ -1,8 +1,7 @@
 """Tải model cho spike theo models.spike.json: tải tiếp khi rớt mạng (HTTP Range), kiểm sha256 nếu đã có.
 
-  python download_models.py                 # nhóm rvc + tts
+  python download_models.py                 # rvc + tts + tts-base (F5 gốc, cho test tiếng Anh)
   python download_models.py --group rvc
-  python download_models.py --group tts-base
 
 Repo gated trên Hugging Face: đặt biến môi trường HF_TOKEN.
 Checkpoint F5-TTS tiếng Việt KHÔNG nằm trong danh sách — chọn và tải tay (xem README, mục "Checkpoint tiếng Việt").
@@ -58,7 +57,7 @@ def download(url: str, dest: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--group", nargs="+", default=["rvc", "tts"])
+    ap.add_argument("--group", nargs="+", default=["rvc", "tts", "tts-base"])
     ap.add_argument("--manifest", default=str(SPIKES_DIR / "models.spike.json"))
     args = ap.parse_args()
 

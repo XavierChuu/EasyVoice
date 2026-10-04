@@ -47,7 +47,7 @@
       "url": "https://huggingface.co/SWivid/F5-TTS/resolve/main/F5TTS_v1_Base/model_1250000.safetensors",
       "dest": "f5-base/model_1250000.safetensors",
       "sha256": null,
-      "license": "CC-BY-NC-4.0 (phi thương mại) — chỉ để so sánh tốc độ, không phải checkpoint tiếng Việt"
+      "license": "CC-BY-NC-4.0 (phi thương mại) — dùng cho test tiếng Anh ở Phase 0, không phải checkpoint tiếng Việt"
     }
   ]
 }

@@ -11,7 +11,17 @@
 | Driver / OS | | |
 | torch / CUDA | | |
 
-## 1. F5-TTS tiếng Việt
+## 1a. F5-TTS tiếng Anh (checkpoint gốc F5TTS_v1_Base, ref đi kèm gói) — chạy trước
+
+| Chỉ số | Windows CUDA | macOS MPS | Mục tiêu (spec mục 5) |
+|---|---|---|---|
+| Thời gian load | | | |
+| RTF tổng (nfe 32) | | | ≤ 0.5 trên RTX 3060 |
+| VRAM đỉnh | | | |
+
+Nghe thử: …
+
+## 1b. F5-TTS tiếng Việt
 
 Checkpoint: `…` (kiến trúc `…`, license `…`)
 

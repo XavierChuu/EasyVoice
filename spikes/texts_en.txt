@@ -1,0 +1,7 @@
+# English test sentences for F5-TTS (Phase 0 runs English first). Lines starting with # are ignored.
+Hello.
+The quick brown fox jumps over the lazy dog.
+This application runs entirely on your computer and never needs an internet connection.
+The ticket costs one hundred and twenty five dollars, and the train leaves at seven thirty in the morning.
+Are you sure you want to delete this voice? This action cannot be undone!
+Once upon a time, in a small village by the river, there lived a boy who loved to listen to the birds every morning. He would wake up early, sit on the doorstep, and listen to every sound of the sunrise. One day he heard a strange song, clearer and longer than ever before, and that was how his adventure began.

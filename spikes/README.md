@@ -5,7 +5,7 @@ Kết quả nghiệm thu: điền `REPORT.md` (số đo, ảnh hưởng tới ca
 
 | Việc cần làm (spec mục 7) | Script | Kết quả ghi vào |
 |---|---|---|
-| F5-TTS checkpoint tiếng Việt trên CUDA và MPS, đo RTF + VRAM đỉnh | `f5_tts_spike.py` | `results/f5_tts-*.json`, `out/f5/*.wav` |
+| F5-TTS checkpoint tiếng Việt trên CUDA và MPS, đo RTF + VRAM đỉnh | `f5_tts_spike.py` | `results/f5_tts_<lang>-*.json`, `out/f5/*.wav` |
 | RVC infer offline + RMVPE | `rvc_offline_spike.py` | `results/rvc_offline-*.json` |
 | RVC real-time tối giản micro → model → loa, độ trễ ở block 100/160/250 ms | `rvc_realtime_spike.py` | `results/rvc_realtime_*.json` |
 | Thời gian train 10 phút audio × 1 preset | `time_cmd.py` + công cụ train ngoài (Applio) | `results/time_*.json` |
@@ -57,11 +57,25 @@ python -m pytest tests -q
 output phải trùng input sau khi bù độ trễ, không có tiếng click.
 Có thể chạy thử toàn bộ đường code RVC với trọng số ngẫu nhiên bằng cờ `--dummy` (output là nhiễu, chỉ để test).
 
+## Thứ tự test: tiếng Anh trước, tiếng Việt sau
+
+Tiếng Anh dùng checkpoint gốc F5-TTS (đã được kiểm chứng) và đoạn ref tiếng Anh đi kèm gói `f5-tts`, nên chạy được
+ngay mà không phải chọn checkpoint hay tự thu âm. Khi số đo tiếng Anh ổn mới chuyển sang checkpoint tiếng Việt —
+lúc đó khác biệt (nếu có) là do checkpoint, không phải do môi trường.
+
+```bash
+python download_models.py        # model RVC phụ trợ + vocos + F5-TTS gốc
+python prepare_samples.py        # samples/en_ref.wav, en_ref.txt, en_speech.wav (~30 s)
+python f5_tts_spike.py           # TTS tiếng Anh, mặc định mọi thứ
+python prepare_samples.py --from-f5-out   # (tùy chọn) en_speech.wav từ chính giọng TTS vừa sinh, tự nhiên hơn
+python rvc_offline_spike.py --input samples/en_speech.wav --model <voice.pth> --index <voice.index>
+python rvc_realtime_spike.py --bench-input samples/en_speech.wav --model <voice.pth>
+```
+
 ## 2. Tải model
 
 ```bash
-python download_models.py                # rmvpe, ContentVec, vocos → spikes/models/
-python download_models.py --group tts-base   # (tùy chọn) F5-TTS gốc để so tốc độ
+python download_models.py        # rmvpe, ContentVec, vocos, F5-TTS gốc → spikes/models/
 ```
 
 Script in sha256 của từng file — ghi lại vào `models.spike.json` để lần sau kiểm tra.
@@ -86,7 +100,8 @@ Cần một model RVC **v2** (`.pth` + `.index`) của giọng có quyền sử 
 ## 3. F5-TTS
 
 ```bash
-python f5_tts_spike.py \
+python f5_tts_spike.py            # tiếng Anh (checkpoint gốc + ref đi kèm), chạy trước
+python f5_tts_spike.py --lang vi \
   --ckpt models/f5-vi-<tên>/model.pt --vocab models/f5-vi-<tên>/vocab.txt --model F5TTS_Base \
   --ref-audio samples/ref.wav --ref-text "transcript chính xác của ref"
 ```

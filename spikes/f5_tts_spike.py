@@ -1,4 +1,7 @@
-"""Spike Phase 0 — F5-TTS zero-shot tiếng Việt, gọi thẳng thư viện f5-tts (không API, không UI).
+"""Spike Phase 0 — F5-TTS zero-shot, gọi thẳng thư viện f5-tts (không API, không UI).
+
+Chạy tiếng Anh trước (mặc định: checkpoint gốc F5TTS_v1_Base + đoạn ref tiếng Anh đi kèm gói f5-tts),
+sau đó mới tới checkpoint tiếng Việt.
 
 Đo: thời gian load, RTF từng câu (thời gian render / thời lượng audio sinh ra), bộ nhớ GPU đỉnh.
 Mục tiêu spec mục 5: RTF ≤ 0.5 trên RTX 3060.
@@ -6,7 +9,8 @@ Mục tiêu spec mục 5: RTF ≤ 0.5 trên RTX 3060.
 Văn bản đầu vào phải đã chuẩn hóa sẵn (số, ngày, đơn vị viết thành chữ) — bộ chuẩn hóa tiếng Việt làm ở Phase 1.
 
 Ví dụ:
-  python f5_tts_spike.py --ckpt models/f5-vi/model.pt --vocab models/f5-vi/vocab.txt \
+  python f5_tts_spike.py                   # tiếng Anh, không cần chuẩn bị gì thêm
+  python f5_tts_spike.py --lang vi --ckpt models/f5-vi/model.pt --vocab models/f5-vi/vocab.txt \
       --ref-audio samples/ref.wav --ref-text "nội dung chính xác của đoạn ref" \
       --vocoder models/vocos-mel-24khz
   python f5_tts_spike.py ... --nfe 16      # thử số bước ODE thấp hơn (nhanh hơn, chất lượng giảm)
@@ -39,9 +43,10 @@ def main() -> None:
                     help="cấu hình kiến trúc của checkpoint: F5TTS_v1_Base hoặc F5TTS_Base (nhiều bản fine-tune cũ)")
     ap.add_argument("--vocoder", default=str(MODELS_DIR / "vocos-mel-24khz"),
                     help="thư mục vocos (config.yaml + pytorch_model.bin); không có thì thư viện tự tải từ HF")
-    ap.add_argument("--ref-audio", required=True, help="5-12 s audio sạch")
-    ap.add_argument("--ref-text", required=True, help="transcript chính xác của ref (không dùng Whisper trong spike)")
-    ap.add_argument("--texts", default=str(SPIKES_DIR / "texts_vi.txt"), help="mỗi dòng một câu/đoạn")
+    ap.add_argument("--lang", choices=["en", "vi"], default="en", help="chọn bộ câu thử mặc định")
+    ap.add_argument("--ref-audio", help="5-12 s audio sạch (mặc định với --lang en: ref tiếng Anh đi kèm f5-tts)")
+    ap.add_argument("--ref-text", help="transcript chính xác của ref (không dùng Whisper trong spike)")
+    ap.add_argument("--texts", help="mỗi dòng một câu/đoạn (mặc định texts_<lang>.txt)")
     ap.add_argument("--device", default="auto")
     ap.add_argument("--nfe", type=int, default=32, help="số bước ODE (mặc định 32)")
     ap.add_argument("--speed", type=float, default=1.0)
@@ -52,10 +57,21 @@ def main() -> None:
     if args.ckpt and not args.vocab:
         ap.error("checkpoint fine-tune cần --vocab tương ứng")
 
+    from importlib.resources import files
+
     from f5_tts.api import F5TTS
 
+    if not args.ref_audio:
+        if args.lang != "en":
+            ap.error("--lang vi cần --ref-audio và --ref-text")
+        args.ref_audio = str(files("f5_tts").joinpath("infer/examples/basic/basic_ref_en.wav"))
+        args.ref_text = args.ref_text or "Some call me nature, others call me mother nature."
+    if not args.ref_text:
+        ap.error("cần --ref-text cho --ref-audio")
+    args.texts = args.texts or str(SPIKES_DIR / f"texts_{args.lang}.txt")
+
     device = pick_device(args.device)
-    res = Results("f5_tts", device, params={k: v for k, v in vars(args).items()})
+    res = Results(f"f5_tts_{args.lang}", device, params={k: v for k, v in vars(args).items()})
     reset_peak_memory(device)
 
     vocoder_dir = Path(args.vocoder)
