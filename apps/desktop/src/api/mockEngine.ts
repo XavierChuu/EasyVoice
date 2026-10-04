@@ -2,6 +2,7 @@
 // Quy tắc mô phỏng theo spec: mỗi lúc 1 job GPU nặng; real-time giữ GPU độc quyền; hủy train = dừng và giữ
 // checkpoint để resume.
 
+import { decodeDuration, estimateDuration } from '../lib/audioMeta';
 import { normalizePreview } from '../lib/normalize';
 import { osName, platform } from '../lib/platform';
 import { slugify, splitSentences } from '../lib/text';
@@ -23,6 +24,12 @@ const MODELS_KEY = 'ev.mock.models';
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const daysAgo = (d: number) => new Date(Date.now() - d * 86400_000).toISOString();
+
+const mkProfile = (p: Partial<Profile> & Pick<Profile, 'id' | 'name' | 'language' | 'createdAt' | 'capabilities'>): Profile => ({
+  trainJobId: null, imported: false, author: null, license: 'personal', hasRef: true, sampleRate: null, ...p,
+});
+
+const ok = (key: string, value: string, bad = false) => ({ key, value, bad });
 
 export function trainStage(p: number): TrainStage {
   return p < 0.15 ? 'preprocess' : p < 0.3 ? 'extract' : p < 0.92 ? 'train' : 'index';
@@ -54,24 +61,6 @@ function saveInstalled(ids: Set<string>) {
   }
 }
 
-async function decodeDuration(ref: FileRef): Promise<{ durationSec: number; sampleRate: number; channels: number } | null> {
-  if (!ref.file || ref.size > 80e6) return null;
-  try {
-    const ctx = new AudioContext();
-    const buf = await ctx.decodeAudioData(await ref.file.arrayBuffer());
-    void ctx.close();
-    return { durationSec: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels };
-  } catch {
-    return null;
-  }
-}
-
-function estimateDuration(ref: FileRef): number {
-  const ext = ref.name.split('.').pop()?.toLowerCase() ?? '';
-  const bytesPerSec = ext === 'wav' ? 96_000 : ext === 'flac' ? 60_000 : 16_000;
-  return ref.size / bytesPerSec;
-}
-
 export class MockEngine implements EngineClient {
   readonly mode = 'mock' as const;
   private listeners = new Set<(ev: EngineEvent) => void>();
@@ -95,10 +84,10 @@ export class MockEngine implements EngineClient {
 
   constructor() {
     this.voices = [
-      { id: 'p1', name: 'My Voice', language: 'vi', createdAt: daysAgo(2), capabilities: ['tts', 'sts'], trainJobId: null, imported: false, hasRef: true, sampleRate: 40000 },
-      { id: 'p2', name: 'Warm Newsreader', language: 'vi', createdAt: daysAgo(6), capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true },
-      { id: 'p3', name: 'Narrator EN', language: 'en', createdAt: daysAgo(13), capabilities: ['tts', 'sts'], trainJobId: null, imported: false, hasRef: true, sampleRate: 40000 },
-      { id: 'p4', name: 'Cartoon Character', language: 'vi', createdAt: daysAgo(0), capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true },
+      mkProfile({ id: 'p1', name: 'My Voice', language: 'vi', createdAt: daysAgo(2), capabilities: ['tts', 'sts'], sampleRate: 40000 }),
+      mkProfile({ id: 'p2', name: 'Warm Newsreader', language: 'vi', createdAt: daysAgo(6), capabilities: ['tts'] }),
+      mkProfile({ id: 'p3', name: 'Narrator EN', language: 'en', createdAt: daysAgo(13), capabilities: ['tts', 'sts'], sampleRate: 40000 }),
+      mkProfile({ id: 'p4', name: 'Cartoon Character', language: 'vi', createdAt: daysAgo(0), capabilities: ['tts'] }),
     ];
     const train = this.newJob('train', 'Cartoon Character', 'p4');
     train.progress = 0.62;
@@ -125,12 +114,16 @@ export class MockEngine implements EngineClient {
   }
 
   private emitJob(job: Job) {
-    this.emit({ type: 'job', job: { ...job, log: [...job.log], sentences: job.sentences?.map((s) => ({ ...s })) } });
+    this.emit({ type: 'job', job: { ...job, log: [...job.log], files: { ...job.files }, sentences: job.sentences ? job.sentences.map((s) => ({ ...s })) : null } });
   }
 
   // ---------- jobs ----------
   private newJob(kind: Job['kind'], label: string, profileId?: string): Job {
-    const job: Job = { id: uid('j'), kind, status: 'queued', progress: 0, label, profileId, log: [] };
+    const job: Job = {
+      id: uid('j'), kind, status: 'queued', progress: 0, label, profileId: profileId ?? null, stage: null, waitingFor: null,
+      log: [], error: null, errorDetail: null, device: null, epoch: null, totalEpochs: null, sentences: null, files: {},
+      outputDurationSec: null, createdAt: Date.now() / 1000,
+    };
     this.jobs.set(job.id, job);
     return job;
   }
@@ -152,11 +145,11 @@ export class MockEngine implements EngineClient {
       const next = this.jobs.get(this.queue.shift()!);
       if (next) {
         next.status = 'running';
-        next.waitingFor = undefined;
+        next.waitingFor = null;
         this.emitJob(next);
       }
     }
-    const holder = this.running()?.label ?? (this.rt.stats.running ? 'Real-time' : undefined);
+    const holder = this.running()?.label ?? (this.rt.stats.running ? 'Real-time' : null);
     for (const id of this.queue) {
       const j = this.jobs.get(id);
       if (j && j.waitingFor !== holder) {
@@ -244,7 +237,7 @@ export class MockEngine implements EngineClient {
     const stages = this.stsStages.get(job.id) ?? [];
     job.stage = stages[Math.min(stages.length - 1, Math.floor(job.progress * stages.length))];
     if (job.progress >= 1) {
-      job.outputPath = job.label.replace(/\.[^.]+$/, '') + '-converted.wav';
+      job.files.output = job.label.replace(/\.[^.]+$/, '') + '-converted.wav';
       void this.renderStsMock(job.id).finally(() => this.finish(job, 'done'));
       job.progress = 0.999;
       return;
@@ -299,6 +292,8 @@ export class MockEngine implements EngineClient {
       vramUsedGb: Math.min(vram, 11.6),
       diskFreeGb: 184,
       driverOk: true,
+      realtime: this.rt.stats.running,
+      loadedModels: [],
       models: MODEL_CATALOG.map((m) => ({ ...m, installed: this.installed.has(m.id) })),
     };
   }
@@ -348,10 +343,7 @@ export class MockEngine implements EngineClient {
 
   async createQuickVoice(input: { name: string; language: VoiceLang; file: FileRef; transcript: string }) {
     await sleep(800);
-    const p: Profile = {
-      id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(),
-      capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true,
-    };
+    const p = mkProfile({ id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(), capabilities: ['tts'] });
     this.refAudio.set(p.id, input.file);
     this.voices.unshift(p);
     this.emitVoices();
@@ -360,10 +352,7 @@ export class MockEngine implements EngineClient {
 
   async startTraining(input: { name: string; language: VoiceLang; files: FileRef[]; separate: boolean; preset: TrainPreset }) {
     await sleep(300);
-    const p: Profile = {
-      id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(),
-      capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true,
-    };
+    const p = mkProfile({ id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(), capabilities: ['tts'] });
     const job = this.newJob('train', input.name, p.id);
     job.totalEpochs = EPOCHS[input.preset];
     job.log.push(
@@ -417,8 +406,8 @@ export class MockEngine implements EngineClient {
       ins = {
         token, kind: 'evoice', fileLabel: evoice.name, blocked: false,
         checks: [
-          { key: 'format', value: 'EVOICE v1' }, { key: 'checksums', value: '6/6 match' },
-          { key: 'model', value: 'safetensors · weights only' }, { key: 'appVersion', value: '≥ 0.1.0 · OK' },
+          ok('format', 'EVOICE v1'), ok('checksums', '6/6 match'),
+          ok('model', 'safetensors · weights only'), ok('appVersion', '≥ 0.1.0 · OK'),
         ],
         suggestedName: evoice.name.replace(/\.evoice$/i, '').replace(/[-_]+/g, ' '),
         author: 'minh.voice', language: 'vi', license: 'personal', capabilities: ['tts', 'sts'],
@@ -430,22 +419,22 @@ export class MockEngine implements EngineClient {
         ? {
           token, kind: 'rvc', fileLabel: pth.name, blocked: true,
           checks: [
-            { key: 'format', value: 'PyTorch pickle' },
-            { key: 'safeLoad', value: 'FAILED · code objects found', bad: true },
-            { key: 'result', value: 'BLOCKED', bad: true },
+            ok('format', 'PyTorch pickle'),
+            ok('safeLoad', 'FAILED · code objects found', true),
+            ok('result', 'BLOCKED', true),
           ],
-          suggestedName: '', author: '', language: 'unknown', license: 'unknown', capabilities: [], sampleRate: 0,
+          suggestedName: '', author: '', language: 'unknown', license: 'unknown', capabilities: [], sampleRate: 0, createdAt: null,
         }
         : {
           token, kind: 'rvc', fileLabel: [pth.name, index?.name].filter(Boolean).join(' + '), blocked: false,
           checks: [
-            { key: 'format', value: 'RVC v2 · 40 kHz' },
-            { key: 'safeLoad', value: 'weights_only · isolated process · OK' },
-            { key: 'convert', value: '.pth → .safetensors' },
-            index ? { key: 'index', value: 'faiss IVF512 · OK' } : { key: 'index', value: 'missing · lower similarity', bad: true },
+            ok('format', 'RVC v2 · 40 kHz'),
+            ok('safeLoad', 'weights_only · isolated process · OK'),
+            ok('convert', '.pth → .safetensors'),
+            index ? ok('index', 'faiss IVF512 · OK') : ok('index', 'missing · lower similarity', true),
           ],
           suggestedName: pth.name.replace(/\.pth$/i, ''), author: 'unknown', language: 'unknown', license: 'unknown',
-          capabilities: ['sts'], sampleRate: 40000,
+          capabilities: ['sts'], sampleRate: 40000, createdAt: null,
         };
     } else {
       throw new EngineError('BAD_FILE');
@@ -458,11 +447,10 @@ export class MockEngine implements EngineClient {
     const ins = this.imports.get(token);
     if (!ins || ins.blocked) throw new EngineError('UNSAFE_MODEL');
     await sleep(600);
-    const p: Profile = {
-      id: uid('p'), name, language: ins.language, createdAt: new Date().toISOString(),
-      capabilities: [...ins.capabilities], trainJobId: null, imported: true, author: ins.author,
-      license: ins.license, hasRef: ins.capabilities.includes('tts'), sampleRate: ins.sampleRate,
-    };
+    const p = mkProfile({
+      id: uid('p'), name, language: ins.language, createdAt: new Date().toISOString(), capabilities: [...ins.capabilities],
+      imported: true, author: ins.author, license: ins.license, hasRef: ins.capabilities.includes('tts'), sampleRate: ins.sampleRate,
+    });
     this.voices.unshift(p);
     this.emitVoices();
     return { ...p };
@@ -492,7 +480,7 @@ export class MockEngine implements EngineClient {
     this.assertGpuFree();
     const v = this.voices.find((p) => p.id === req.profileId);
     const job = this.newJob('tts', v?.name ?? 'TTS', req.profileId);
-    job.sentences = splitSentences(req.text).map((text, index) => ({ index, text, status: 'queued', progress: 0 }));
+    job.sentences = splitSentences(req.text).map((text, index) => ({ index, text, status: 'queued' as const, progress: 0, durationSec: null }));
     this.ttsReq.set(job.id, { lang: v?.language === 'en' ? 'en-US' : 'vi-VN', rate: req.speed });
     this.enqueue(job);
     return job.id;
@@ -573,7 +561,7 @@ export class MockEngine implements EngineClient {
 
   async exportSts(jobId: string) {
     const job = this.jobs.get(jobId);
-    const name = job?.outputPath ?? 'converted.wav';
+    const name = job?.files.output ?? 'converted.wav';
     const out = this.stsOut.get(jobId);
     if (out) downloadBlob(out.blob, name); // mock: tải file WAV thật xuống
     const { downloads } = await platform.appPaths();

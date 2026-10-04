@@ -1,14 +1,27 @@
 // Kiểu dữ liệu giữa UI và engine.
-// TẠM THỜI viết tay để dựng UI với mock engine. Khi engine (FastAPI) có OpenAPI ở Phase 1-2, thay bằng
-// types sinh tự động trong packages/api-types (quy tắc mục 10: không viết tay types API).
+// Các kiểu của API lấy từ types SINH TỰ ĐỘNG theo OpenAPI của engine (packages/api-types — quy tắc mục 10).
+// Chỉ các kiểu thuần UI hoặc của tính năng chưa có trong API (real-time Phase 4, xuất .evoice Phase 5) viết ở đây.
 
-export type VoiceLang = 'vi' | 'en' | 'unknown';
-export type Capability = 'tts' | 'sts';
-export type LicenseId = 'personal' | 'commercial' | 'noredist' | 'unknown';
+import type { components } from '../../../../packages/api-types/src/schema';
+
+type S = components['schemas'];
+
+export type Profile = S['Profile'];
+export type Job = S['Job'];
+export type JobStatus = Job['status'];
+export type JobKind = Job['kind'];
+export type TtsSentence = S['TtsSentence'];
+export type RefAnalysis = S['RefAnalysis'];
+export type ImportInspection = S['ImportInspection'];
+export type ModelInfo = S['ModelInfo'];
+export type SystemInfo = S['SystemInfo'];
+export type AudioDevice = S['AudioDevice'];
+export type VoiceLang = Profile['language'];
+export type Capability = Profile['capabilities'][number];
+export type LicenseId = Profile['license'];
+
 export type TrainPreset = 'fast' | 'balanced' | 'thorough';
 export type TrainStage = 'preprocess' | 'extract' | 'train' | 'index';
-export type JobStatus = 'queued' | 'running' | 'paused' | 'done' | 'failed' | 'cancelled';
-export type JobKind = 'tts' | 'sts' | 'train' | 'download';
 
 export interface FileRef {
   path: string;
@@ -18,94 +31,19 @@ export interface FileRef {
   file?: File;
 }
 
-export interface Profile {
-  id: string;
-  name: string;
-  language: VoiceLang;
-  createdAt: string; // ISO
-  capabilities: Capability[];
-  /** Job train RVC đang gắn với profile (null khi không train). */
-  trainJobId: string | null;
-  imported: boolean;
-  author?: string;
-  license?: LicenseId;
-  hasRef: boolean;
-  sampleRate?: number;
-}
 
-export interface RefAnalysis {
-  durationSec: number;
-  sampleRate: number;
-  channels: number;
-  checks: { key: 'trim' | 'loudness' | 'music' | 'noise'; ok: boolean }[];
-  warnings: ('too_short' | 'too_long' | 'music' | 'noise' | 'clipping')[];
-}
 
 export interface DatasetFile {
   ref: FileRef;
   durationSec: number;
 }
 
-export interface TtsSentence {
-  index: number;
-  text: string;
-  status: 'queued' | 'rendering' | 'done' | 'redo';
-  progress: number; // 0..1
-  durationSec?: number;
-}
 
-export interface Job {
-  id: string;
-  kind: JobKind;
-  status: JobStatus;
-  progress: number; // 0..1
-  label: string;
-  profileId?: string;
-  stage?: TrainStage | StsStage | string;
-  /** Job đang giữ GPU khiến job này phải chờ. */
-  waitingFor?: string;
-  log: string[];
-  error?: EngineErrorCode;
-  // train
-  epoch?: number;
-  totalEpochs?: number;
-  // tts
-  sentences?: TtsSentence[];
-  // kết quả
-  outputPath?: string;
-  outputDurationSec?: number;
-}
 
 export type StsStage = 'demux' | 'separate' | 'prep' | 'convert' | 'remix' | 'join';
 
-export interface ModelInfo {
-  id: string;
-  name: string;
-  role: string;
-  group: 'tts' | 'sts' | 'common';
-  sizeMb: number;
-  license: string;
-  commercial: boolean | null;
-  installed: boolean;
-  required: boolean;
-}
 
-export interface SystemInfo {
-  appVersion: string;
-  gpu: string;
-  device: string; // cuda:0 | mps | cpu
-  vramTotalGb: number;
-  vramUsedGb: number;
-  diskFreeGb: number;
-  driverOk: boolean;
-  models: ModelInfo[];
-}
 
-export interface AudioDevice {
-  id: string;
-  name: string;
-  virtual: boolean;
-}
 
 export interface RealtimeConfig {
   profileId: string;
@@ -128,20 +66,6 @@ export interface RealtimeStats {
   underruns: number;
 }
 
-export interface ImportInspection {
-  token: string;
-  kind: 'evoice' | 'rvc';
-  fileLabel: string;
-  blocked: boolean;
-  checks: { key: string; value: string; bad?: boolean }[];
-  suggestedName: string;
-  author: string;
-  language: VoiceLang;
-  license: LicenseId;
-  capabilities: Capability[];
-  createdAt?: string;
-  sampleRate: number;
-}
 
 export interface ExportOptions {
   includeModel: boolean;
@@ -157,6 +81,7 @@ export interface TtsRequest {
   speed: number;
   seed: number;
   pauseMs: number;
+  dict: DictEntry[];
 }
 
 export interface StsRequest {
@@ -182,6 +107,10 @@ export type EngineErrorCode =
   | 'BAD_FILE'
   | 'ENGINE_OFFLINE'
   | 'MODEL_MISSING'
+  | 'NOT_IMPLEMENTED'
+  | 'NOT_FOUND'
+  | 'BAD_REQUEST'
+  | 'UNAUTHORIZED'
   | 'UNKNOWN';
 
 export class EngineError extends Error {

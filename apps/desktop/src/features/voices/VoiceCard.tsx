@@ -99,7 +99,8 @@ export function VoiceCard({ profile: p, code, job, onRead, onConvert, onExport, 
         )}
       </div>
       <div className="flex border-t border-line mt-auto">
-        <button type="button" onClick={() => void togglePlay()} className={`${actionCls} ${playing ? '!bg-acc !text-bg' : ''}`}>
+        <button type="button" onClick={() => void togglePlay()} disabled={!p.hasRef} title={p.hasRef ? undefined : t('voices.noPreview')}
+          className={`${actionCls} ${playing ? '!bg-acc !text-bg' : ''}`}>
           {playing ? `■ ${t('common.stop')}` : `▶ ${t('common.play')}`}
         </button>
         <button type="button" onClick={onRead} disabled={!canTts(p)} className={actionCls}>{t('voices.read')}</button>

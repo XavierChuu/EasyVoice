@@ -51,7 +51,7 @@ export function TtsPage() {
     if (!profile) return;
     try {
       player.stop();
-      const jobId = await engine().startTts({ profileId: profile.id, text: s.text, mode, speed: s.speed, seed: s.seed, pauseMs });
+      const jobId = await engine().startTts({ profileId: profile.id, text: s.text, mode, speed: s.speed, seed: s.seed, pauseMs, dict });
       s.set({ jobId });
       setNotice('');
     } catch (err) {
@@ -70,7 +70,7 @@ export function TtsPage() {
     if (!job) return;
     const path = await engine().exportTts(job.id, fmt);
     if (fmt !== 'srt') setSettings({ ttsFormat: fmt });
-    toast(t('tts.exported', { fmt: fmt.toUpperCase() }), path);
+    toast(t('tts.exported', { fmt: fmt.toUpperCase() }), path || undefined);
   };
   const openTxt = async () => {
     const [ref] = await platform.pickFiles({ title: t('tts.openTxt'), filters: [{ name: 'Text', extensions: ['txt'] }] });

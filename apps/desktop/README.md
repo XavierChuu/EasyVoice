@@ -13,13 +13,16 @@ npm test               # vitest (chuẩn hóa văn bản preview, quy tắc hàn
 npm run build          # typecheck + build renderer + bundle main/preload
 ```
 
-## Trạng thái
+## Engine
 
-Engine Python chưa có (Phase 1), nên UI chạy với **mock engine** (`src/api/mockEngine.ts`) mô phỏng đúng quy tắc của spec:
+Có `engine/.venv` (xem `engine/README.md`) thì Electron tự bật engine Python thật và UI dùng `src/api/httpEngine.ts`
+(REST + WebSocket, types sinh từ OpenAPI). Không có thì UI chạy **mock engine** (`src/api/mockEngine.ts`) mô phỏng đúng quy tắc của spec:
 một job GPU nặng mỗi lúc (TTS phải chờ train), real-time giữ GPU độc quyền, tạm dừng train giữ checkpoint để tiếp tục,
 chặn `.pth` chứa code. Header hiện `ENGINE: MOCK`. Khi có engine, thay `MockEngine` bằng client HTTP/WS cùng interface
-`src/api/engine.ts`; `electron/sidecar.ts` đã có sẵn spawn engine (port động, token qua env, health check, tự restart,
+`src/api/engine.ts`. `electron/sidecar.ts`: spawn engine (port động, token qua env, health check, tự restart,
 không để sót process khi tắt app).
+
+Trình duyệt + engine chạy riêng: `VITE_ENGINE_URL=http://127.0.0.1:8765 VITE_ENGINE_TOKEN=dev npm run dev`.
 
 ## Cấu trúc
 
@@ -35,4 +38,4 @@ không để sót process khi tắt app).
   màn hình chạy lần đầu (kiểm tra GPU/ổ đĩa, chọn và tải model).
 - `src/components/` — bộ component theo ngôn ngữ thiết kế của UI mẫu; `src/i18n/` — `vi.json`, `en.json` (đủ khóa).
 
-Ghi chú: `src/api/types.ts` tạm viết tay; sẽ thay bằng types sinh từ OpenAPI (`packages/api-types`) khi engine có.
+Types API trong `src/api/types.ts` lấy từ `packages/api-types` (sinh từ OpenAPI: `npm run gen:api`).

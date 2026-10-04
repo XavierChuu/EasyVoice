@@ -84,8 +84,12 @@
     "UNSAFE_MODEL": "This file contains executable code, not just model weights. Nothing was imported.",
     "BAD_FILE": "This file type is not supported.",
     "ENGINE_OFFLINE": "The engine is not running.",
-    "MODEL_MISSING": "A required model is not installed. Open Settings → Re-run first-time setup.",
-    "UNKNOWN": "Something went wrong. Details were written to the log."
+    "MODEL_MISSING": "A required model is not installed ({{detail}}). Open Settings → Re-run first-time setup.",
+    "UNKNOWN": "Something went wrong. Details were written to the log.",
+    "NOT_IMPLEMENTED": "This feature is not in this engine version yet ({{detail}}).",
+    "NOT_FOUND": "Not found ({{detail}}).",
+    "BAD_REQUEST": "Invalid request: {{detail}}",
+    "UNAUTHORIZED": "The app could not authenticate with the engine. Restart EasyVoice."
   },
   "voices": {
     "code": "01 / VOICE PROFILES",
@@ -108,7 +112,8 @@
     "deleteBodyTraining": "“{{name}}” is still training. Deleting stops training and removes everything, including checkpoints. This cannot be undone.",
     "deleted": "Deleted “{{name}}”.",
     "emptyCaption": "NO VOICES YET",
-    "empty": "Create your first voice from a short clip, or import one someone shared with you."
+    "empty": "Create your first voice from a short clip, or import one someone shared with you.",
+    "noPreview": "No preview clip for this voice yet."
   },
   "wizard": {
     "aria": "Create new voice",

@@ -12,7 +12,7 @@ export function FirstRunModal() {
   const system = useEngine((s) => s.system);
   const jobs = useEngine((s) => s.jobs);
   const set = useSettings((s) => s.set);
-  const [groups, setGroups] = useState({ tts: true, sts: true, common: true });
+  const [groups, setGroups] = useState<Record<string, boolean>>({ tts: true, sts: true, common: true });
   const [jobId, setJobId] = useState<string | null>(null);
   const models = system?.models ?? [];
 
@@ -43,7 +43,7 @@ export function FirstRunModal() {
         { k: t('firstRun.disk'), v: `${system?.diskFreeGb ?? 0} GB`, bad: (system?.diskFreeGb ?? 0) < 15 },
       ]} />
       <div className="border border-line">
-        {(['tts', 'sts', 'common'] as const).map((g) => {
+        {(['tts', 'sts', 'common'] as const).filter((g) => models.some((m) => m.group === g)).map((g) => {
           const list = models.filter((m) => m.group === g);
           return (
             <div key={g} className="p-3 border-b border-line2 last:border-b-0">

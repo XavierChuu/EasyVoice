@@ -1,7 +1,8 @@
 // Trạng thái phản chiếu từ engine (profiles, jobs, hệ thống, real-time) + kết nối sidecar.
 import { create } from 'zustand';
 
-import { engine } from '../api/engine';
+import { connectEngine } from '../api/engine';
+import { HttpEngine } from '../api/httpEngine';
 import type { Job, Profile, RealtimeStats, SystemInfo } from '../api/types';
 import { platform, type EngineInfo } from '../lib/platform';
 
@@ -27,16 +28,33 @@ export const useEngine = create<EngineState>((set, get) => ({
   init: async () => {
     if (started) return;
     started = true;
-    const e = engine();
+    const info0 = await platform.engineInfo();
+    const e = connectEngine(info0);
     e.subscribe((ev) => {
       if (ev.type === 'voices') set({ voices: ev.voices });
       else if (ev.type === 'job') set({ jobs: { ...get().jobs, [ev.job.id]: ev.job } });
       else if (ev.type === 'realtime') set({ rt: ev.stats });
       else if (ev.type === 'system') set({ system: ev.system });
     });
-    platform.onEngineStatus((info) => set({ info }));
-    const [info, voices, system] = await Promise.all([platform.engineInfo(), e.listVoices(), e.system()]);
-    set({ info: e.mode === 'mock' ? { ...info, status: info.status === 'offline' ? 'offline' : 'mock' } : info, voices, system, ready: true });
+    platform.onEngineStatus((info) => {
+      connectEngine(info); // sidecar khởi động lại với port/token mới
+      set({ info });
+      if (info.status === 'online') void refresh();
+    });
+    const refresh = async () => {
+      try {
+        const [voices, system] = await Promise.all([e.listVoices(), e.system()]);
+        set({ voices, system, ready: true });
+        if (e instanceof HttpEngine && get().info.status !== 'online') set({ info: { ...get().info, status: 'online' } });
+      } catch {
+        if (e instanceof HttpEngine) {
+          set({ info: { ...get().info, status: get().info.status === 'starting' ? 'starting' : 'offline' }, ready: true });
+          setTimeout(() => void refresh(), 1500); // engine chưa lên: thử lại
+        }
+      }
+    };
+    set({ info: e.mode === 'mock' ? { ...info0, status: info0.status === 'offline' ? 'offline' : 'mock' } : info0 });
+    await refresh();
   },
 }));
 

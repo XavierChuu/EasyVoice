@@ -83,8 +83,12 @@
     "UNSAFE_MODEL": "File này chứa mã thực thi, không chỉ là trọng số model. Không có gì được nhập.",
     "BAD_FILE": "Không hỗ trợ loại file này.",
     "ENGINE_OFFLINE": "Engine không chạy.",
-    "MODEL_MISSING": "Thiếu model cần thiết. Vào Cài đặt → Chạy lại thiết lập ban đầu.",
-    "UNKNOWN": "Đã có lỗi xảy ra. Chi tiết đã được ghi vào file log."
+    "MODEL_MISSING": "Thiếu model cần thiết ({{detail}}). Vào Cài đặt → Chạy lại thiết lập ban đầu để tải.",
+    "UNKNOWN": "Đã có lỗi xảy ra. Chi tiết đã được ghi vào file log.",
+    "NOT_IMPLEMENTED": "Tính năng này chưa có trong bản engine hiện tại ({{detail}}).",
+    "NOT_FOUND": "Không tìm thấy ({{detail}}).",
+    "BAD_REQUEST": "Yêu cầu không hợp lệ: {{detail}}",
+    "UNAUTHORIZED": "App không xác thực được với engine. Hãy mở lại EasyVoice."
   },
   "voices": {
     "code": "01 / HỒ SƠ GIỌNG",
@@ -107,7 +111,8 @@
     "deleteBodyTraining": "“{{name}}” đang huấn luyện. Xóa sẽ dừng huấn luyện và xóa toàn bộ, kể cả checkpoint. Không thể hoàn tác.",
     "deleted": "Đã xóa “{{name}}”.",
     "emptyCaption": "CHƯA CÓ GIỌNG NÀO",
-    "empty": "Tạo giọng đầu tiên từ một đoạn audio ngắn, hoặc nhập giọng người khác chia sẻ."
+    "empty": "Tạo giọng đầu tiên từ một đoạn audio ngắn, hoặc nhập giọng người khác chia sẻ.",
+    "noPreview": "Giọng này chưa có đoạn nghe thử."
   },
   "wizard": {
     "aria": "Tạo giọng mới",

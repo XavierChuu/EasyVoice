@@ -16,7 +16,7 @@ describe('MockEngine job rules (spec mục 5)', () => {
   it('runs one heavy GPU job at a time; TTS waits behind training', async () => {
     const e = new MockEngine();
     const jobs = collect(e);
-    const id = await e.startTts({ profileId: 'p1', text: 'Một. Hai.', mode: 'direct', speed: 1, seed: 1, pauseMs: 0 });
+    const id = await e.startTts({ profileId: 'p1', text: 'Một. Hai.', mode: 'direct', speed: 1, seed: 1, pauseMs: 0, dict: [] });
     expect(jobs[id].status).toBe('queued');
     expect(jobs[id].waitingFor).toBe('Cartoon Character');
   });
@@ -30,7 +30,7 @@ describe('MockEngine job rules (spec mục 5)', () => {
     const start = e.startRealtime(cfg);
     await vi.advanceTimersByTimeAsync(400);
     await start;
-    await expect(e.startTts({ profileId: 'p1', text: 'x', mode: 'direct', speed: 1, seed: 1, pauseMs: 0 })).rejects.toBeInstanceOf(EngineError);
+    await expect(e.startTts({ profileId: 'p1', text: 'x', mode: 'direct', speed: 1, seed: 1, pauseMs: 0, dict: [] })).rejects.toBeInstanceOf(EngineError);
     await expect(e.resumeJob('nope')).resolves.toBeUndefined();
   });
 

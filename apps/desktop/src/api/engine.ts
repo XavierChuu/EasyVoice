@@ -1,6 +1,8 @@
 // Interface UI dùng để nói chuyện với engine. Bản thật (HTTP + WebSocket tới sidecar, spec mục 4) sẽ thay
 // MockEngine khi engine có ở Phase 1-2; UI không cần đổi.
 
+import type { EngineInfo } from '../lib/platform';
+import { HttpEngine } from './httpEngine';
 import { MockEngine } from './mockEngine';
 import type {
   AudioDevice, DatasetFile, DictEntry, EngineEvent, ExportOptions, FileRef, ImportInspection, PlaySource, Profile,
@@ -58,4 +60,21 @@ let instance: EngineClient | null = null;
 export function engine(): EngineClient {
   if (!instance) instance = new MockEngine();
   return instance;
+}
+
+/**
+ * Chọn engine: sidecar do Electron khởi động (port + token qua preload) → HttpEngine;
+ * chạy `npm run dev` trong trình duyệt với VITE_ENGINE_URL + VITE_ENGINE_TOKEN → HttpEngine;
+ * không có engine → MockEngine (giả lập để dựng UI).
+ */
+export function connectEngine(info: EngineInfo): EngineClient {
+  const env = import.meta.env as Record<string, string | undefined>;
+  let target: { base: string; token: string } | null = null;
+  if (info.port && info.token && info.status !== 'mock') target = { base: `http://127.0.0.1:${info.port}`, token: info.token };
+  else if (env.VITE_ENGINE_URL && env.VITE_ENGINE_TOKEN) target = { base: env.VITE_ENGINE_URL, token: env.VITE_ENGINE_TOKEN };
+  if (target) {
+    if (instance instanceof HttpEngine) instance.rebind(target.base, target.token);
+    else instance = new HttpEngine(target.base, target.token);
+  }
+  return engine();
 }

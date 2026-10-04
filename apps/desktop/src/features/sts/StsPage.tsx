@@ -94,7 +94,7 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
   };
   const exportOut = async () => {
     if (!job) return;
-    toast(t('sts.exported'), await engine().exportSts(job.id));
+    toast(t('sts.exported'), (await engine().exportSts(job.id)) || undefined);
   };
 
   const stageNames = s.separate ? ['demux', 'separate', 'convert', 'remix'] : ['demux', 'prep', 'convert', 'join'];

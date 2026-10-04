@@ -29,6 +29,7 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
   const [quick, setQuick] = useState<{ ref: FileRef; analysis: RefAnalysis | null } | null>(null);
   const [transcript, setTranscript] = useState('');
   const [transcribing, setTranscribing] = useState(false);
+  const [transcribeError, setTranscribeError] = useState('');
   const [dataset, setDataset] = useState<DatasetFile[]>([]);
   const [analyzing, setAnalyzing] = useState(false);
   const [separate, setSeparate] = useState(true);
@@ -42,7 +43,12 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
 
   const setQuickFile = async (ref: FileRef) => {
     setQuick({ ref, analysis: null });
-    setQuick({ ref, analysis: await engine().analyzeRef(ref) });
+    try {
+      setQuick({ ref, analysis: await engine().analyzeRef(ref) });
+    } catch (err) {
+      setQuick(null);
+      setNotice(errorText(t, err));
+    }
   };
   const pickQuick = async () => {
     const [ref] = await platform.pickFiles({ title: t('wizard.quick.choose'), filters: [AUDIO_FILTER] });
@@ -59,8 +65,11 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
   const autoTranscript = async () => {
     if (!quick) return;
     setTranscribing(true);
+    setTranscribeError('');
     try {
       setTranscript(await engine().transcribe(quick.ref, language));
+    } catch (err) {
+      setTranscribeError(errorText(t, err));
     } finally {
       setTranscribing(false);
     }
@@ -165,6 +174,7 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
               <textarea id="transcript" value={transcript} onChange={(e) => setTranscript(e.target.value)} rows={2} placeholder={t('wizard.transcriptPlaceholder')}
                 className="bg-bg border border-line3 p-3 text-fg text-[15px] resize-y rounded-none placeholder:text-dim" />
               <span className="text-[12px] text-mute">{t('wizard.transcriptHint')}</span>
+              {transcribeError && <span className="text-[12px] text-acc">{transcribeError}</span>}
             </div>
           </div>
         ) : (
