@@ -7,8 +7,10 @@ quản lý và huấn luyện giọng. Ưu tiên tiếng Việt. Windows 10/11 (
 
 - **Phase 0 — Spike kỹ thuật**: script đo hiệu năng F5-TTS và RVC trong `spikes/` (test tiếng Anh trước, xem
   `spikes/README.md`). Kết quả và quyết định Go/No-go ghi ở `spikes/REPORT.md`.
-- **App desktop** (`apps/desktop`): giao diện đầy đủ theo UI mẫu, đang chạy với mock engine cho tới khi engine Python
-  (Phase 1) sẵn sàng. `cd apps/desktop && npm install && npm run dev`.
+- **Engine Python — Phase 1** (`engine/`): FastAPI sidecar, TTS F5-TTS, đổi giọng offline RVC, quản lý giọng, tải model.
+  Cài theo `engine/README.md`.
+- **App desktop** (`apps/desktop`): giao diện theo UI mẫu, tự bật engine nếu đã cài (không thì chạy mock).
+  `cd apps/desktop && npm install && npm run electron:dev`.
 - Đề xuất kỹ thuật: `docs/adr/0001-de-xuat-ky-thuat.md`.
 
 ## Cấu trúc

@@ -1,0 +1,37 @@
+[project]
+name = "easyvoice-engine"
+version = "0.1.0"
+description = "EasyVoice local AI engine (FastAPI sidecar)"
+requires-python = ">=3.10,<3.12"
+# torch/torchaudio cài riêng theo nền tảng trước (requirements/cuda.txt hoặc mps.txt) — xem engine/README.md
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+  "python-multipart>=0.0.9",
+  "pydantic>=2.6",
+  "numpy",
+  "scipy",
+  "soundfile",
+  "soxr",
+  "pyloudnorm",
+  "safetensors",
+  "faiss-cpu",
+  "librosa",
+  "transformers",
+]
+
+[project.optional-dependencies]
+tts = ["f5-tts==1.1.22"]
+asr = ["faster-whisper>=1.0"]
+realtime = ["sounddevice"]
+dev = ["pytest", "httpx"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["easyvoice_engine*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

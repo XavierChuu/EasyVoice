@@ -1,0 +1,10 @@
+{
+  "name": "@easyvoice/api-types",
+  "private": true,
+  "version": "0.1.0",
+  "description": "TypeScript types sinh từ OpenAPI của engine — không sửa tay",
+  "types": "src/schema.d.ts",
+  "scripts": {
+    "gen": "openapi-typescript openapi.json -o src/schema.d.ts"
+  }
+}

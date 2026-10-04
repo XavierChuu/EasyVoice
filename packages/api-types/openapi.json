@@ -1,0 +1,2133 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EasyVoice Engine",
+    "description": "API local của EasyVoice. Mọi request cần header `Authorization: Bearer <token>`.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/system/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health",
+        "operationId": "health_system_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/info": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Info",
+        "operationId": "info_system_info_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/models": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Models",
+        "operationId": "models_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ModelInfo"
+                  },
+                  "type": "array",
+                  "title": "Response Models Models Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/models/download": {
+      "post": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Download",
+        "operationId": "download_models_download_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/audio/devices": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Audio Devices",
+        "operationId": "audio_devices_audio_devices_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AudioDevices"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices": {
+      "get": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "List Voices",
+        "operationId": "list_voices_voices_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Profile"
+                  },
+                  "type": "array",
+                  "title": "Response List Voices Voices Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Create Quick",
+        "operationId": "create_quick_voices_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_quick_voices_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/analyze": {
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Analyze",
+        "operationId": "analyze_voices_analyze_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_analyze_voices_analyze_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefAnalysis"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/transcribe": {
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Transcribe",
+        "operationId": "transcribe_voices_transcribe_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_transcribe_voices_transcribe_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transcript"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/{voice_id}": {
+      "patch": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Rename",
+        "operationId": "rename_voices__voice_id__patch",
+        "parameters": [
+          {
+            "name": "voice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Voice Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Delete",
+        "operationId": "delete_voices__voice_id__delete",
+        "parameters": [
+          {
+            "name": "voice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Voice Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/{voice_id}/preview": {
+      "get": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Preview",
+        "operationId": "preview_voices__voice_id__preview_get",
+        "parameters": [
+          {
+            "name": "voice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Voice Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/import/inspect": {
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Inspect Import",
+        "operationId": "inspect_import_voices_import_inspect_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_inspect_import_voices_import_inspect_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportInspection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/import": {
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Do Import",
+        "operationId": "do_import_voices_import_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/{voice_id}/export": {
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Export Voice",
+        "operationId": "export_voice_voices__voice_id__export_post",
+        "parameters": [
+          {
+            "name": "voice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Voice Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/train": {
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Train",
+        "operationId": "train_train_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tts": {
+      "post": {
+        "tags": [
+          "tts"
+        ],
+        "summary": "Start Tts",
+        "operationId": "start_tts_tts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TtsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tts/{job_id}/redo": {
+      "post": {
+        "tags": [
+          "tts"
+        ],
+        "summary": "Redo",
+        "operationId": "redo_tts__job_id__redo_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tts/{job_id}/audio": {
+      "get": {
+        "tags": [
+          "tts"
+        ],
+        "summary": "Tts Audio",
+        "description": "Một câu (index) hoặc các câu đã xong ghép lại — nghe được khi phần sau còn đang render.",
+        "operationId": "tts_audio_tts__job_id__audio_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "index",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Index"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tts/{job_id}/export": {
+      "get": {
+        "tags": [
+          "tts"
+        ],
+        "summary": "Tts Export",
+        "operationId": "tts_export_tts__job_id__export_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "wav",
+                "mp3",
+                "flac",
+                "srt"
+              ],
+              "type": "string",
+              "default": "wav",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sts/offline": {
+      "post": {
+        "tags": [
+          "sts"
+        ],
+        "summary": "Start Offline",
+        "operationId": "start_offline_sts_offline_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_start_offline_sts_offline_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sts/{job_id}/audio": {
+      "get": {
+        "tags": [
+          "sts"
+        ],
+        "summary": "Sts Audio",
+        "operationId": "sts_audio_sts__job_id__audio_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "which",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "a",
+                "b"
+              ],
+              "type": "string",
+              "default": "b",
+              "title": "Which"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Download"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime/start": {
+      "post": {
+        "tags": [
+          "sts"
+        ],
+        "summary": "Realtime Start",
+        "operationId": "realtime_start_realtime_start_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime/stop": {
+      "post": {
+        "tags": [
+          "sts"
+        ],
+        "summary": "Realtime Stop",
+        "operationId": "realtime_stop_realtime_stop_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "List Jobs",
+        "operationId": "list_jobs_jobs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  },
+                  "type": "array",
+                  "title": "Response List Jobs Jobs Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job",
+        "operationId": "get_job_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Cancel Job",
+        "operationId": "cancel_job_jobs__job_id__delete",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{job_id}/resume": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Resume Job",
+        "operationId": "resume_job_jobs__job_id__resume_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get File",
+        "operationId": "get_file_files__file_id__get",
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Download"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AudioDevice": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "virtual": {
+            "type": "boolean",
+            "title": "Virtual"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "virtual"
+        ],
+        "title": "AudioDevice"
+      },
+      "AudioDevices": {
+        "properties": {
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/AudioDevice"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/AudioDevice"
+            },
+            "type": "array",
+            "title": "Outputs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "inputs",
+          "outputs"
+        ],
+        "title": "AudioDevices"
+      },
+      "Body_analyze_voices_analyze_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_analyze_voices_analyze_post"
+      },
+      "Body_create_quick_voices_post": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en"
+            ],
+            "title": "Language",
+            "default": "vi"
+          },
+          "transcript": {
+            "type": "string",
+            "title": "Transcript"
+          },
+          "consent": {
+            "type": "boolean",
+            "title": "Consent"
+          },
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "transcript",
+          "consent",
+          "file"
+        ],
+        "title": "Body_create_quick_voices_post"
+      },
+      "Body_inspect_import_voices_import_inspect_post": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_inspect_import_voices_import_inspect_post"
+      },
+      "Body_start_offline_sts_offline_post": {
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "title": "Profileid"
+          },
+          "pitch": {
+            "type": "number",
+            "title": "Pitch",
+            "default": 0.0
+          },
+          "indexRate": {
+            "type": "number",
+            "title": "Indexrate",
+            "default": 0.5
+          },
+          "protect": {
+            "type": "number",
+            "title": "Protect",
+            "default": 0.33
+          },
+          "separate": {
+            "type": "boolean",
+            "title": "Separate",
+            "default": false
+          },
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profileId",
+          "file"
+        ],
+        "title": "Body_start_offline_sts_offline_post"
+      },
+      "Body_transcribe_voices_transcribe_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "vi"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_transcribe_voices_transcribe_post"
+      },
+      "DownloadRequest": {
+        "properties": {
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "title": "DownloadRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status",
+            "default": "ok"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version"
+        ],
+        "title": "Health"
+      },
+      "ImportCheck": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "bad": {
+            "type": "boolean",
+            "title": "Bad",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "value",
+          "bad"
+        ],
+        "title": "ImportCheck"
+      },
+      "ImportInspection": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "evoice",
+              "rvc"
+            ],
+            "title": "Kind"
+          },
+          "fileLabel": {
+            "type": "string",
+            "title": "Filelabel"
+          },
+          "blocked": {
+            "type": "boolean",
+            "title": "Blocked"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/ImportCheck"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "suggestedName": {
+            "type": "string",
+            "title": "Suggestedname"
+          },
+          "author": {
+            "type": "string",
+            "title": "Author"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en",
+              "unknown"
+            ],
+            "title": "Language"
+          },
+          "license": {
+            "type": "string",
+            "enum": [
+              "personal",
+              "commercial",
+              "noredist",
+              "unknown"
+            ],
+            "title": "License"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "tts",
+                "sts"
+              ]
+            },
+            "type": "array",
+            "title": "Capabilities"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "sampleRate": {
+            "type": "integer",
+            "title": "Samplerate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "kind",
+          "fileLabel",
+          "blocked",
+          "checks",
+          "suggestedName",
+          "author",
+          "language",
+          "license",
+          "capabilities",
+          "createdAt",
+          "sampleRate"
+        ],
+        "title": "ImportInspection"
+      },
+      "ImportRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "name"
+        ],
+        "title": "ImportRequest"
+      },
+      "Job": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "tts",
+              "sts",
+              "train",
+              "download"
+            ],
+            "title": "Kind"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "paused",
+              "done",
+              "failed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "default": "queued"
+          },
+          "progress": {
+            "type": "number",
+            "title": "Progress",
+            "default": 0.0
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "profileId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profileid"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "waitingFor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waitingfor"
+          },
+          "log": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Log"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "errorDetail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errordetail"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "epoch": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epoch"
+          },
+          "totalEpochs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Totalepochs"
+          },
+          "sentences": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TtsSentence"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentences"
+          },
+          "files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Files"
+          },
+          "outputDurationSec": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputdurationsec"
+          },
+          "createdAt": {
+            "type": "number",
+            "title": "Createdat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "progress",
+          "label",
+          "profileId",
+          "stage",
+          "waitingFor",
+          "log",
+          "error",
+          "errorDetail",
+          "device",
+          "epoch",
+          "totalEpochs",
+          "sentences",
+          "files",
+          "outputDurationSec",
+          "createdAt"
+        ],
+        "title": "Job"
+      },
+      "JobRef": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId"
+        ],
+        "title": "JobRef"
+      },
+      "ModelInfo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "group": {
+            "type": "string",
+            "title": "Group"
+          },
+          "sizeMb": {
+            "type": "number",
+            "title": "Sizemb"
+          },
+          "license": {
+            "type": "string",
+            "title": "License"
+          },
+          "commercial": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commercial"
+          },
+          "installed": {
+            "type": "boolean",
+            "title": "Installed"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role",
+          "group",
+          "sizeMb",
+          "license",
+          "commercial",
+          "installed",
+          "required"
+        ],
+        "title": "ModelInfo"
+      },
+      "Profile": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en",
+              "unknown"
+            ],
+            "title": "Language"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "tts",
+                "sts"
+              ]
+            },
+            "type": "array",
+            "title": "Capabilities"
+          },
+          "trainJobId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trainjobid"
+          },
+          "imported": {
+            "type": "boolean",
+            "title": "Imported"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "license": {
+            "type": "string",
+            "enum": [
+              "personal",
+              "commercial",
+              "noredist",
+              "unknown"
+            ],
+            "title": "License"
+          },
+          "hasRef": {
+            "type": "boolean",
+            "title": "Hasref"
+          },
+          "sampleRate": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Samplerate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "language",
+          "createdAt",
+          "capabilities",
+          "trainJobId",
+          "imported",
+          "author",
+          "license",
+          "hasRef",
+          "sampleRate"
+        ],
+        "title": "Profile",
+        "description": "Dạng gửi cho UI."
+      },
+      "RedoRequest": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index"
+        ],
+        "title": "RedoRequest"
+      },
+      "RefAnalysis": {
+        "properties": {
+          "durationSec": {
+            "type": "number",
+            "title": "Durationsec"
+          },
+          "sampleRate": {
+            "type": "integer",
+            "title": "Samplerate"
+          },
+          "channels": {
+            "type": "integer",
+            "title": "Channels"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/RefCheck"
+            },
+            "type": "array",
+            "title": "Checks"
+          },
+          "warnings": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "too_short",
+                "too_long",
+                "music",
+                "noise",
+                "clipping"
+              ]
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "durationSec",
+          "sampleRate",
+          "channels",
+          "checks",
+          "warnings"
+        ],
+        "title": "RefAnalysis"
+      },
+      "RefCheck": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "trim",
+              "loudness",
+              "music",
+              "noise"
+            ],
+            "title": "Key"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "ok"
+        ],
+        "title": "RefCheck"
+      },
+      "RenameRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "RenameRequest"
+      },
+      "SystemInfo": {
+        "properties": {
+          "appVersion": {
+            "type": "string",
+            "title": "Appversion"
+          },
+          "gpu": {
+            "type": "string",
+            "title": "Gpu"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device"
+          },
+          "vramTotalGb": {
+            "type": "number",
+            "title": "Vramtotalgb"
+          },
+          "vramUsedGb": {
+            "type": "number",
+            "title": "Vramusedgb"
+          },
+          "diskFreeGb": {
+            "type": "number",
+            "title": "Diskfreegb"
+          },
+          "driverOk": {
+            "type": "boolean",
+            "title": "Driverok"
+          },
+          "realtime": {
+            "type": "boolean",
+            "title": "Realtime"
+          },
+          "loadedModels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Loadedmodels"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/ModelInfo"
+            },
+            "type": "array",
+            "title": "Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "appVersion",
+          "gpu",
+          "device",
+          "vramTotalGb",
+          "vramUsedGb",
+          "diskFreeGb",
+          "driverOk",
+          "realtime",
+          "loadedModels",
+          "models"
+        ],
+        "title": "SystemInfo"
+      },
+      "Transcript": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "Transcript"
+      },
+      "TtsRequest": {
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "title": "Profileid"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "chain"
+            ],
+            "title": "Mode",
+            "default": "direct"
+          },
+          "speed": {
+            "type": "number",
+            "title": "Speed",
+            "default": 1.0
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 1234
+          },
+          "pauseMs": {
+            "type": "integer",
+            "title": "Pausems",
+            "default": 250
+          },
+          "userDict": {
+            "items": {
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "type": "array",
+            "title": "Userdict",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "profileId",
+          "text"
+        ],
+        "title": "TtsRequest"
+      },
+      "TtsSentence": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "rendering",
+              "done",
+              "redo"
+            ],
+            "title": "Status",
+            "default": "queued"
+          },
+          "progress": {
+            "type": "number",
+            "title": "Progress",
+            "default": 0.0
+          },
+          "durationSec": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationsec"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "text",
+          "status",
+          "progress",
+          "durationSec"
+        ],
+        "title": "TtsSentence"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

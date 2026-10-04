@@ -1,0 +1,4 @@
+# Windows + NVIDIA. Cài TRƯỚC base.txt (chốt phiên bản theo spikes/REPORT.md).
+--index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0
+torchaudio==2.8.0
