@@ -1,0 +1,15 @@
+# Cài SAU cuda.txt / mps.txt. Ghim lại torch để f5-tts không kéo bản khác về
+# (bản +cu128 đã cài vẫn thỏa "==2.8.0").
+torch==2.8.0
+torchaudio==2.8.0
+
+f5-tts==1.1.22
+transformers
+faiss-cpu
+librosa
+numpy
+scipy
+soundfile
+sounddevice
+psutil
+pytest

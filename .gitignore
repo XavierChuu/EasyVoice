@@ -27,3 +27,14 @@ venv/
 
 # Logs
 *.log
+
+# Model, dữ liệu và audio không bao giờ nằm trong repo
+spikes/models/
+spikes/out/
+spikes/samples/
+spikes/data/
+*.pth
+*.pt
+*.safetensors
+*.index
+*.onnx

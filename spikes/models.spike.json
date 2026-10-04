@@ -1,0 +1,53 @@
+{
+  "_comment": "Model dùng cho spike Phase 0. sha256 = null nghĩa là chưa chốt: download_models.py in ra hash sau khi tải, hãy ghi lại vào đây và vào models.manifest.json khi chọn dùng chính thức. license phải được xác minh tại trang gốc (xem LICENSES_CHECK.md).",
+  "models": [
+    {
+      "id": "rmvpe",
+      "group": "rvc",
+      "url": "https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt",
+      "dest": "rmvpe.pt",
+      "sha256": null,
+      "license": "CẦN XÁC MINH (phát hành kèm RVC WebUI)"
+    },
+    {
+      "id": "contentvec-config",
+      "group": "rvc",
+      "url": "https://huggingface.co/lengyue233/content-vec-best/resolve/main/config.json",
+      "dest": "content-vec-best/config.json",
+      "sha256": null,
+      "license": "CẦN XÁC MINH (ContentVec gốc: MIT)"
+    },
+    {
+      "id": "contentvec-weights",
+      "group": "rvc",
+      "url": "https://huggingface.co/lengyue233/content-vec-best/resolve/main/pytorch_model.bin",
+      "dest": "content-vec-best/pytorch_model.bin",
+      "sha256": null,
+      "license": "CẦN XÁC MINH (ContentVec gốc: MIT)"
+    },
+    {
+      "id": "vocos-config",
+      "group": "tts",
+      "url": "https://huggingface.co/charactr/vocos-mel-24khz/resolve/main/config.yaml",
+      "dest": "vocos-mel-24khz/config.yaml",
+      "sha256": null,
+      "license": "CẦN XÁC MINH (model card ghi MIT)"
+    },
+    {
+      "id": "vocos-weights",
+      "group": "tts",
+      "url": "https://huggingface.co/charactr/vocos-mel-24khz/resolve/main/pytorch_model.bin",
+      "dest": "vocos-mel-24khz/pytorch_model.bin",
+      "sha256": null,
+      "license": "CẦN XÁC MINH (model card ghi MIT)"
+    },
+    {
+      "id": "f5tts-v1-base",
+      "group": "tts-base",
+      "url": "https://huggingface.co/SWivid/F5-TTS/resolve/main/F5TTS_v1_Base/model_1250000.safetensors",
+      "dest": "f5-base/model_1250000.safetensors",
+      "sha256": null,
+      "license": "CC-BY-NC-4.0 (phi thương mại) — chỉ để so sánh tốc độ, không phải checkpoint tiếng Việt"
+    }
+  ]
+}
