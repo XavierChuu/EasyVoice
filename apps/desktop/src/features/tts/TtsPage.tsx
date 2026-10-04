@@ -174,10 +174,13 @@ export function TtsPage() {
       {job && (
         <section aria-label={t('tts.output')} className="border border-line flex flex-col">
           <div className="flex justify-between items-center flex-wrap gap-3 py-2 pr-2 pl-3.5 border-b border-line">
-            <div className="font-mono text-[12px] tracking-[.06em]">{progressText}</div>
+            <div className="flex flex-col">
+              <span className="font-mono text-[12px] tracking-[.06em]">{progressText}</span>
+              {engine().mode === 'mock' && <span className="font-mono text-[10px] text-mute">{t('tts.mockNote')}</span>}
+            </div>
             <div className="flex flex-wrap">
               <button type="button" className={outBtn} disabled={done === 0}
-                onClick={() => (playingAll ? player.stop() : player.play(`tts:${job.id}`, doneDuration))}>
+                onClick={async () => (playingAll ? player.stop() : player.play(`tts:${job.id}`, await engine().ttsAudio(job.id)))}>
                 {playingAll ? '■ STOP' : '▶ PLAY'}
               </button>
               {(['wav', 'mp3', 'flac', 'srt'] as const).map((f) => (
@@ -198,7 +201,7 @@ export function TtsPage() {
                   <span className="flex-1 min-w-0">{r.text}</span>
                   <span className="font-mono text-[11px] whitespace-nowrap" style={{ color: col }}>{st}</span>
                   <button type="button" disabled={r.status !== 'done'} aria-label={t('tts.playSentence')}
-                    onClick={() => (player.key === key ? player.stop() : player.play(key, r.durationSec ?? 1))}
+                    onClick={async () => (player.key === key ? player.stop() : player.play(key, await engine().ttsAudio(job.id, i)))}
                     className="bg-transparent border border-line3 text-fg px-2.5 py-1.5 cursor-pointer font-mono text-[11px] min-h-[34px] hover:border-fg">
                     {player.key === key ? '■' : '▶'}
                   </button>

@@ -22,6 +22,8 @@ interface Bridge {
   platform: string;
   pickFiles(opts: { title?: string; multiple?: boolean; filters?: FileFilter[] }): Promise<FileRef[]>;
   pickFolder(title?: string): Promise<string | null>;
+  micAccess(): Promise<string>;
+  readPicked(path: string): Promise<Uint8Array>;
   readText(path: string): Promise<string>;
   showInFolder(path: string): Promise<void>;
   openExternal(url: string): Promise<void>;
@@ -38,6 +40,12 @@ declare global {
 }
 
 const bridge = (): Bridge | undefined => window.easyvoice;
+
+const MIME: Record<string, string> = {
+  wav: 'audio/wav', mp3: 'audio/mpeg', m4a: 'audio/mp4', flac: 'audio/flac', ogg: 'audio/ogg', webm: 'audio/webm',
+  mp4: 'video/mp4', mov: 'video/quicktime', mkv: 'video/x-matroska', txt: 'text/plain',
+};
+const mimeOf = (name: string) => MIME[name.split('.').pop()?.toLowerCase() ?? ''] ?? 'application/octet-stream';
 
 export const isElectron = () => !!bridge();
 
@@ -62,9 +70,25 @@ function browserPick(multiple: boolean, filters?: FileFilter[]): Promise<FileRef
 }
 
 export const platform = {
-  pickFiles: (opts: { title?: string; multiple?: boolean; filters?: FileFilter[] }) =>
-    bridge()?.pickFiles(opts) ?? browserPick(!!opts.multiple, opts.filters),
+  pickFiles: async (opts: { title?: string; multiple?: boolean; filters?: FileFilter[] }): Promise<FileRef[]> => {
+    const b = bridge();
+    if (!b) return browserPick(!!opts.multiple, opts.filters);
+    const refs = await b.pickFiles(opts);
+    // Đọc kèm nội dung file nhỏ để renderer phân tích/nghe thử được (file lớn chỉ engine đọc).
+    for (const ref of refs) {
+      if (ref.size > 100e6) continue;
+      try {
+        const bytes = await b.readPicked(ref.path);
+        ref.file = new File([bytes as BlobPart], ref.name, { type: mimeOf(ref.name) });
+      } catch {
+        /* để engine xử lý */
+      }
+    }
+    return refs;
+  },
   pickFolder: async (title?: string) => (await bridge()?.pickFolder(title)) ?? null,
+  /** 'granted' | 'denied' | 'restricted' | 'not-determined' | 'unknown' */
+  micAccess: async () => (await bridge()?.micAccess()) ?? 'granted',
   readText: (ref: FileRef): Promise<string> => (ref.file ? ref.file.text() : bridge()!.readText(ref.path)),
   showInFolder: (path: string) => bridge()?.showInFolder(path) ?? Promise.resolve(),
   openExternal: (url: string) => {

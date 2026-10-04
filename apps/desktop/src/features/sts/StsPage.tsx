@@ -100,7 +100,17 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
   const stageNames = s.separate ? ['demux', 'separate', 'convert', 'remix'] : ['demux', 'prep', 'convert', 'join'];
   const stageIdx = job ? Math.min(3, Math.floor(job.progress * 4)) : 0;
   const ab = player.key?.startsWith('sts:') ? player.key.slice(4) : null;
-  const dur = s.fileDurationSec || 30;
+  const playAb = async (which: 'a' | 'b') => {
+    if (!job) return;
+    if (ab === which) return player.stop();
+    player.play(`sts:${which}`, await engine().stsAudio(job.id, which));
+  };
+  const abBtn = (which: 'a' | 'b') => (
+    <button type="button" onClick={() => void playAb(which)} aria-label={`${t('common.play')} ${which.toUpperCase()}`}
+      className="bg-transparent border-0 p-0 text-mute hover:text-fg cursor-pointer font-mono text-[11px]">
+      {ab === which ? '■' : '▶'}
+    </button>
+  );
 
   return (
     <Box className="flex-[2_1_420px]" title="BATCH · RMVPE">
@@ -117,7 +127,7 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
               <Btn variant="link" disabled={running} onClick={() => { player.stop(); s.set({ file: null, jobId: null }); }}>[{t('common.replace')}]</Btn>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>A · {t('sts.source')}</Label>
+              <span className="flex gap-2 items-center"><Label>A · {t('sts.source')}</Label>{job && abBtn('a')}</span>
               <div className="border border-line"><Bars seed={0.4} color="#6A6A6A" playhead={ab === 'a' ? player.position : undefined} /></div>
             </div>
             <Check id="stssep" checked={s.separate} onChange={(separate) => s.set({ separate })}>{t('sts.separate')}</Check>
@@ -153,16 +163,20 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
             )}
             {done && (
               <div className="flex flex-col gap-1.5">
-                <span className="font-mono text-[11px] tracking-label text-acc">B · {t('sts.output')} → {targetName.toUpperCase()}</span>
+                <span className="flex gap-2 items-center">
+                  <span className="font-mono text-[11px] tracking-label text-acc">B · {t('sts.output')} → {targetName.toUpperCase()}</span>
+                  {abBtn('b')}
+                </span>
                 <div className="border border-line"><Bars seed={2.1} playhead={ab === 'b' ? player.position : undefined} /></div>
+                {engine().mode === 'mock' && <span className="font-mono text-[10px] text-mute">{t('sts.mockNote')}</span>}
               </div>
             )}
             <div className="flex gap-2 flex-wrap justify-end">
               {done && (
                 <>
                   <Btn variant="ghost" className="!font-mono !text-[12px] !font-bold"
-                    onClick={() => (ab === 'a' ? player.play('sts:b', dur) : ab === 'b' ? player.stop() : player.play('sts:a', dur))}>
-                    {ab === 'a' ? '▶ B' : ab === 'b' ? '■ A/B' : '▶ A/B'}
+                    onClick={() => void playAb(ab === 'a' ? 'b' : 'a')}>
+                    {ab === 'a' ? '▶ B' : ab === 'b' ? '▶ A' : '▶ A/B'}
                   </Btn>
                   <Btn variant="ghost" className="!font-mono !text-[12px] !font-bold" onClick={() => void exportOut()}>{t('sts.export')}</Btn>
                 </>

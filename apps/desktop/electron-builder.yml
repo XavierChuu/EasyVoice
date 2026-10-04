@@ -11,6 +11,8 @@ win:
 mac:
   target: dmg
   category: public.app-category.music
+  extendInfo:
+    NSMicrophoneUsageDescription: EasyVoice dùng micro để thu giọng mẫu và đổi giọng trực tiếp.
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true

@@ -1,25 +1,80 @@
 {
   "common": {
-    "advanced": "ADVANCED", "cancel": "Cancel", "close": "Close", "dismiss": "Dismiss", "done": "DONE", "no": "No", "yes": "Yes",
-    "play": "Play", "stop": "Stop", "remove": "Remove", "replace": "REPLACE", "save": "Save", "showInFolder": "Show in folder",
-    "unknown": "Unknown", "working": "WORKING…"
+    "advanced": "ADVANCED",
+    "cancel": "Cancel",
+    "close": "Close",
+    "dismiss": "Dismiss",
+    "done": "DONE",
+    "no": "No",
+    "yes": "Yes",
+    "play": "Play",
+    "stop": "Stop",
+    "remove": "Remove",
+    "replace": "REPLACE",
+    "save": "Save",
+    "showInFolder": "Show in folder",
+    "unknown": "Unknown",
+    "working": "WORKING…"
   },
-  "lang": { "vi": "Vietnamese", "en": "English", "unknown": "Unknown language" },
-  "license": { "personal": "Personal use only", "commercial": "Commercial use allowed", "noredist": "No resharing", "unknown": "unknown, personal use only" },
-  "nav": { "aria": "Main navigation", "modules": "MODULES", "voices": "My Voices", "tts": "Text to Speech", "sts": "Voice Changer", "settings": "Settings", "licenses": "Licenses" },
+  "lang": {
+    "vi": "Vietnamese",
+    "en": "English",
+    "unknown": "Unknown language"
+  },
+  "license": {
+    "personal": "Personal use only",
+    "commercial": "Commercial use allowed",
+    "noredist": "No resharing",
+    "unknown": "unknown, personal use only"
+  },
+  "nav": {
+    "aria": "Main navigation",
+    "modules": "MODULES",
+    "voices": "My Voices",
+    "tts": "Text to Speech",
+    "sts": "Voice Changer",
+    "settings": "Settings",
+    "licenses": "Licenses"
+  },
   "shell": {
-    "mode": "MODE: OFFLINE", "hardware": "HARDWARE", "local": "// 100% LOCAL · NO CLOUD", "profiles": "PROFILES",
-    "engine": { "starting": "STARTING", "online": "ONLINE", "restarting": "RESTARTING", "offline": "OFFLINE", "mock": "MOCK" },
-    "busy": { "idle": "IDLE", "rt": "RT LIVE", "tts": "TTS RUNNING", "sts": "STS RUNNING", "train": "TRAINING" },
+    "mode": "MODE: OFFLINE",
+    "hardware": "HARDWARE",
+    "local": "// 100% LOCAL · NO CLOUD",
+    "profiles": "PROFILES",
+    "engine": {
+      "starting": "STARTING",
+      "online": "ONLINE",
+      "restarting": "RESTARTING",
+      "offline": "OFFLINE",
+      "mock": "MOCK"
+    },
+    "busy": {
+      "idle": "IDLE",
+      "rt": "RT LIVE",
+      "tts": "TTS RUNNING",
+      "sts": "STS RUNNING",
+      "train": "TRAINING"
+    },
     "queue": {
-      "empty": "Queue empty.", "rt": "Real-time is holding the GPU. Other jobs are waiting.", "tts": "Reading text.",
-      "sts": "Converting file.", "train": "Training: {{name}}", "waiting_one": "{{count}} job waiting.", "waiting_other": "{{count}} jobs waiting."
+      "empty": "Queue empty.",
+      "rt": "Real-time is holding the GPU. Other jobs are waiting.",
+      "tts": "Reading text.",
+      "sts": "Converting file.",
+      "train": "Training: {{name}}",
+      "waiting_one": "{{count}} job waiting.",
+      "waiting_other": "{{count}} jobs waiting."
     }
   },
   "engineBanner": {
     "restart": "Restart engine",
-    "restarting": { "title": "The engine stopped unexpectedly and is restarting", "body": "Your voices and files are safe. Running jobs will need to be started again." },
-    "offline": { "title": "The engine is not running", "body": "EasyVoice could not start its local engine. Restart it, or check the log for details." }
+    "restarting": {
+      "title": "The engine stopped unexpectedly and is restarting",
+      "body": "Your voices and files are safe. Running jobs will need to be started again."
+    },
+    "offline": {
+      "title": "The engine is not running",
+      "body": "EasyVoice could not start its local engine. Restart it, or check the log for details."
+    }
   },
   "errors": {
     "GPU_BUSY_REALTIME": "The real-time voice changer is holding the GPU. Stop it first.",
@@ -33,170 +88,439 @@
     "UNKNOWN": "Something went wrong. Details were written to the log."
   },
   "voices": {
-    "code": "01 / VOICE PROFILES", "title": "My Voices", "desc": "Create a voice once, use it for Text to Speech and Voice Changer.",
-    "import": "IMPORT", "new": "NEW VOICE", "today": "TODAY", "menu": "Voice options", "rename": "Rename", "viewTraining": "Training details",
-    "delete": "Delete", "read": "Read", "convert": "Convert", "export": "Export voice", "importedBy": "imported · by {{author}}",
-    "renameTitle": "RENAME_VOICE", "deleteTitle": "DELETE_VOICE",
+    "code": "01 / VOICE PROFILES",
+    "title": "My Voices",
+    "desc": "Create a voice once, use it for Text to Speech and Voice Changer.",
+    "import": "IMPORT",
+    "new": "NEW VOICE",
+    "today": "TODAY",
+    "menu": "Voice options",
+    "rename": "Rename",
+    "viewTraining": "Training details",
+    "delete": "Delete",
+    "read": "Read",
+    "convert": "Convert",
+    "export": "Export voice",
+    "importedBy": "imported · by {{author}}",
+    "renameTitle": "RENAME_VOICE",
+    "deleteTitle": "DELETE_VOICE",
     "deleteBody": "Delete “{{name}}”? Its model and reference audio are removed from this computer. This cannot be undone.",
     "deleteBodyTraining": "“{{name}}” is still training. Deleting stops training and removes everything, including checkpoints. This cannot be undone.",
-    "deleted": "Deleted “{{name}}”.", "emptyCaption": "NO VOICES YET", "empty": "Create your first voice from a short clip, or import one someone shared with you."
+    "deleted": "Deleted “{{name}}”.",
+    "emptyCaption": "NO VOICES YET",
+    "empty": "Create your first voice from a short clip, or import one someone shared with you."
   },
   "wizard": {
-    "aria": "Create new voice", "name": "VOICE NAME", "namePlaceholder": "e.g. Podcast narrator", "language": "LANGUAGE",
+    "aria": "Create new voice",
+    "name": "VOICE NAME",
+    "namePlaceholder": "e.g. Podcast narrator",
+    "language": "LANGUAGE",
     "quick": {
-      "title": "Quick", "desc": "Just 5–12 seconds of audio. Ready for Text to Speech right away.", "meta": "NO TRAINING · ~SECONDS",
-      "caption": "INPUT · 5–12s · WAV/MP3/M4A", "drop": "Drop one audio file — clear voice, no background music",
-      "choose": "Choose file", "record": "Record now", "analyzing": "ANALYZING…"
+      "title": "Quick",
+      "desc": "Just 5–12 seconds of audio. Ready for Text to Speech right away.",
+      "meta": "NO TRAINING · ~SECONDS",
+      "caption": "INPUT · 5–12s · WAV/MP3/M4A",
+      "drop": "Drop one audio file — clear voice, no background music",
+      "choose": "Choose file",
+      "record": "Record now",
+      "analyzing": "ANALYZING…"
     },
     "hq": {
-      "title": "High quality", "desc": "10–30 minutes of audio. Works for both Text to Speech and Voice Changer.",
-      "meta": "GPU TRAINING · BACKGROUND · RESUMABLE", "caption": "DATASET · 10–30 MIN · 1 SPEAKER",
-      "drop": "Drop several audio or video files of the same speaker", "choose": "Choose files", "add": "ADD FILES",
-      "file": "FILE", "duration": "DURATION", "total": "TOTAL", "separate": "Remove background music and denoise before training",
+      "title": "High quality",
+      "desc": "10–30 minutes of audio. Works for both Text to Speech and Voice Changer.",
+      "meta": "GPU TRAINING · BACKGROUND · RESUMABLE",
+      "caption": "DATASET · 10–30 MIN · 1 SPEAKER",
+      "drop": "Drop several audio or video files of the same speaker",
+      "choose": "Choose files",
+      "add": "ADD FILES",
+      "file": "FILE",
+      "duration": "DURATION",
+      "total": "TOTAL",
+      "separate": "Remove background music and denoise before training",
       "preset": "TRAINING PRESET",
       "shortTitle": "Not enough audio — at least {{min}} minutes of clean speech is needed",
       "shortBody": "You have {{have}}. Add more recordings of the same speaker for a voice that sounds right.",
-      "okTitle": "Enough to train", "okBody": "10–30 minutes gives a closer, more stable voice."
+      "okTitle": "Enough to train",
+      "okBody": "10–30 minutes gives a closer, more stable voice."
     },
     "preset": {
-      "fast": { "title": "Fast", "desc": "Quick test" },
-      "balanced": { "title": "Balanced", "desc": "Recommended" },
-      "thorough": { "title": "Thorough", "desc": "Slowest, most accurate" }
+      "fast": {
+        "title": "Fast",
+        "desc": "Quick test"
+      },
+      "balanced": {
+        "title": "Balanced",
+        "desc": "Recommended"
+      },
+      "thorough": {
+        "title": "Thorough",
+        "desc": "Slowest, most accurate"
+      }
     },
-    "check": { "trim": "trim silence", "loudness": "loudness −16 LUFS", "music": "no music detected", "noise": "low noise" },
+    "check": {
+      "trim": "trim silence",
+      "loudness": "loudness −16 LUFS",
+      "music": "no music detected",
+      "noise": "low noise"
+    },
     "warn": {
-      "too_short": { "title": "Clip is shorter than 5 seconds", "body": "The cloned voice may sound off. Use a 5–12 second clip." },
-      "too_long": { "title": "Clip is longer than 12 seconds", "body": "Only the first 12 seconds will be used. Pick your best part for a closer voice." },
-      "music": { "title": "Background music detected", "body": "Music makes the cloned voice less accurate. Use a clean recording if you can." },
-      "noise": { "title": "Noisy recording", "body": "Background noise is copied into the voice. Record in a quiet room if you can." },
-      "clipping": { "title": "Recording is clipping", "body": "The audio is too loud and distorted. Record a little further from the mic." }
+      "too_short": {
+        "title": "Clip is shorter than 5 seconds",
+        "body": "The cloned voice may sound off. Use a 5–12 second clip."
+      },
+      "too_long": {
+        "title": "Clip is longer than 12 seconds",
+        "body": "Only the first 12 seconds will be used. Pick your best part for a closer voice."
+      },
+      "music": {
+        "title": "Background music detected",
+        "body": "Music makes the cloned voice less accurate. Use a clean recording if you can."
+      },
+      "noise": {
+        "title": "Noisy recording",
+        "body": "Background noise is copied into the voice. Record in a quiet room if you can."
+      },
+      "clipping": {
+        "title": "Recording is clipping",
+        "body": "The audio is too loud and distorted. Record a little further from the mic."
+      }
     },
-    "transcript": "TRANSCRIPT", "transcribing": "TRANSCRIBING…",
+    "transcript": "TRANSCRIPT",
+    "transcribing": "TRANSCRIBING…",
     "transcriptPlaceholder": "Type exactly what is said in the clip, or hit AUTO and correct it",
     "transcriptHint": "The closer the transcript matches the clip, the closer the cloned voice.",
     "consent": "This is my own voice, or I have the speaker's permission to use it.",
     "hint": {
-      "name": "Name your voice", "file": "Choose an audio file", "transcript": "Enter the transcript", "files": "Choose files to train on",
-      "tooShort": "Add at least {{min}} minutes of audio", "consent": "Confirm you have rights to this voice", "ready": "Ready",
+      "name": "Name your voice",
+      "file": "Choose an audio file",
+      "transcript": "Enter the transcript",
+      "files": "Choose files to train on",
+      "tooShort": "Add at least {{min}} minutes of audio",
+      "consent": "Confirm you have rights to this voice",
+      "ready": "Ready",
       "background": "Training runs in the background, keep using the app"
     },
-    "create": "CREATE VOICE", "startTraining": "START TRAINING",
-    "created": "Voice “{{name}}” is ready for Text to Speech.", "trainingStarted": "Training “{{name}}” in the background."
+    "create": "CREATE VOICE",
+    "startTraining": "START TRAINING",
+    "created": "Voice “{{name}}” is ready for Text to Speech.",
+    "trainingStarted": "Training “{{name}}” in the background."
   },
   "recorder": {
-    "title": "RECORD_REFERENCE", "hint": "Read the sentence below in your normal voice. 5–12 seconds, quiet room, about a hand's width from the mic.",
+    "title": "RECORD_REFERENCE",
+    "hint": "Read the sentence below in your normal voice. 5–12 seconds, quiet room, about a hand's width from the mic.",
     "script": "Today the weather is lovely, so I'm going for a walk by the river and maybe a coffee on the way back.",
-    "start": "START RECORDING", "stop": "STOP", "again": "Record again", "use": "USE RECORDING",
-    "tooShort": "Too short — record at least {{min}} seconds.", "noMic": "Can't access the microphone",
-    "noMicBody": "Allow microphone access for EasyVoice in your system settings, or choose a file instead."
+    "start": "START RECORDING",
+    "stop": "STOP",
+    "again": "Record again",
+    "use": "USE RECORDING",
+    "tooShort": "Too short — record at least {{min}} seconds.",
+    "noMic": "Can't access the microphone",
+    "noMicBody": "Allow microphone access for EasyVoice in your system settings, or choose a file instead.",
+    "device": "MICROPHONE",
+    "defaultDevice": "System default",
+    "mic": "Microphone",
+    "take": "Your recording",
+    "listen": "LISTEN",
+    "silent": "No sound is coming in",
+    "silentBody": "Check that the right microphone is selected and not muted.",
+    "playFail": "Can't play this recording on this device.",
+    "err": {
+      "denied": {
+        "title": "Microphone access is blocked",
+        "windows": "Open Windows Settings → Privacy & security → Microphone, turn on “Microphone access” and “Let desktop apps access your microphone”, then try again.",
+        "mac": "Open System Settings → Privacy & Security → Microphone, turn on EasyVoice (or Electron while developing), then restart the app.",
+        "browser": "Click the lock icon next to the address bar, allow Microphone for this site, then try again."
+      },
+      "notFound": {
+        "title": "No microphone found",
+        "body": "Plug in a microphone or choose another input, then try again. You can also use Choose file."
+      },
+      "busy": {
+        "title": "The microphone is in use",
+        "body": "Another app (Zoom, Discord, OBS…) may be holding the mic. Close it and try again."
+      },
+      "insecure": {
+        "title": "Recording is not available here",
+        "body": "Open the app at http://127.0.0.1:5173 or run the desktop app."
+      },
+      "other": {
+        "title": "Could not start recording",
+        "body": "Try another microphone, or use Choose file instead."
+      }
+    }
   },
   "import": {
-    "aria": "Import voice", "drop": "Drop a voice package someone shared with you, or an RVC model pair", "scanning": "Checking file safety…",
-    "chooseEvoice": "Choose .evoice", "chooseRvc": "Choose .pth + .index", "unsafeDemo": "Unsafe .pth (demo)", "scan": "SECURITY SCAN",
-    "check": { "format": "FORMAT", "checksums": "CHECKSUMS", "model": "MODEL", "appVersion": "APP VERSION", "safeLoad": "SAFE LOAD", "convert": "CONVERT", "index": "INDEX", "result": "RESULT" },
+    "aria": "Import voice",
+    "drop": "Drop a voice package someone shared with you, or an RVC model pair",
+    "scanning": "Checking file safety…",
+    "chooseEvoice": "Choose .evoice",
+    "chooseRvc": "Choose .pth + .index",
+    "unsafeDemo": "Unsafe .pth (demo)",
+    "scan": "SECURITY SCAN",
+    "check": {
+      "format": "FORMAT",
+      "checksums": "CHECKSUMS",
+      "model": "MODEL",
+      "appVersion": "APP VERSION",
+      "safeLoad": "SAFE LOAD",
+      "convert": "CONVERT",
+      "index": "INDEX",
+      "result": "RESULT"
+    },
     "blockedTitle": "Import blocked",
     "blockedBody": "This file contains executable code, not just model weights. Loading it could run programs on your computer. Nothing was imported.",
-    "meta": { "author": "AUTHOR", "language": "LANGUAGE", "includes": "INCLUDES", "license": "LICENSE", "source": "SOURCE", "sampleRate": "SAMPLE RATE" },
-    "cap": { "tts": "Text to Speech", "sts": "Voice Changer" }, "rawRvc": "Raw RVC model",
-    "name": "NAME IN YOUR LIBRARY", "agree": "I will use this voice according to its license: {{license}}.", "submit": "IMPORT VOICE",
+    "meta": {
+      "author": "AUTHOR",
+      "language": "LANGUAGE",
+      "includes": "INCLUDES",
+      "license": "LICENSE",
+      "source": "SOURCE",
+      "sampleRate": "SAMPLE RATE"
+    },
+    "cap": {
+      "tts": "Text to Speech",
+      "sts": "Voice Changer"
+    },
+    "rawRvc": "Raw RVC model",
+    "name": "NAME IN YOUR LIBRARY",
+    "agree": "I will use this voice according to its license: {{license}}.",
+    "submit": "IMPORT VOICE",
     "done": "Imported “{{name}}”."
   },
   "export": {
-    "aria": "Export voice", "include": "INCLUDE", "model": "RVC model + index", "modelNote": "Lets others use this voice in Voice Changer. ~143 MB.",
-    "noModel": "This voice has no RVC model yet.", "ref": "Reference audio + transcript",
+    "aria": "Export voice",
+    "include": "INCLUDE",
+    "model": "RVC model + index",
+    "modelNote": "Lets others use this voice in Voice Changer. ~143 MB.",
+    "noModel": "This voice has no RVC model yet.",
+    "ref": "Reference audio + transcript",
     "refOff": "Lets others use it in Text to Speech. Contains the real voice recording.",
     "refOn": "Includes the real voice recording. Only share with people you trust.",
-    "refNone": "Not available for this voice.", "refImported": "Not available — this voice was imported from someone else.",
+    "refNone": "Not available for this voice.",
+    "refImported": "Not available — this voice was imported from someone else.",
     "license": "LICENSE",
     "lic": {
-      "personal": { "title": "Personal use", "desc": "No commercial projects" },
-      "commercial": { "title": "Commercial OK", "desc": "Use in paid work" },
-      "noredist": { "title": "No resharing", "desc": "Only for the person you send it to" }
+      "personal": {
+        "title": "Personal use",
+        "desc": "No commercial projects"
+      },
+      "commercial": {
+        "title": "Commercial OK",
+        "desc": "Use in paid work"
+      },
+      "noredist": {
+        "title": "No resharing",
+        "desc": "Only for the person you send it to"
+      }
     },
-    "author": "AUTHOR", "authorPlaceholder": "Your name or handle", "submit": "EXPORT .EVOICE",
+    "author": "AUTHOR",
+    "authorPlaceholder": "Your name or handle",
+    "submit": "EXPORT .EVOICE",
     "doneBody": "Send this file to anyone with EasyVoice. They open it with Import, it is checked for safety, then it appears in their library."
   },
   "training": {
-    "aria": "Training details", "stage": { "preprocess": "PREPROCESS", "extract": "EXTRACT F0/FEAT", "train": "TRAIN", "index": "BUILD INDEX" },
-    "queued": "QUEUED", "paused": "PAUSED", "failed": "FAILED", "done": "DONE", "waitingFor": "Waiting for: {{name}}",
-    "pause": "PAUSE", "resume": "RESUME", "pausedTitle": "Training paused", "pausedBody": "Progress is saved at the last checkpoint. Resume any time — it continues from there.",
-    "pauseConfirmTitle": "PAUSE_TRAINING", "pauseConfirmBody": "Training stops and keeps the last checkpoint. You can resume later without starting over.",
+    "aria": "Training details",
+    "stage": {
+      "preprocess": "PREPROCESS",
+      "extract": "EXTRACT F0/FEAT",
+      "train": "TRAIN",
+      "index": "BUILD INDEX"
+    },
+    "queued": "QUEUED",
+    "paused": "PAUSED",
+    "failed": "FAILED",
+    "done": "DONE",
+    "waitingFor": "Waiting for: {{name}}",
+    "pause": "PAUSE",
+    "resume": "RESUME",
+    "pausedTitle": "Training paused",
+    "pausedBody": "Progress is saved at the last checkpoint. Resume any time — it continues from there.",
+    "pauseConfirmTitle": "PAUSE_TRAINING",
+    "pauseConfirmBody": "Training stops and keeps the last checkpoint. You can resume later without starting over.",
     "background": "Training runs in the background. You can close this and keep using the app."
   },
   "tts": {
-    "code": "02 / TEXT-TO-SPEECH", "title": "Text to Speech", "desc": "Paste your text, pick a voice, hit Read. Long text is split into sentences.",
+    "code": "02 / TEXT-TO-SPEECH",
+    "title": "Text to Speech",
+    "desc": "Paste your text, pick a voice, hit Read. Long text is split into sentences.",
     "sample": "Hello, I am EasyVoice. Gold prices in NYC rose 10% compared to last week! Try pasting a longer passage to see how the app splits it into sentences.",
-    "chars": "CHARS", "sent": "SENT", "openTxt": "OPEN .TXT", "dictionary": "DICTIONARY", "normalization": "TEXT NORMALIZATION",
-    "voice": "VOICE", "noVoices": "No voice can read text yet. Create a Quick voice first.", "mode": "MODE", "direct": "Direct", "chain": "Via RVC",
+    "chars": "CHARS",
+    "sent": "SENT",
+    "openTxt": "OPEN .TXT",
+    "dictionary": "DICTIONARY",
+    "normalization": "TEXT NORMALIZATION",
+    "voice": "VOICE",
+    "noVoices": "No voice can read text yet. Create a Quick voice first.",
+    "mode": "MODE",
+    "direct": "Direct",
+    "chain": "Via RVC",
     "hint": {
-      "chain": "Closer, more stable voice. Slightly slower.", "direct": "Fast, keeps the emotion of the reference clip.",
+      "chain": "Closer, more stable voice. Slightly slower.",
+      "direct": "Fast, keeps the emotion of the reference clip.",
       "noRvc": "This voice has no RVC model yet, so only Direct is available."
     },
-    "speed": "SPEED", "pause": "PAUSE BETWEEN SENTENCES", "pauseHint": "Silence added between sentences, with a short crossfade.",
-    "seedHint": "Same seed + same text = same result.", "randomSeed": "Random seed",
-    "read": "READ ALOUD", "output": "Output", "queued": "QUEUED", "queuedFor": "QUEUED · waiting for {{name}}", "rendering": "RENDERING",
-    "complete": "COMPLETE", "stoppedAt": "STOPPED AT", "st": { "queued": "QUEUED", "done": "DONE", "render": "RENDER", "redo": "RE-RENDER" },
-    "redo": "REDO", "playSentence": "Play sentence", "exported": "Saved {{fmt}}."
+    "speed": "SPEED",
+    "pause": "PAUSE BETWEEN SENTENCES",
+    "pauseHint": "Silence added between sentences, with a short crossfade.",
+    "seedHint": "Same seed + same text = same result.",
+    "randomSeed": "Random seed",
+    "read": "READ ALOUD",
+    "output": "Output",
+    "queued": "QUEUED",
+    "queuedFor": "QUEUED · waiting for {{name}}",
+    "rendering": "RENDERING",
+    "complete": "COMPLETE",
+    "stoppedAt": "STOPPED AT",
+    "st": {
+      "queued": "QUEUED",
+      "done": "DONE",
+      "render": "RENDER",
+      "redo": "RE-RENDER"
+    },
+    "redo": "REDO",
+    "playSentence": "Play sentence",
+    "exported": "Saved {{fmt}}.",
+    "mockNote": "MOCK · system voice for testing playback — not F5-TTS yet"
   },
   "dict": {
-    "title": "PRONUNCIATION_DICTIONARY", "desc": "Tell EasyVoice how to say words it gets wrong: names, brands, abbreviations. Applied before reading.",
-    "from": "WRITTEN", "to": "SAY AS", "toPlaceholder": "ay eye", "add": "ADD WORD"
+    "title": "PRONUNCIATION_DICTIONARY",
+    "desc": "Tell EasyVoice how to say words it gets wrong: names, brands, abbreviations. Applied before reading.",
+    "from": "WRITTEN",
+    "to": "SAY AS",
+    "toPlaceholder": "ay eye",
+    "add": "ADD WORD"
   },
   "sts": {
-    "code": "03 / SPEECH-TO-SPEECH", "title": "Voice Changer", "desc": "Convert a voice from a file or your mic into one of your trained voices.",
-    "modeOffline": "FILE · QUALITY", "modeRt": "LIVE · REAL-TIME", "target": "TARGET VOICE", "onlyTrained": "Only fully trained voices are listed.",
-    "pitch": "PITCH", "pitchHint": "Male → female is usually +12, female → male −12.", "gate": "NOISE GATE", "gateHint": "Sound quieter than this is muted.",
-    "drop": "Drop the file you want to convert", "chooseFile": "Choose file", "source": "SOURCE", "output": "OUTPUT",
+    "code": "03 / SPEECH-TO-SPEECH",
+    "title": "Voice Changer",
+    "desc": "Convert a voice from a file or your mic into one of your trained voices.",
+    "modeOffline": "FILE · QUALITY",
+    "modeRt": "LIVE · REAL-TIME",
+    "target": "TARGET VOICE",
+    "onlyTrained": "Only fully trained voices are listed.",
+    "pitch": "PITCH",
+    "pitchHint": "Male → female is usually +12, female → male −12.",
+    "gate": "NOISE GATE",
+    "gateHint": "Sound quieter than this is muted.",
+    "drop": "Drop the file you want to convert",
+    "chooseFile": "Choose file",
+    "source": "SOURCE",
+    "output": "OUTPUT",
     "separate": "Separate background music, convert the voice, then remix with the original music",
-    "indexHint": "Higher = closer to the target voice, may add artifacts.", "protectHint": "Protects breaths and consonants. Lower = stronger protection.",
-    "stage": { "demux": "DEMUX", "separate": "SEPARATE", "prep": "PREP", "convert": "CONVERT", "remix": "REMIX", "join": "JOIN" },
-    "processing": "PROCESSING…", "again": "RUN AGAIN", "convert": "CONVERT", "export": "EXPORT", "exported": "Saved converted audio.",
+    "indexHint": "Higher = closer to the target voice, may add artifacts.",
+    "protectHint": "Protects breaths and consonants. Lower = stronger protection.",
+    "stage": {
+      "demux": "DEMUX",
+      "separate": "SEPARATE",
+      "prep": "PREP",
+      "convert": "CONVERT",
+      "remix": "REMIX",
+      "join": "JOIN"
+    },
+    "processing": "PROCESSING…",
+    "again": "RUN AGAIN",
+    "convert": "CONVERT",
+    "export": "EXPORT",
+    "exported": "Saved converted audio.",
     "rt": {
-      "refresh": "REFRESH", "virtualTitle": "Want to use this voice in Discord, OBS or Zoom?",
+      "refresh": "REFRESH",
+      "virtualTitle": "Want to use this voice in Discord, OBS or Zoom?",
       "virtualInstall": "You need a virtual audio device: VB-Cable (Windows) or BlackHole (macOS). Once installed, select it as Output.",
       "virtualSelect": "Select the virtual device (CABLE Input / BlackHole) as Output, then pick it as the microphone in the other app.",
-      "guide": "See setup guide", "preset": { "low": "Low latency", "balanced": "Balanced", "quality": "Quality" },
-      "latency": "LATENCY", "status": "STATUS", "standby": "STANDBY", "starting": "STARTING…", "stable": "STABLE",
-      "underrun": "UNDERRUN · try Balanced", "underrunCount_one": "{{count}} dropout", "underrunCount_other": "{{count}} dropouts", "start": "START"
-    }
+      "guide": "See setup guide",
+      "preset": {
+        "low": "Low latency",
+        "balanced": "Balanced",
+        "quality": "Quality"
+      },
+      "latency": "LATENCY",
+      "status": "STATUS",
+      "standby": "STANDBY",
+      "starting": "STARTING…",
+      "stable": "STABLE",
+      "underrun": "UNDERRUN · try Balanced",
+      "underrunCount_one": "{{count}} dropout",
+      "underrunCount_other": "{{count}} dropouts",
+      "start": "START"
+    },
+    "mockNote": "MOCK · pitch shift only for testing playback — not RVC yet"
   },
   "guide": {
-    "title": "VIRTUAL_AUDIO_SETUP", "open": "Open {{name}} website",
-    "windows": { "steps": [
-      "Download VB-Cable from the official VB-Audio website and unzip it.",
-      "Right-click VBCABLE_Setup_x64.exe → Run as administrator → Install Driver. Restart your computer.",
-      "In EasyVoice → Voice Changer → LIVE, pick “CABLE Input (VB-Audio)” as Output, then press START.",
-      "In Discord / OBS / Zoom, choose “CABLE Output (VB-Audio)” as your microphone.",
-      "To hear yourself, enable “Listen to this device” for CABLE Output in Windows Sound settings."
-    ] },
-    "mac": { "steps": [
-      "Download BlackHole 2ch from the official Existential Audio website and run the installer.",
-      "Open EasyVoice → Voice Changer → LIVE, pick “BlackHole 2ch” as Output, then press START.",
-      "In Discord / OBS / Zoom, choose “BlackHole 2ch” as your microphone.",
-      "To hear yourself too, create a Multi-Output Device in Audio MIDI Setup with your speakers + BlackHole."
-    ] },
+    "title": "VIRTUAL_AUDIO_SETUP",
+    "open": "Open {{name}} website",
+    "windows": {
+      "steps": [
+        "Download VB-Cable from the official VB-Audio website and unzip it.",
+        "Right-click VBCABLE_Setup_x64.exe → Run as administrator → Install Driver. Restart your computer.",
+        "In EasyVoice → Voice Changer → LIVE, pick “CABLE Input (VB-Audio)” as Output, then press START.",
+        "In Discord / OBS / Zoom, choose “CABLE Output (VB-Audio)” as your microphone.",
+        "To hear yourself, enable “Listen to this device” for CABLE Output in Windows Sound settings."
+      ]
+    },
+    "mac": {
+      "steps": [
+        "Download BlackHole 2ch from the official Existential Audio website and run the installer.",
+        "Open EasyVoice → Voice Changer → LIVE, pick “BlackHole 2ch” as Output, then press START.",
+        "In Discord / OBS / Zoom, choose “BlackHole 2ch” as your microphone.",
+        "To hear yourself too, create a Multi-Output Device in Audio MIDI Setup with your speakers + BlackHole."
+      ]
+    },
     "note": "EasyVoice does not install audio drivers itself. Links open the developers' official pages."
   },
   "settings": {
-    "code": "SETTINGS", "title": "Settings", "desc": "Where things are stored, which device runs the models, and app language.",
-    "language": "LANGUAGE", "modelsDir": "MODELS FOLDER", "modelsHint": "AI models are large (several GB). Move them to another drive if needed.",
-    "voicesDir": "VOICES FOLDER", "voicesHint": "Your voice profiles and training data.", "defaultFolder": "Default (app data folder)",
-    "choose": "Choose…", "reset": "RESET", "device": "DEVICE", "deviceHint": "Auto uses your GPU and falls back to CPU if needed.",
-    "deviceAuto": "Auto", "deviceCpu": "CPU only", "cpuWarn": "CPU only is very slow, and real-time voice changing is not available.",
-    "format": "DEFAULT AUDIO FORMAT", "privacy": "PRIVACY", "privacyHint": "Telemetry, if ever added, will be opt-in.",
-    "privacyBody": "Nothing leaves your computer except model downloads.", "engine": "ENGINE", "rerunSetup": "Re-run first-time setup"
+    "code": "SETTINGS",
+    "title": "Settings",
+    "desc": "Where things are stored, which device runs the models, and app language.",
+    "language": "LANGUAGE",
+    "modelsDir": "MODELS FOLDER",
+    "modelsHint": "AI models are large (several GB). Move them to another drive if needed.",
+    "voicesDir": "VOICES FOLDER",
+    "voicesHint": "Your voice profiles and training data.",
+    "defaultFolder": "Default (app data folder)",
+    "choose": "Choose…",
+    "reset": "RESET",
+    "device": "DEVICE",
+    "deviceHint": "Auto uses your GPU and falls back to CPU if needed.",
+    "deviceAuto": "Auto",
+    "deviceCpu": "CPU only",
+    "cpuWarn": "CPU only is very slow, and real-time voice changing is not available.",
+    "format": "DEFAULT AUDIO FORMAT",
+    "privacy": "PRIVACY",
+    "privacyHint": "Telemetry, if ever added, will be opt-in.",
+    "privacyBody": "Nothing leaves your computer except model downloads.",
+    "engine": "ENGINE",
+    "rerunSetup": "Re-run first-time setup"
   },
   "licenses": {
-    "code": "LICENSES", "title": "Licenses", "desc": "Every AI model EasyVoice uses, and what its license allows.",
-    "model": "MODEL", "role": "ROLE", "license": "LICENSE", "commercial": "COMMERCIAL", "size": "SIZE", "installed": "INSTALLED",
+    "code": "LICENSES",
+    "title": "Licenses",
+    "desc": "Every AI model EasyVoice uses, and what its license allows.",
+    "model": "MODEL",
+    "role": "ROLE",
+    "license": "LICENSE",
+    "commercial": "COMMERCIAL",
+    "size": "SIZE",
+    "installed": "INSTALLED",
     "ncWarn": "Some models are licensed for non-commercial use only. Audio you create with them should not be used in paid work.",
     "appNote": "EasyVoice app code and bundled libraries are listed in the NOTICE file that ships with the app."
   },
   "firstRun": {
-    "title": "WELCOME_TO_EASYVOICE", "intro": "EasyVoice runs entirely on your computer. First, it needs to download its AI models once. After that it works offline.",
-    "check": "SYSTEM CHECK", "driver": "GPU DRIVER", "driverOld": "Too old — please update", "disk": "FREE DISK",
-    "group": { "tts": "Text to Speech", "sts": "Voice Changer + training", "common": "Extras (music separation, auto transcript)" },
-    "download": "DOWNLOAD {{size}} GB", "skip": "Skip for now", "downloading": "DOWNLOADING…", "done": "ALL SET",
-    "resumeNote": "If your connection drops, the download continues where it left off.", "start": "START USING EASYVOICE"
+    "title": "WELCOME_TO_EASYVOICE",
+    "intro": "EasyVoice runs entirely on your computer. First, it needs to download its AI models once. After that it works offline.",
+    "check": "SYSTEM CHECK",
+    "driver": "GPU DRIVER",
+    "driverOld": "Too old — please update",
+    "disk": "FREE DISK",
+    "group": {
+      "tts": "Text to Speech",
+      "sts": "Voice Changer + training",
+      "common": "Extras (music separation, auto transcript)"
+    },
+    "download": "DOWNLOAD {{size}} GB",
+    "skip": "Skip for now",
+    "downloading": "DOWNLOADING…",
+    "done": "ALL SET",
+    "resumeNote": "If your connection drops, the download continues where it left off.",
+    "start": "START USING EASYVOICE"
   }
 }

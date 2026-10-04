@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('easyvoice', {
   platform: process.platform,
   pickFiles: (opts: unknown) => ipcRenderer.invoke('dialog:pickFiles', opts),
   pickFolder: (title?: string) => ipcRenderer.invoke('dialog:pickFolder', title),
+  micAccess: () => ipcRenderer.invoke('mic:access'),
+  readPicked: (p: string) => ipcRenderer.invoke('fs:readPicked', p),
   readText: (p: string) => ipcRenderer.invoke('fs:readText', p),
   showInFolder: (p: string) => ipcRenderer.invoke('shell:showInFolder', p),
   openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url),

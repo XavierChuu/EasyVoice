@@ -8,6 +8,7 @@ import { errorText } from '../../lib/errors';
 import { AUDIO_FILTER, MEDIA_FILTER, platform } from '../../lib/platform';
 import { formatDuration } from '../../lib/text';
 import { useSettings } from '../../stores/settings';
+import { usePlayer } from '../../stores/player';
 import { useUi } from '../../stores/ui';
 import { Recorder } from './Recorder';
 
@@ -21,6 +22,7 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
   const uiLang = useSettings((s) => s.lang);
   const toast = useUi((s) => s.toast);
   const setNotice = useUi((s) => s.setNotice);
+  const player = usePlayer();
   const [mode, setMode] = useState<'quick' | 'hq'>('quick');
   const [name, setName] = useState('');
   const [language, setLanguage] = useState<VoiceLang>(uiLang);
@@ -132,9 +134,17 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
               <div className="border border-line">
                 <div className="flex justify-between items-center flex-wrap gap-2 px-3 py-2 border-b border-line font-mono text-[12px]">
                   <span>{quick.ref.name} {a && <span className="text-mute">· {a.durationSec.toFixed(2)}s · {Math.round(a.sampleRate / 1000)}kHz · {a.channels === 1 ? 'mono' : 'stereo'}</span>}</span>
-                  <Btn variant="link" onClick={() => { setQuick(null); setTranscript(''); }}>[{t('common.replace')}]</Btn>
+                  <span className="flex gap-3">
+                    {quick.ref.file && (
+                      <Btn variant="link" onClick={() => (player.key === 'wizard-ref' ? player.stop()
+                        : player.play('wizard-ref', { durationSec: a?.durationSec ?? 8, url: URL.createObjectURL(quick.ref.file!) }))}>
+                        [{player.key === 'wizard-ref' ? `■ ${t('common.stop')}` : `▶ ${t('recorder.listen')}`}]
+                      </Btn>
+                    )}
+                    <Btn variant="link" onClick={() => { player.stop(); setQuick(null); setTranscript(''); }}>[{t('common.replace')}]</Btn>
+                  </span>
                 </div>
-                <Bars seed={0.9} n={60} height={56} />
+                <Bars seed={0.9} n={60} height={56} playhead={player.key === 'wizard-ref' ? player.position : undefined} />
                 <div className="flex flex-wrap gap-x-5 gap-y-2 px-3 py-2.5 border-t border-line font-mono text-[11px] text-mute">
                   {!a && <span className="text-acc">{t('wizard.quick.analyzing')}</span>}
                   {a?.checks.map((c) => (

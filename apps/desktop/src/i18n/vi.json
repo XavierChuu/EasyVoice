@@ -1,25 +1,79 @@
 {
   "common": {
-    "advanced": "NÂNG CAO", "cancel": "Hủy", "close": "Đóng", "dismiss": "Ẩn", "done": "XONG", "no": "Không", "yes": "Có",
-    "play": "Nghe", "stop": "Dừng", "remove": "Xóa", "replace": "THAY", "save": "Lưu", "showInFolder": "Mở thư mục",
-    "unknown": "Không rõ", "working": "ĐANG XỬ LÝ…"
+    "advanced": "NÂNG CAO",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "dismiss": "Ẩn",
+    "done": "XONG",
+    "no": "Không",
+    "yes": "Có",
+    "play": "Nghe",
+    "stop": "Dừng",
+    "remove": "Xóa",
+    "replace": "THAY",
+    "save": "Lưu",
+    "showInFolder": "Mở thư mục",
+    "unknown": "Không rõ",
+    "working": "ĐANG XỬ LÝ…"
   },
-  "lang": { "vi": "Tiếng Việt", "en": "Tiếng Anh", "unknown": "Chưa rõ ngôn ngữ" },
-  "license": { "personal": "Chỉ dùng cá nhân", "commercial": "Được dùng thương mại", "noredist": "Không được chia sẻ lại", "unknown": "không rõ, chỉ dùng cá nhân" },
-  "nav": { "aria": "Điều hướng chính", "modules": "CHỨC NĂNG", "voices": "Giọng của tôi", "tts": "Đọc văn bản", "sts": "Đổi giọng", "settings": "Cài đặt", "licenses": "Giấy phép" },
+  "lang": {
+    "vi": "Tiếng Việt",
+    "en": "Tiếng Anh",
+    "unknown": "Chưa rõ ngôn ngữ"
+  },
+  "license": {
+    "personal": "Chỉ dùng cá nhân",
+    "commercial": "Được dùng thương mại",
+    "noredist": "Không được chia sẻ lại",
+    "unknown": "không rõ, chỉ dùng cá nhân"
+  },
+  "nav": {
+    "aria": "Điều hướng chính",
+    "modules": "CHỨC NĂNG",
+    "voices": "Giọng của tôi",
+    "tts": "Đọc văn bản",
+    "sts": "Đổi giọng",
+    "settings": "Cài đặt",
+    "licenses": "Giấy phép"
+  },
   "shell": {
-    "mode": "CHẾ ĐỘ: OFFLINE", "hardware": "PHẦN CỨNG", "local": "// 100% TRÊN MÁY · KHÔNG CLOUD", "profiles": "GIỌNG",
-    "engine": { "starting": "ĐANG KHỞI ĐỘNG", "online": "SẴN SÀNG", "restarting": "ĐANG KHỞI ĐỘNG LẠI", "offline": "KHÔNG CHẠY", "mock": "MOCK" },
-    "busy": { "idle": "RẢNH", "rt": "ĐỔI GIỌNG TRỰC TIẾP", "tts": "ĐANG ĐỌC", "sts": "ĐANG ĐỔI GIỌNG", "train": "ĐANG HUẤN LUYỆN" },
+    "mode": "CHẾ ĐỘ: OFFLINE",
+    "hardware": "PHẦN CỨNG",
+    "local": "// 100% TRÊN MÁY · KHÔNG CLOUD",
+    "profiles": "GIỌNG",
+    "engine": {
+      "starting": "ĐANG KHỞI ĐỘNG",
+      "online": "SẴN SÀNG",
+      "restarting": "ĐANG KHỞI ĐỘNG LẠI",
+      "offline": "KHÔNG CHẠY",
+      "mock": "MOCK"
+    },
+    "busy": {
+      "idle": "RẢNH",
+      "rt": "ĐỔI GIỌNG TRỰC TIẾP",
+      "tts": "ĐANG ĐỌC",
+      "sts": "ĐANG ĐỔI GIỌNG",
+      "train": "ĐANG HUẤN LUYỆN"
+    },
     "queue": {
-      "empty": "Hàng đợi trống.", "rt": "Đổi giọng trực tiếp đang giữ GPU. Các tác vụ khác phải chờ.", "tts": "Đang đọc văn bản.",
-      "sts": "Đang đổi giọng file.", "train": "Đang huấn luyện: {{name}}", "waiting_other": "{{count}} tác vụ đang chờ."
+      "empty": "Hàng đợi trống.",
+      "rt": "Đổi giọng trực tiếp đang giữ GPU. Các tác vụ khác phải chờ.",
+      "tts": "Đang đọc văn bản.",
+      "sts": "Đang đổi giọng file.",
+      "train": "Đang huấn luyện: {{name}}",
+      "waiting_other": "{{count}} tác vụ đang chờ."
     }
   },
   "engineBanner": {
     "restart": "Khởi động lại engine",
-    "restarting": { "title": "Engine bị dừng đột ngột và đang khởi động lại", "body": "Giọng và file của bạn vẫn an toàn. Các tác vụ đang chạy cần được chạy lại." },
-    "offline": { "title": "Engine không chạy", "body": "EasyVoice không khởi động được engine trên máy. Hãy khởi động lại, hoặc xem file log để biết chi tiết." }
+    "restarting": {
+      "title": "Engine bị dừng đột ngột và đang khởi động lại",
+      "body": "Giọng và file của bạn vẫn an toàn. Các tác vụ đang chạy cần được chạy lại."
+    },
+    "offline": {
+      "title": "Engine không chạy",
+      "body": "EasyVoice không khởi động được engine trên máy. Hãy khởi động lại, hoặc xem file log để biết chi tiết."
+    }
   },
   "errors": {
     "GPU_BUSY_REALTIME": "Đổi giọng trực tiếp đang giữ GPU. Hãy dừng nó trước.",
@@ -33,170 +87,438 @@
     "UNKNOWN": "Đã có lỗi xảy ra. Chi tiết đã được ghi vào file log."
   },
   "voices": {
-    "code": "01 / HỒ SƠ GIỌNG", "title": "Giọng của tôi", "desc": "Tạo giọng một lần, dùng cho cả Đọc văn bản và Đổi giọng.",
-    "import": "NHẬP", "new": "GIỌNG MỚI", "today": "HÔM NAY", "menu": "Tùy chọn giọng", "rename": "Đổi tên", "viewTraining": "Chi tiết huấn luyện",
-    "delete": "Xóa", "read": "Đọc", "convert": "Đổi giọng", "export": "Xuất giọng", "importedBy": "đã nhập · của {{author}}",
-    "renameTitle": "ĐỔI_TÊN_GIỌNG", "deleteTitle": "XÓA_GIỌNG",
+    "code": "01 / HỒ SƠ GIỌNG",
+    "title": "Giọng của tôi",
+    "desc": "Tạo giọng một lần, dùng cho cả Đọc văn bản và Đổi giọng.",
+    "import": "NHẬP",
+    "new": "GIỌNG MỚI",
+    "today": "HÔM NAY",
+    "menu": "Tùy chọn giọng",
+    "rename": "Đổi tên",
+    "viewTraining": "Chi tiết huấn luyện",
+    "delete": "Xóa",
+    "read": "Đọc",
+    "convert": "Đổi giọng",
+    "export": "Xuất giọng",
+    "importedBy": "đã nhập · của {{author}}",
+    "renameTitle": "ĐỔI_TÊN_GIỌNG",
+    "deleteTitle": "XÓA_GIỌNG",
     "deleteBody": "Xóa “{{name}}”? Model và audio mẫu sẽ bị xóa khỏi máy. Không thể hoàn tác.",
     "deleteBodyTraining": "“{{name}}” đang huấn luyện. Xóa sẽ dừng huấn luyện và xóa toàn bộ, kể cả checkpoint. Không thể hoàn tác.",
-    "deleted": "Đã xóa “{{name}}”.", "emptyCaption": "CHƯA CÓ GIỌNG NÀO", "empty": "Tạo giọng đầu tiên từ một đoạn audio ngắn, hoặc nhập giọng người khác chia sẻ."
+    "deleted": "Đã xóa “{{name}}”.",
+    "emptyCaption": "CHƯA CÓ GIỌNG NÀO",
+    "empty": "Tạo giọng đầu tiên từ một đoạn audio ngắn, hoặc nhập giọng người khác chia sẻ."
   },
   "wizard": {
-    "aria": "Tạo giọng mới", "name": "TÊN GIỌNG", "namePlaceholder": "vd. Giọng đọc podcast", "language": "NGÔN NGỮ",
+    "aria": "Tạo giọng mới",
+    "name": "TÊN GIỌNG",
+    "namePlaceholder": "vd. Giọng đọc podcast",
+    "language": "NGÔN NGỮ",
     "quick": {
-      "title": "Nhanh", "desc": "Chỉ cần 5–12 giây audio. Dùng được cho Đọc văn bản ngay.", "meta": "KHÔNG CẦN TRAIN · VÀI GIÂY",
-      "caption": "ĐẦU VÀO · 5–12s · WAV/MP3/M4A", "drop": "Thả một file audio — giọng rõ, không có nhạc nền",
-      "choose": "Chọn file", "record": "Thu âm ngay", "analyzing": "ĐANG PHÂN TÍCH…"
+      "title": "Nhanh",
+      "desc": "Chỉ cần 5–12 giây audio. Dùng được cho Đọc văn bản ngay.",
+      "meta": "KHÔNG CẦN TRAIN · VÀI GIÂY",
+      "caption": "ĐẦU VÀO · 5–12s · WAV/MP3/M4A",
+      "drop": "Thả một file audio — giọng rõ, không có nhạc nền",
+      "choose": "Chọn file",
+      "record": "Thu âm ngay",
+      "analyzing": "ĐANG PHÂN TÍCH…"
     },
     "hq": {
-      "title": "Chất lượng cao", "desc": "10–30 phút audio. Dùng được cho cả Đọc văn bản và Đổi giọng.",
-      "meta": "TRAIN BẰNG GPU · CHẠY NỀN · TIẾP TỤC ĐƯỢC", "caption": "DỮ LIỆU · 10–30 PHÚT · 1 NGƯỜI NÓI",
-      "drop": "Thả nhiều file audio hoặc video của cùng một người nói", "choose": "Chọn file", "add": "THÊM FILE",
-      "file": "FILE", "duration": "THỜI LƯỢNG", "total": "TỔNG", "separate": "Tách nhạc nền và khử nhiễu trước khi huấn luyện",
+      "title": "Chất lượng cao",
+      "desc": "10–30 phút audio. Dùng được cho cả Đọc văn bản và Đổi giọng.",
+      "meta": "TRAIN BẰNG GPU · CHẠY NỀN · TIẾP TỤC ĐƯỢC",
+      "caption": "DỮ LIỆU · 10–30 PHÚT · 1 NGƯỜI NÓI",
+      "drop": "Thả nhiều file audio hoặc video của cùng một người nói",
+      "choose": "Chọn file",
+      "add": "THÊM FILE",
+      "file": "FILE",
+      "duration": "THỜI LƯỢNG",
+      "total": "TỔNG",
+      "separate": "Tách nhạc nền và khử nhiễu trước khi huấn luyện",
       "preset": "CHẾ ĐỘ HUẤN LUYỆN",
       "shortTitle": "Chưa đủ audio — cần ít nhất {{min}} phút giọng nói sạch",
       "shortBody": "Hiện có {{have}}. Thêm bản ghi của cùng người nói để giọng ra giống hơn.",
-      "okTitle": "Đủ để huấn luyện", "okBody": "10–30 phút sẽ cho giọng giống và ổn định hơn."
+      "okTitle": "Đủ để huấn luyện",
+      "okBody": "10–30 phút sẽ cho giọng giống và ổn định hơn."
     },
     "preset": {
-      "fast": { "title": "Nhanh", "desc": "Thử nhanh" },
-      "balanced": { "title": "Cân bằng", "desc": "Khuyên dùng" },
-      "thorough": { "title": "Kỹ", "desc": "Chậm nhất, giống nhất" }
+      "fast": {
+        "title": "Nhanh",
+        "desc": "Thử nhanh"
+      },
+      "balanced": {
+        "title": "Cân bằng",
+        "desc": "Khuyên dùng"
+      },
+      "thorough": {
+        "title": "Kỹ",
+        "desc": "Chậm nhất, giống nhất"
+      }
     },
-    "check": { "trim": "đã cắt khoảng lặng", "loudness": "âm lượng −16 LUFS", "music": "không có nhạc nền", "noise": "ít nhiễu" },
+    "check": {
+      "trim": "đã cắt khoảng lặng",
+      "loudness": "âm lượng −16 LUFS",
+      "music": "không có nhạc nền",
+      "noise": "ít nhiễu"
+    },
     "warn": {
-      "too_short": { "title": "Đoạn audio ngắn hơn 5 giây", "body": "Giọng tạo ra có thể không giống. Hãy dùng đoạn 5–12 giây." },
-      "too_long": { "title": "Đoạn audio dài hơn 12 giây", "body": "Chỉ 12 giây đầu được dùng. Chọn đoạn hay nhất để giọng giống hơn." },
-      "music": { "title": "Phát hiện nhạc nền", "body": "Nhạc nền làm giọng kém chính xác. Nên dùng bản ghi sạch nếu có thể." },
-      "noise": { "title": "Bản ghi nhiều nhiễu", "body": "Tiếng ồn sẽ bị sao chép vào giọng. Nên thu trong phòng yên tĩnh." },
-      "clipping": { "title": "Bản ghi bị vỡ tiếng", "body": "Âm lượng quá to và méo. Hãy thu xa micro hơn một chút." }
+      "too_short": {
+        "title": "Đoạn audio ngắn hơn 5 giây",
+        "body": "Giọng tạo ra có thể không giống. Hãy dùng đoạn 5–12 giây."
+      },
+      "too_long": {
+        "title": "Đoạn audio dài hơn 12 giây",
+        "body": "Chỉ 12 giây đầu được dùng. Chọn đoạn hay nhất để giọng giống hơn."
+      },
+      "music": {
+        "title": "Phát hiện nhạc nền",
+        "body": "Nhạc nền làm giọng kém chính xác. Nên dùng bản ghi sạch nếu có thể."
+      },
+      "noise": {
+        "title": "Bản ghi nhiều nhiễu",
+        "body": "Tiếng ồn sẽ bị sao chép vào giọng. Nên thu trong phòng yên tĩnh."
+      },
+      "clipping": {
+        "title": "Bản ghi bị vỡ tiếng",
+        "body": "Âm lượng quá to và méo. Hãy thu xa micro hơn một chút."
+      }
     },
-    "transcript": "LỜI THOẠI", "transcribing": "ĐANG NHẬN DẠNG…",
+    "transcript": "LỜI THOẠI",
+    "transcribing": "ĐANG NHẬN DẠNG…",
     "transcriptPlaceholder": "Gõ chính xác lời nói trong đoạn audio, hoặc bấm AUTO rồi sửa lại",
     "transcriptHint": "Lời thoại càng khớp với audio, giọng tạo ra càng giống.",
     "consent": "Đây là giọng của tôi hoặc tôi có sự đồng ý của người nói.",
     "hint": {
-      "name": "Đặt tên cho giọng", "file": "Chọn một file audio", "transcript": "Nhập lời thoại", "files": "Chọn file để huấn luyện",
-      "tooShort": "Thêm ít nhất {{min}} phút audio", "consent": "Xác nhận bạn có quyền dùng giọng này", "ready": "Sẵn sàng",
+      "name": "Đặt tên cho giọng",
+      "file": "Chọn một file audio",
+      "transcript": "Nhập lời thoại",
+      "files": "Chọn file để huấn luyện",
+      "tooShort": "Thêm ít nhất {{min}} phút audio",
+      "consent": "Xác nhận bạn có quyền dùng giọng này",
+      "ready": "Sẵn sàng",
       "background": "Huấn luyện chạy nền, bạn vẫn dùng app bình thường"
     },
-    "create": "TẠO GIỌNG", "startTraining": "BẮT ĐẦU HUẤN LUYỆN",
-    "created": "Giọng “{{name}}” đã sẵn sàng cho Đọc văn bản.", "trainingStarted": "Đang huấn luyện “{{name}}” ở chế độ nền."
+    "create": "TẠO GIỌNG",
+    "startTraining": "BẮT ĐẦU HUẤN LUYỆN",
+    "created": "Giọng “{{name}}” đã sẵn sàng cho Đọc văn bản.",
+    "trainingStarted": "Đang huấn luyện “{{name}}” ở chế độ nền."
   },
   "recorder": {
-    "title": "THU_ÂM_GIỌNG_MẪU", "hint": "Đọc câu bên dưới bằng giọng bình thường. 5–12 giây, phòng yên tĩnh, cách micro khoảng một gang tay.",
+    "title": "THU_ÂM_GIỌNG_MẪU",
+    "hint": "Đọc câu bên dưới bằng giọng bình thường. 5–12 giây, phòng yên tĩnh, cách micro khoảng một gang tay.",
     "script": "Hôm nay trời đẹp quá, mình đi dạo một vòng bờ sông rồi ghé uống ly cà phê trên đường về.",
-    "start": "BẮT ĐẦU THU", "stop": "DỪNG", "again": "Thu lại", "use": "DÙNG BẢN THU NÀY",
-    "tooShort": "Quá ngắn — hãy thu ít nhất {{min}} giây.", "noMic": "Không truy cập được micro",
-    "noMicBody": "Cho phép EasyVoice dùng micro trong cài đặt hệ thống, hoặc chọn file thay thế."
+    "start": "BẮT ĐẦU THU",
+    "stop": "DỪNG",
+    "again": "Thu lại",
+    "use": "DÙNG BẢN THU NÀY",
+    "tooShort": "Quá ngắn — hãy thu ít nhất {{min}} giây.",
+    "noMic": "Không truy cập được micro",
+    "noMicBody": "Cho phép EasyVoice dùng micro trong cài đặt hệ thống, hoặc chọn file thay thế.",
+    "device": "MICRO",
+    "defaultDevice": "Mặc định của hệ thống",
+    "mic": "Micro",
+    "take": "Bản thu của bạn",
+    "listen": "NGHE LẠI",
+    "silent": "Không nhận được âm thanh",
+    "silentBody": "Kiểm tra đã chọn đúng micro và micro không bị tắt tiếng.",
+    "playFail": "Không phát được bản thu trên máy này.",
+    "err": {
+      "denied": {
+        "title": "Micro đang bị chặn",
+        "windows": "Mở Settings của Windows → Privacy & security → Microphone, bật “Microphone access” và “Let desktop apps access your microphone”, rồi thử lại.",
+        "mac": "Mở System Settings → Privacy & Security → Microphone, bật EasyVoice (hoặc Electron khi đang chạy dev), rồi mở lại app.",
+        "browser": "Bấm biểu tượng ổ khóa cạnh thanh địa chỉ, cho phép Micro với trang này, rồi thử lại."
+      },
+      "notFound": {
+        "title": "Không tìm thấy micro",
+        "body": "Cắm micro hoặc chọn thiết bị khác rồi thử lại. Hoặc dùng Chọn file."
+      },
+      "busy": {
+        "title": "Micro đang được app khác dùng",
+        "body": "Có thể Zoom, Discord, OBS… đang giữ micro. Đóng app đó rồi thử lại."
+      },
+      "insecure": {
+        "title": "Không thu âm được ở đây",
+        "body": "Mở app tại http://127.0.0.1:5173 hoặc chạy bản desktop."
+      },
+      "other": {
+        "title": "Không bắt đầu thu được",
+        "body": "Thử micro khác, hoặc dùng Chọn file."
+      }
+    }
   },
   "import": {
-    "aria": "Nhập giọng", "drop": "Thả gói giọng người khác chia sẻ, hoặc cặp file model RVC", "scanning": "Đang kiểm tra an toàn…",
-    "chooseEvoice": "Chọn .evoice", "chooseRvc": "Chọn .pth + .index", "unsafeDemo": ".pth độc hại (demo)", "scan": "KIỂM TRA AN TOÀN",
-    "check": { "format": "ĐỊNH DẠNG", "checksums": "CHECKSUM", "model": "MODEL", "appVersion": "PHIÊN BẢN APP", "safeLoad": "LOAD AN TOÀN", "convert": "CHUYỂN ĐỔI", "index": "INDEX", "result": "KẾT QUẢ" },
+    "aria": "Nhập giọng",
+    "drop": "Thả gói giọng người khác chia sẻ, hoặc cặp file model RVC",
+    "scanning": "Đang kiểm tra an toàn…",
+    "chooseEvoice": "Chọn .evoice",
+    "chooseRvc": "Chọn .pth + .index",
+    "unsafeDemo": ".pth độc hại (demo)",
+    "scan": "KIỂM TRA AN TOÀN",
+    "check": {
+      "format": "ĐỊNH DẠNG",
+      "checksums": "CHECKSUM",
+      "model": "MODEL",
+      "appVersion": "PHIÊN BẢN APP",
+      "safeLoad": "LOAD AN TOÀN",
+      "convert": "CHUYỂN ĐỔI",
+      "index": "INDEX",
+      "result": "KẾT QUẢ"
+    },
     "blockedTitle": "Đã chặn nhập",
     "blockedBody": "File này chứa mã thực thi, không chỉ là trọng số model. Mở nó có thể chạy chương trình trên máy bạn. Không có gì được nhập.",
-    "meta": { "author": "TÁC GIẢ", "language": "NGÔN NGỮ", "includes": "BAO GỒM", "license": "GIẤY PHÉP", "source": "NGUỒN", "sampleRate": "SAMPLE RATE" },
-    "cap": { "tts": "Đọc văn bản", "sts": "Đổi giọng" }, "rawRvc": "Model RVC thô",
-    "name": "TÊN TRONG THƯ VIỆN", "agree": "Tôi sẽ dùng giọng này theo đúng giấy phép: {{license}}.", "submit": "NHẬP GIỌNG",
+    "meta": {
+      "author": "TÁC GIẢ",
+      "language": "NGÔN NGỮ",
+      "includes": "BAO GỒM",
+      "license": "GIẤY PHÉP",
+      "source": "NGUỒN",
+      "sampleRate": "SAMPLE RATE"
+    },
+    "cap": {
+      "tts": "Đọc văn bản",
+      "sts": "Đổi giọng"
+    },
+    "rawRvc": "Model RVC thô",
+    "name": "TÊN TRONG THƯ VIỆN",
+    "agree": "Tôi sẽ dùng giọng này theo đúng giấy phép: {{license}}.",
+    "submit": "NHẬP GIỌNG",
     "done": "Đã nhập “{{name}}”."
   },
   "export": {
-    "aria": "Xuất giọng", "include": "BAO GỒM", "model": "Model RVC + index", "modelNote": "Cho phép người khác dùng giọng này trong Đổi giọng. ~143 MB.",
-    "noModel": "Giọng này chưa có model RVC.", "ref": "Audio mẫu + lời thoại",
+    "aria": "Xuất giọng",
+    "include": "BAO GỒM",
+    "model": "Model RVC + index",
+    "modelNote": "Cho phép người khác dùng giọng này trong Đổi giọng. ~143 MB.",
+    "noModel": "Giọng này chưa có model RVC.",
+    "ref": "Audio mẫu + lời thoại",
     "refOff": "Cho phép người khác dùng trong Đọc văn bản. Có chứa bản ghi giọng thật.",
     "refOn": "Có kèm bản ghi giọng thật. Chỉ chia sẻ với người bạn tin tưởng.",
-    "refNone": "Giọng này không có.", "refImported": "Không khả dụng — giọng này được nhập từ người khác.",
+    "refNone": "Giọng này không có.",
+    "refImported": "Không khả dụng — giọng này được nhập từ người khác.",
     "license": "GIẤY PHÉP",
     "lic": {
-      "personal": { "title": "Dùng cá nhân", "desc": "Không dùng cho dự án thương mại" },
-      "commercial": { "title": "Cho phép thương mại", "desc": "Được dùng trong công việc có trả phí" },
-      "noredist": { "title": "Không chia sẻ lại", "desc": "Chỉ người nhận được dùng" }
+      "personal": {
+        "title": "Dùng cá nhân",
+        "desc": "Không dùng cho dự án thương mại"
+      },
+      "commercial": {
+        "title": "Cho phép thương mại",
+        "desc": "Được dùng trong công việc có trả phí"
+      },
+      "noredist": {
+        "title": "Không chia sẻ lại",
+        "desc": "Chỉ người nhận được dùng"
+      }
     },
-    "author": "TÁC GIẢ", "authorPlaceholder": "Tên hoặc biệt danh của bạn", "submit": "XUẤT .EVOICE",
+    "author": "TÁC GIẢ",
+    "authorPlaceholder": "Tên hoặc biệt danh của bạn",
+    "submit": "XUẤT .EVOICE",
     "doneBody": "Gửi file này cho bất kỳ ai dùng EasyVoice. Họ mở bằng Nhập, file được kiểm tra an toàn rồi xuất hiện trong thư viện của họ."
   },
   "training": {
-    "aria": "Chi tiết huấn luyện", "stage": { "preprocess": "TIỀN XỬ LÝ", "extract": "TRÍCH ĐẶC TRƯNG", "train": "HUẤN LUYỆN", "index": "TẠO INDEX" },
-    "queued": "ĐANG CHỜ", "paused": "TẠM DỪNG", "failed": "LỖI", "done": "XONG", "waitingFor": "Đang chờ: {{name}}",
-    "pause": "TẠM DỪNG", "resume": "TIẾP TỤC", "pausedTitle": "Đã tạm dừng huấn luyện", "pausedBody": "Tiến độ được lưu ở checkpoint gần nhất. Bấm Tiếp tục bất cứ lúc nào — sẽ chạy tiếp từ đó.",
-    "pauseConfirmTitle": "TẠM_DỪNG_HUẤN_LUYỆN", "pauseConfirmBody": "Huấn luyện sẽ dừng và giữ checkpoint gần nhất. Bạn có thể tiếp tục sau mà không phải chạy lại từ đầu.",
+    "aria": "Chi tiết huấn luyện",
+    "stage": {
+      "preprocess": "TIỀN XỬ LÝ",
+      "extract": "TRÍCH ĐẶC TRƯNG",
+      "train": "HUẤN LUYỆN",
+      "index": "TẠO INDEX"
+    },
+    "queued": "ĐANG CHỜ",
+    "paused": "TẠM DỪNG",
+    "failed": "LỖI",
+    "done": "XONG",
+    "waitingFor": "Đang chờ: {{name}}",
+    "pause": "TẠM DỪNG",
+    "resume": "TIẾP TỤC",
+    "pausedTitle": "Đã tạm dừng huấn luyện",
+    "pausedBody": "Tiến độ được lưu ở checkpoint gần nhất. Bấm Tiếp tục bất cứ lúc nào — sẽ chạy tiếp từ đó.",
+    "pauseConfirmTitle": "TẠM_DỪNG_HUẤN_LUYỆN",
+    "pauseConfirmBody": "Huấn luyện sẽ dừng và giữ checkpoint gần nhất. Bạn có thể tiếp tục sau mà không phải chạy lại từ đầu.",
     "background": "Huấn luyện chạy nền. Bạn có thể đóng bảng này và tiếp tục dùng app."
   },
   "tts": {
-    "code": "02 / ĐỌC VĂN BẢN", "title": "Đọc văn bản", "desc": "Dán văn bản, chọn giọng, bấm Đọc. Văn bản dài được tách thành từng câu.",
+    "code": "02 / ĐỌC VĂN BẢN",
+    "title": "Đọc văn bản",
+    "desc": "Dán văn bản, chọn giọng, bấm Đọc. Văn bản dài được tách thành từng câu.",
     "sample": "Xin chào, mình là EasyVoice. Giá vàng tại TP.HCM tăng 10% so với tuần trước! Hãy dán một đoạn dài hơn để xem app tách câu như thế nào.",
-    "chars": "KÝ TỰ", "sent": "CÂU", "openTxt": "MỞ .TXT", "dictionary": "TỪ ĐIỂN", "normalization": "CHUẨN HÓA VĂN BẢN",
-    "voice": "GIỌNG", "noVoices": "Chưa có giọng nào đọc được văn bản. Hãy tạo một giọng Nhanh trước.", "mode": "CHẾ ĐỘ", "direct": "Trực tiếp", "chain": "Qua RVC",
+    "chars": "KÝ TỰ",
+    "sent": "CÂU",
+    "openTxt": "MỞ .TXT",
+    "dictionary": "TỪ ĐIỂN",
+    "normalization": "CHUẨN HÓA VĂN BẢN",
+    "voice": "GIỌNG",
+    "noVoices": "Chưa có giọng nào đọc được văn bản. Hãy tạo một giọng Nhanh trước.",
+    "mode": "CHẾ ĐỘ",
+    "direct": "Trực tiếp",
+    "chain": "Qua RVC",
     "hint": {
-      "chain": "Giọng giống và ổn định hơn. Chậm hơn một chút.", "direct": "Nhanh, giữ được cảm xúc của đoạn mẫu.",
+      "chain": "Giọng giống và ổn định hơn. Chậm hơn một chút.",
+      "direct": "Nhanh, giữ được cảm xúc của đoạn mẫu.",
       "noRvc": "Giọng này chưa có model RVC nên chỉ dùng được chế độ Trực tiếp."
     },
-    "speed": "TỐC ĐỘ", "pause": "NGHỈ GIỮA CÁC CÂU", "pauseHint": "Khoảng lặng thêm giữa các câu, có crossfade ngắn.",
-    "seedHint": "Cùng seed + cùng văn bản = cùng kết quả.", "randomSeed": "Seed ngẫu nhiên",
-    "read": "ĐỌC", "output": "Kết quả", "queued": "ĐANG CHỜ", "queuedFor": "ĐANG CHỜ · {{name}}", "rendering": "ĐANG TẠO",
-    "complete": "HOÀN TẤT", "stoppedAt": "DỪNG Ở", "st": { "queued": "CHỜ", "done": "XONG", "render": "TẠO", "redo": "TẠO LẠI" },
-    "redo": "LÀM LẠI", "playSentence": "Nghe câu này", "exported": "Đã lưu {{fmt}}."
+    "speed": "TỐC ĐỘ",
+    "pause": "NGHỈ GIỮA CÁC CÂU",
+    "pauseHint": "Khoảng lặng thêm giữa các câu, có crossfade ngắn.",
+    "seedHint": "Cùng seed + cùng văn bản = cùng kết quả.",
+    "randomSeed": "Seed ngẫu nhiên",
+    "read": "ĐỌC",
+    "output": "Kết quả",
+    "queued": "ĐANG CHỜ",
+    "queuedFor": "ĐANG CHỜ · {{name}}",
+    "rendering": "ĐANG TẠO",
+    "complete": "HOÀN TẤT",
+    "stoppedAt": "DỪNG Ở",
+    "st": {
+      "queued": "CHỜ",
+      "done": "XONG",
+      "render": "TẠO",
+      "redo": "TẠO LẠI"
+    },
+    "redo": "LÀM LẠI",
+    "playSentence": "Nghe câu này",
+    "exported": "Đã lưu {{fmt}}.",
+    "mockNote": "MOCK · đọc bằng giọng hệ thống để test phần nghe — chưa phải F5-TTS"
   },
   "dict": {
-    "title": "TỪ_ĐIỂN_PHÁT_ÂM", "desc": "Chỉ cho EasyVoice cách đọc những từ hay bị đọc sai: tên riêng, thương hiệu, viết tắt. Áp dụng trước khi đọc.",
-    "from": "VIẾT", "to": "ĐỌC LÀ", "toPlaceholder": "ây ai", "add": "THÊM TỪ"
+    "title": "TỪ_ĐIỂN_PHÁT_ÂM",
+    "desc": "Chỉ cho EasyVoice cách đọc những từ hay bị đọc sai: tên riêng, thương hiệu, viết tắt. Áp dụng trước khi đọc.",
+    "from": "VIẾT",
+    "to": "ĐỌC LÀ",
+    "toPlaceholder": "ây ai",
+    "add": "THÊM TỪ"
   },
   "sts": {
-    "code": "03 / ĐỔI GIỌNG", "title": "Đổi giọng", "desc": "Đổi giọng từ file hoặc micro sang một trong các giọng đã huấn luyện.",
-    "modeOffline": "FILE · CHẤT LƯỢNG", "modeRt": "TRỰC TIẾP · REAL-TIME", "target": "GIỌNG ĐÍCH", "onlyTrained": "Chỉ hiện các giọng đã huấn luyện xong.",
-    "pitch": "CAO ĐỘ", "pitchHint": "Nam → nữ thường là +12, nữ → nam là −12.", "gate": "LỌC TIẾNG ỒN", "gateHint": "Âm thanh nhỏ hơn mức này sẽ bị tắt.",
-    "drop": "Thả file bạn muốn đổi giọng", "chooseFile": "Chọn file", "source": "GỐC", "output": "KẾT QUẢ",
+    "code": "03 / ĐỔI GIỌNG",
+    "title": "Đổi giọng",
+    "desc": "Đổi giọng từ file hoặc micro sang một trong các giọng đã huấn luyện.",
+    "modeOffline": "FILE · CHẤT LƯỢNG",
+    "modeRt": "TRỰC TIẾP · REAL-TIME",
+    "target": "GIỌNG ĐÍCH",
+    "onlyTrained": "Chỉ hiện các giọng đã huấn luyện xong.",
+    "pitch": "CAO ĐỘ",
+    "pitchHint": "Nam → nữ thường là +12, nữ → nam là −12.",
+    "gate": "LỌC TIẾNG ỒN",
+    "gateHint": "Âm thanh nhỏ hơn mức này sẽ bị tắt.",
+    "drop": "Thả file bạn muốn đổi giọng",
+    "chooseFile": "Chọn file",
+    "source": "GỐC",
+    "output": "KẾT QUẢ",
     "separate": "Tách nhạc nền, đổi giọng, rồi trộn lại với nhạc nền gốc",
-    "indexHint": "Cao hơn = giống giọng đích hơn, có thể sinh tạp âm.", "protectHint": "Giữ hơi thở và phụ âm. Thấp hơn = bảo vệ mạnh hơn.",
-    "stage": { "demux": "TÁCH AUDIO", "separate": "TÁCH NHẠC", "prep": "CHUẨN BỊ", "convert": "ĐỔI GIỌNG", "remix": "TRỘN LẠI", "join": "GHÉP" },
-    "processing": "ĐANG XỬ LÝ…", "again": "CHẠY LẠI", "convert": "ĐỔI GIỌNG", "export": "XUẤT FILE", "exported": "Đã lưu audio đã đổi giọng.",
+    "indexHint": "Cao hơn = giống giọng đích hơn, có thể sinh tạp âm.",
+    "protectHint": "Giữ hơi thở và phụ âm. Thấp hơn = bảo vệ mạnh hơn.",
+    "stage": {
+      "demux": "TÁCH AUDIO",
+      "separate": "TÁCH NHẠC",
+      "prep": "CHUẨN BỊ",
+      "convert": "ĐỔI GIỌNG",
+      "remix": "TRỘN LẠI",
+      "join": "GHÉP"
+    },
+    "processing": "ĐANG XỬ LÝ…",
+    "again": "CHẠY LẠI",
+    "convert": "ĐỔI GIỌNG",
+    "export": "XUẤT FILE",
+    "exported": "Đã lưu audio đã đổi giọng.",
     "rt": {
-      "refresh": "LÀM MỚI", "virtualTitle": "Muốn dùng giọng này trong Discord, OBS hay Zoom?",
+      "refresh": "LÀM MỚI",
+      "virtualTitle": "Muốn dùng giọng này trong Discord, OBS hay Zoom?",
       "virtualInstall": "Bạn cần một thiết bị âm thanh ảo: VB-Cable (Windows) hoặc BlackHole (macOS). Cài xong, chọn nó làm Output.",
       "virtualSelect": "Chọn thiết bị ảo (CABLE Input / BlackHole) làm Output, rồi chọn nó làm micro trong app kia.",
-      "guide": "Xem hướng dẫn cài", "preset": { "low": "Độ trễ thấp", "balanced": "Cân bằng", "quality": "Chất lượng" },
-      "latency": "ĐỘ TRỄ", "status": "TRẠNG THÁI", "standby": "CHỜ", "starting": "ĐANG BẬT…", "stable": "ỔN ĐỊNH",
-      "underrun": "GIẬT TIẾNG · thử Cân bằng", "underrunCount_other": "{{count}} lần giật", "start": "BẮT ĐẦU"
-    }
+      "guide": "Xem hướng dẫn cài",
+      "preset": {
+        "low": "Độ trễ thấp",
+        "balanced": "Cân bằng",
+        "quality": "Chất lượng"
+      },
+      "latency": "ĐỘ TRỄ",
+      "status": "TRẠNG THÁI",
+      "standby": "CHỜ",
+      "starting": "ĐANG BẬT…",
+      "stable": "ỔN ĐỊNH",
+      "underrun": "GIẬT TIẾNG · thử Cân bằng",
+      "underrunCount_other": "{{count}} lần giật",
+      "start": "BẮT ĐẦU"
+    },
+    "mockNote": "MOCK · chỉ đổi cao độ để test phần nghe — chưa phải RVC"
   },
   "guide": {
-    "title": "CÀI_THIẾT_BỊ_ÂM_THANH_ẢO", "open": "Mở trang {{name}}",
-    "windows": { "steps": [
-      "Tải VB-Cable từ trang chính thức của VB-Audio và giải nén.",
-      "Chuột phải VBCABLE_Setup_x64.exe → Run as administrator → Install Driver. Khởi động lại máy.",
-      "Trong EasyVoice → Đổi giọng → TRỰC TIẾP, chọn “CABLE Input (VB-Audio)” làm Output rồi bấm BẮT ĐẦU.",
-      "Trong Discord / OBS / Zoom, chọn “CABLE Output (VB-Audio)” làm micro.",
-      "Muốn tự nghe giọng mình: bật “Listen to this device” cho CABLE Output trong cài đặt Sound của Windows."
-    ] },
-    "mac": { "steps": [
-      "Tải BlackHole 2ch từ trang chính thức của Existential Audio và chạy trình cài.",
-      "Mở EasyVoice → Đổi giọng → TRỰC TIẾP, chọn “BlackHole 2ch” làm Output rồi bấm BẮT ĐẦU.",
-      "Trong Discord / OBS / Zoom, chọn “BlackHole 2ch” làm micro.",
-      "Muốn tự nghe giọng mình: tạo Multi-Output Device trong Audio MIDI Setup gồm loa + BlackHole."
-    ] },
+    "title": "CÀI_THIẾT_BỊ_ÂM_THANH_ẢO",
+    "open": "Mở trang {{name}}",
+    "windows": {
+      "steps": [
+        "Tải VB-Cable từ trang chính thức của VB-Audio và giải nén.",
+        "Chuột phải VBCABLE_Setup_x64.exe → Run as administrator → Install Driver. Khởi động lại máy.",
+        "Trong EasyVoice → Đổi giọng → TRỰC TIẾP, chọn “CABLE Input (VB-Audio)” làm Output rồi bấm BẮT ĐẦU.",
+        "Trong Discord / OBS / Zoom, chọn “CABLE Output (VB-Audio)” làm micro.",
+        "Muốn tự nghe giọng mình: bật “Listen to this device” cho CABLE Output trong cài đặt Sound của Windows."
+      ]
+    },
+    "mac": {
+      "steps": [
+        "Tải BlackHole 2ch từ trang chính thức của Existential Audio và chạy trình cài.",
+        "Mở EasyVoice → Đổi giọng → TRỰC TIẾP, chọn “BlackHole 2ch” làm Output rồi bấm BẮT ĐẦU.",
+        "Trong Discord / OBS / Zoom, chọn “BlackHole 2ch” làm micro.",
+        "Muốn tự nghe giọng mình: tạo Multi-Output Device trong Audio MIDI Setup gồm loa + BlackHole."
+      ]
+    },
     "note": "EasyVoice không tự cài driver âm thanh. Các link mở trang chính thức của nhà phát triển."
   },
   "settings": {
-    "code": "CÀI ĐẶT", "title": "Cài đặt", "desc": "Nơi lưu dữ liệu, thiết bị chạy model và ngôn ngữ giao diện.",
-    "language": "NGÔN NGỮ", "modelsDir": "THƯ MỤC MODEL", "modelsHint": "Model AI rất nặng (vài GB). Có thể chuyển sang ổ khác.",
-    "voicesDir": "THƯ MỤC GIỌNG", "voicesHint": "Hồ sơ giọng và dữ liệu huấn luyện của bạn.", "defaultFolder": "Mặc định (thư mục dữ liệu app)",
-    "choose": "Chọn…", "reset": "MẶC ĐỊNH", "device": "THIẾT BỊ", "deviceHint": "Tự động dùng GPU, không có thì chuyển sang CPU.",
-    "deviceAuto": "Tự động", "deviceCpu": "Chỉ CPU", "cpuWarn": "Chỉ CPU sẽ rất chậm và không dùng được đổi giọng trực tiếp.",
-    "format": "ĐỊNH DẠNG AUDIO MẶC ĐỊNH", "privacy": "QUYỀN RIÊNG TƯ", "privacyHint": "Nếu sau này có telemetry, bạn phải tự bật.",
-    "privacyBody": "Không có dữ liệu nào rời khỏi máy, ngoài việc tải model.", "engine": "ENGINE", "rerunSetup": "Chạy lại thiết lập ban đầu"
+    "code": "CÀI ĐẶT",
+    "title": "Cài đặt",
+    "desc": "Nơi lưu dữ liệu, thiết bị chạy model và ngôn ngữ giao diện.",
+    "language": "NGÔN NGỮ",
+    "modelsDir": "THƯ MỤC MODEL",
+    "modelsHint": "Model AI rất nặng (vài GB). Có thể chuyển sang ổ khác.",
+    "voicesDir": "THƯ MỤC GIỌNG",
+    "voicesHint": "Hồ sơ giọng và dữ liệu huấn luyện của bạn.",
+    "defaultFolder": "Mặc định (thư mục dữ liệu app)",
+    "choose": "Chọn…",
+    "reset": "MẶC ĐỊNH",
+    "device": "THIẾT BỊ",
+    "deviceHint": "Tự động dùng GPU, không có thì chuyển sang CPU.",
+    "deviceAuto": "Tự động",
+    "deviceCpu": "Chỉ CPU",
+    "cpuWarn": "Chỉ CPU sẽ rất chậm và không dùng được đổi giọng trực tiếp.",
+    "format": "ĐỊNH DẠNG AUDIO MẶC ĐỊNH",
+    "privacy": "QUYỀN RIÊNG TƯ",
+    "privacyHint": "Nếu sau này có telemetry, bạn phải tự bật.",
+    "privacyBody": "Không có dữ liệu nào rời khỏi máy, ngoài việc tải model.",
+    "engine": "ENGINE",
+    "rerunSetup": "Chạy lại thiết lập ban đầu"
   },
   "licenses": {
-    "code": "GIẤY PHÉP", "title": "Giấy phép", "desc": "Tất cả model AI EasyVoice dùng và giấy phép của chúng cho phép gì.",
-    "model": "MODEL", "role": "VAI TRÒ", "license": "GIẤY PHÉP", "commercial": "THƯƠNG MẠI", "size": "DUNG LƯỢNG", "installed": "ĐÃ CÀI",
+    "code": "GIẤY PHÉP",
+    "title": "Giấy phép",
+    "desc": "Tất cả model AI EasyVoice dùng và giấy phép của chúng cho phép gì.",
+    "model": "MODEL",
+    "role": "VAI TRÒ",
+    "license": "GIẤY PHÉP",
+    "commercial": "THƯƠNG MẠI",
+    "size": "DUNG LƯỢNG",
+    "installed": "ĐÃ CÀI",
     "ncWarn": "Một số model chỉ được dùng phi thương mại. Audio tạo bằng các model này không nên dùng cho công việc có trả phí.",
     "appNote": "Code của app và các thư viện đi kèm được liệt kê trong file NOTICE cài cùng app."
   },
   "firstRun": {
-    "title": "CHÀO_MỪNG_ĐẾN_EASYVOICE", "intro": "EasyVoice chạy hoàn toàn trên máy bạn. Lần đầu cần tải các model AI một lần, sau đó dùng offline.",
-    "check": "KIỂM TRA HỆ THỐNG", "driver": "DRIVER GPU", "driverOld": "Quá cũ — hãy cập nhật", "disk": "Ổ TRỐNG",
-    "group": { "tts": "Đọc văn bản", "sts": "Đổi giọng + huấn luyện", "common": "Bổ sung (tách nhạc nền, tự nhận dạng lời)" },
-    "download": "TẢI {{size}} GB", "skip": "Để sau", "downloading": "ĐANG TẢI…", "done": "ĐÃ XONG",
-    "resumeNote": "Nếu rớt mạng, lần sau sẽ tải tiếp từ chỗ dừng.", "start": "BẮT ĐẦU DÙNG EASYVOICE"
+    "title": "CHÀO_MỪNG_ĐẾN_EASYVOICE",
+    "intro": "EasyVoice chạy hoàn toàn trên máy bạn. Lần đầu cần tải các model AI một lần, sau đó dùng offline.",
+    "check": "KIỂM TRA HỆ THỐNG",
+    "driver": "DRIVER GPU",
+    "driverOld": "Quá cũ — hãy cập nhật",
+    "disk": "Ổ TRỐNG",
+    "group": {
+      "tts": "Đọc văn bản",
+      "sts": "Đổi giọng + huấn luyện",
+      "common": "Bổ sung (tách nhạc nền, tự nhận dạng lời)"
+    },
+    "download": "TẢI {{size}} GB",
+    "skip": "Để sau",
+    "downloading": "ĐANG TẢI…",
+    "done": "ĐÃ XONG",
+    "resumeNote": "Nếu rớt mạng, lần sau sẽ tải tiếp từ chỗ dừng.",
+    "start": "BẮT ĐẦU DÙNG EASYVOICE"
   }
 }

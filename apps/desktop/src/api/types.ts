@@ -190,6 +190,13 @@ export class EngineError extends Error {
   }
 }
 
+/** Nguồn phát: url (file WAV engine trả về) hoặc speak (mock: giọng hệ thống). */
+export interface PlaySource {
+  durationSec: number;
+  url?: string;
+  speak?: { texts: string[]; lang: string; rate: number };
+}
+
 export type EngineEvent =
   | { type: 'voices'; voices: Profile[] }
   | { type: 'job'; job: Job }

@@ -5,11 +5,12 @@
 import { normalizePreview } from '../lib/normalize';
 import { osName, platform } from '../lib/platform';
 import { slugify, splitSentences } from '../lib/text';
+import { downloadBlob, encodeWav } from '../lib/wav';
 import type { EngineClient } from './engine';
 import {
   EngineError,
   type AudioDevice, type DatasetFile, type DictEntry, type EngineEvent, type ExportOptions, type FileRef,
-  type ImportInspection, type Job, type ModelInfo, type Profile, type RealtimeConfig, type RealtimeStats,
+  type ImportInspection, type Job, type ModelInfo, type PlaySource, type Profile, type RealtimeConfig, type RealtimeStats,
   type RefAnalysis, type StsRequest, type StsStage, type SystemInfo, type TrainPreset, type TrainStage,
   type TtsRequest, type VoiceLang,
 } from './types';
@@ -86,6 +87,11 @@ export class MockEngine implements EngineClient {
     stats: { running: false, inDb: -120, outDb: -120, latencyMs: 0, underrun: false, underruns: 0 },
   };
   private ticks = 0;
+  /** Audio thật của mock: ref người dùng chọn/thu, file STS gốc và bản "đổi giọng" giả lập. */
+  private refAudio = new Map<string, FileRef>();
+  private ttsReq = new Map<string, { lang: string; rate: number }>();
+  private stsIn = new Map<string, { file: FileRef; pitch: number }>();
+  private stsOut = new Map<string, { blob: Blob; url: string; durationSec: number }>();
 
   constructor() {
     this.voices = [
@@ -239,7 +245,8 @@ export class MockEngine implements EngineClient {
     job.stage = stages[Math.min(stages.length - 1, Math.floor(job.progress * stages.length))];
     if (job.progress >= 1) {
       job.outputPath = job.label.replace(/\.[^.]+$/, '') + '-converted.wav';
-      this.finish(job, 'done');
+      void this.renderStsMock(job.id).finally(() => this.finish(job, 'done'));
+      job.progress = 0.999;
       return;
     }
     this.emitJob(job);
@@ -345,6 +352,7 @@ export class MockEngine implements EngineClient {
       id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(),
       capabilities: ['tts'], trainJobId: null, imported: false, hasRef: true,
     };
+    this.refAudio.set(p.id, input.file);
     this.voices.unshift(p);
     this.emitVoices();
     return { ...p };
@@ -363,6 +371,8 @@ export class MockEngine implements EngineClient {
       'Auto-selected a clean 9.2 s reference clip + Whisper transcript for Text to Speech',
     );
     this.presetOf.set(job.id, input.preset);
+    const sample = input.files.find((f) => f.file && /^audio\//.test(f.file.type));
+    if (sample) this.refAudio.set(p.id, sample);
     p.trainJobId = job.id;
     this.voices.unshift(p);
     this.emitVoices();
@@ -389,8 +399,10 @@ export class MockEngine implements EngineClient {
     this.emitVoices();
   }
 
-  async previewVoice() {
-    return 4;
+  async previewVoice(id: string): Promise<PlaySource> {
+    const ref = this.refAudio.get(id);
+    if (ref?.file) return { durationSec: 8, url: URL.createObjectURL(ref.file) };
+    return { durationSec: 4 }; // giọng mẫu dựng sẵn của mock: không có audio
   }
 
   // ---------- import / export ----------
@@ -481,6 +493,7 @@ export class MockEngine implements EngineClient {
     const v = this.voices.find((p) => p.id === req.profileId);
     const job = this.newJob('tts', v?.name ?? 'TTS', req.profileId);
     job.sentences = splitSentences(req.text).map((text, index) => ({ index, text, status: 'queued', progress: 0 }));
+    this.ttsReq.set(job.id, { lang: v?.language === 'en' ? 'en-US' : 'vi-VN', rate: req.speed });
     this.enqueue(job);
     return job.id;
   }
@@ -502,20 +515,69 @@ export class MockEngine implements EngineClient {
     return `${downloads}/easyvoice-tts-${jobId.slice(-6)}.${format}`;
   }
 
+  async ttsAudio(jobId: string, index?: number): Promise<PlaySource> {
+    // Mock: đọc bằng giọng hệ thống để test luồng nghe; engine thật trả file WAV do F5-TTS sinh ra.
+    const job = this.jobs.get(jobId);
+    const req = this.ttsReq.get(jobId) ?? { lang: 'vi-VN', rate: 1 };
+    const done = (job?.sentences ?? []).filter((s) => s.status === 'done' && (index === undefined || s.index === index));
+    return {
+      durationSec: done.reduce((a, s) => a + (s.durationSec ?? 1), 0),
+      speak: { texts: done.map((s) => s.text), lang: req.lang, rate: req.rate },
+    };
+  }
+
   // ---------- STS ----------
   async startSts(req: StsRequest) {
     this.assertGpuFree();
     const job = this.newJob('sts', req.file.name, req.profileId);
     this.stsStages.set(job.id, req.separate ? ['demux', 'separate', 'convert', 'remix'] : ['demux', 'prep', 'convert', 'join']);
+    this.stsIn.set(job.id, { file: req.file, pitch: req.pitch });
     this.enqueue(job);
     return job.id;
   }
 
+  /** "Đổi giọng" giả lập để có audio thật mà nghe: chỉ dịch cao độ (kéo theo tốc độ) + lọc nhẹ. Không phải RVC. */
+  private async renderStsMock(jobId: string) {
+    const input = this.stsIn.get(jobId);
+    if (!input?.file.file || this.stsOut.has(jobId)) return;
+    try {
+      const ctx = new AudioContext();
+      const src = await ctx.decodeAudioData(await input.file.file.arrayBuffer());
+      void ctx.close();
+      const rate = Math.pow(2, input.pitch / 12);
+      const off = new OfflineAudioContext(Math.min(2, src.numberOfChannels), Math.ceil(src.length / rate), src.sampleRate);
+      const node = off.createBufferSource();
+      node.buffer = src;
+      node.playbackRate.value = rate;
+      const shelf = off.createBiquadFilter();
+      shelf.type = 'peaking';
+      shelf.frequency.value = 2500;
+      shelf.gain.value = 4;
+      node.connect(shelf).connect(off.destination);
+      node.start();
+      const out = await off.startRendering();
+      const blob = encodeWav(out);
+      this.stsOut.set(jobId, { blob, url: URL.createObjectURL(blob), durationSec: out.duration });
+    } catch {
+      /* file không giải mã được trong trình duyệt (vd. video) — engine thật dùng FFmpeg */
+    }
+  }
+
+  async stsAudio(jobId: string, which: 'a' | 'b'): Promise<PlaySource> {
+    const input = this.stsIn.get(jobId);
+    if (which === 'a' && input?.file.file) return { durationSec: 30, url: URL.createObjectURL(input.file.file) };
+    const out = this.stsOut.get(jobId);
+    if (which === 'b' && out) return { durationSec: out.durationSec, url: out.url };
+    return { durationSec: 30 };
+  }
+
   async exportSts(jobId: string) {
-    await sleep(500);
     const job = this.jobs.get(jobId);
+    const name = job?.outputPath ?? 'converted.wav';
+    const out = this.stsOut.get(jobId);
+    if (out) downloadBlob(out.blob, name); // mock: tải file WAV thật xuống
     const { downloads } = await platform.appPaths();
-    return `${downloads}/${job?.outputPath ?? 'converted.wav'}`;
+    return `${downloads}/${name}`;
   }
 
   // ---------- jobs control ----------

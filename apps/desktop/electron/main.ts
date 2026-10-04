@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, session, shell, systemPreferences } from 'electron';
 import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
@@ -7,6 +7,9 @@ import { Sidecar, type EngineInfo } from './sidecar';
 let win: BrowserWindow | null = null;
 let sidecar: Sidecar | null = null;
 let engineInfo: EngineInfo = { status: 'mock', restarts: 0 };
+// Chỉ đọc lại được những file người dùng vừa chọn qua hộp thoại (không cho renderer đọc file tùy ý).
+const picked = new Set<string>();
+const MAX_READ = 100e6;
 
 function broadcast(info: EngineInfo) {
   engineInfo = info;
@@ -37,6 +40,26 @@ function createWindow() {
   });
 }
 
+// Micro: renderer chỉ cần audio (thu đoạn ref 5-12 s). Chỉ cấp cho trang của app, từ chối camera/quyền khác.
+function setupPermissions() {
+  const isAppPage = (url: string) => url.startsWith('file://') || url.startsWith(process.env.VITE_DEV_SERVER_URL ?? '\0');
+  session.defaultSession.setPermissionRequestHandler((wc, permission, callback, details) => {
+    const media = permission === 'media' && (details as { mediaTypes?: string[] }).mediaTypes?.every((t) => t === 'audio');
+    callback(!!media && isAppPage(wc.getURL()));
+  });
+  session.defaultSession.setPermissionCheckHandler((wc, permission) => permission === 'media' && !!wc && isAppPage(wc.getURL()));
+}
+
+ipcMain.handle('mic:access', async () => {
+  // macOS: hệ điều hành phải cho phép riêng (System Settings → Privacy & Security → Microphone).
+  if (process.platform === 'darwin') {
+    if (systemPreferences.getMediaAccessStatus('microphone') === 'granted') return 'granted';
+    return (await systemPreferences.askForMediaAccess('microphone')) ? 'granted' : 'denied';
+  }
+  if (process.platform === 'win32') return systemPreferences.getMediaAccessStatus('microphone');
+  return 'granted';
+});
+
 ipcMain.handle('dialog:pickFiles', async (_e, opts: { title?: string; multiple?: boolean; filters?: Electron.FileFilter[] }) => {
   if (!win) return [];
   const r = await dialog.showOpenDialog(win, {
@@ -45,6 +68,7 @@ ipcMain.handle('dialog:pickFiles', async (_e, opts: { title?: string; multiple?:
     properties: opts.multiple ? ['openFile', 'multiSelections'] : ['openFile'],
   });
   if (r.canceled) return [];
+  r.filePaths.forEach((p) => picked.add(p));
   return r.filePaths.map((p) => ({ path: p, name: path.basename(p), size: statSync(p).size }));
 });
 ipcMain.handle('dialog:pickFolder', async (_e, title?: string) => {
@@ -56,6 +80,10 @@ ipcMain.handle('shell:showInFolder', (_e, p: string) => shell.showItemInFolder(p
 ipcMain.handle('shell:openExternal', (_e, url: string) => {
   if (/^https:\/\//.test(url)) return shell.openExternal(url);
 });
+ipcMain.handle('fs:readPicked', (_e, p: string) => {
+  if (!picked.has(p) || statSync(p).size > MAX_READ) throw new Error('not allowed');
+  return readFileSync(p);
+});
 ipcMain.handle('fs:readText', (_e, p: string) => {
   // Chỉ đọc file .txt người dùng vừa chọn (mở văn bản cho TTS), giới hạn 5 MB.
   if (!/\.txt$/i.test(p) || statSync(p).size > 5e6) throw new Error('unsupported file');
@@ -66,6 +94,7 @@ ipcMain.handle('engine:restart', () => sidecar?.restart());
 ipcMain.handle('app:paths', () => ({ downloads: app.getPath('downloads'), userData: app.getPath('userData') }));
 
 void app.whenReady().then(async () => {
+  setupPermissions();
   createWindow();
   const loc = Sidecar.locate(app.getAppPath());
   if (loc) {

@@ -3,7 +3,7 @@
 
 import { MockEngine } from './mockEngine';
 import type {
-  AudioDevice, DatasetFile, DictEntry, EngineEvent, ExportOptions, FileRef, ImportInspection, Profile,
+  AudioDevice, DatasetFile, DictEntry, EngineEvent, ExportOptions, FileRef, ImportInspection, PlaySource, Profile,
   RealtimeConfig, RefAnalysis, StsRequest, SystemInfo, TrainPreset, TtsRequest, VoiceLang,
 } from './types';
 
@@ -24,7 +24,8 @@ export interface EngineClient {
   }): Promise<Profile>;
   renameVoice(id: string, name: string): Promise<void>;
   deleteVoice(id: string): Promise<void>;
-  previewVoice(id: string): Promise<number>; // độ dài đoạn nghe thử (giây)
+  /** Đoạn nghe thử của giọng (preview.wav / ref.wav). */
+  previewVoice(id: string): Promise<PlaySource>;
 
   inspectImport(files: FileRef[]): Promise<ImportInspection>;
   importVoice(token: string, name: string): Promise<Profile>;
@@ -35,9 +36,13 @@ export interface EngineClient {
   startTts(req: TtsRequest): Promise<string>;
   redoSentence(jobId: string, index: number): Promise<void>;
   exportTts(jobId: string, format: 'wav' | 'mp3' | 'flac' | 'srt'): Promise<string>;
+  /** Audio của cả bài (index bỏ trống) hoặc một câu đã render xong. */
+  ttsAudio(jobId: string, index?: number): Promise<PlaySource>;
 
   startSts(req: StsRequest): Promise<string>;
   exportSts(jobId: string): Promise<string>;
+  /** a = audio gốc, b = audio đã đổi giọng. */
+  stsAudio(jobId: string, which: 'a' | 'b'): Promise<PlaySource>;
 
   cancelJob(id: string): Promise<void>;
   resumeJob(id: string): Promise<void>;
