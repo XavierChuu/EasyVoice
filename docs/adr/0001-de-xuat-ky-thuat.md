@@ -18,7 +18,7 @@ Trạng thái: **Đề xuất** (Oct 2026). Các mục đánh dấu ⏳ sẽ ch�
 | Profile ghi `model.pth`, nhưng `.evoice` chỉ nhận `safetensors` | Profile lưu **`model.safetensors`** + cấu hình RVC (`config`, `sr`, `f0`, `version`) trong `profile.json`. Model tự train hay import đều convert ngay, không giữ `.pth` → một đường load duy nhất, an toàn. |
 | Chain cần "một giọng chuẩn đẹp" | Người dùng chọn **giọng nền** là một profile Quick bất kỳ của họ (mặc định: profile Quick gần nhất). Không bundle giọng nền trong v1 trừ khi tìm được ref có license rõ ràng. |
 | Giọng "Chất lượng cao" có dùng cho TTS không? | Có (UI mẫu ghi "Works for both"). Khi train, app **tự chọn một đoạn sạch 5-12 s** trong dataset + Whisper làm ref cho F5-TTS, nên profile có cả TTS lẫn STS. |
-| Train RVC trong app | Vendor code train từ **Applio** (MIT, không phụ thuộc fairseq, chạy Python 3.11). ⏳ xác nhận sau khi đo train ở Phase 0. |
+| Train RVC trong app | **Đã làm (Phase 3):** vòng lặp train tự viết theo công thức RVC v2 40k; phần phụ trợ (loss, mel, slicer) vendored từ gói `rvc` 0.3.5 chính thức (MIT) — Applio không lấy được trong môi trường build. Khởi tạo từ pretrained f0G/f0D, batch tự chọn theo VRAM (6 GB → 4), fp16 trên CUDA, CPU bị từ chối (`GPU_REQUIRED`). ⏳ chất lượng/thời gian đo trên máy thật. |
 | Encoder nội dung | **ContentVec dạng `transformers`** thay cho `hubert_base.pt` (fairseq). ⏳ nghe so sánh ở Phase 0. |
 
 ## Stack
@@ -28,7 +28,7 @@ Trạng thái: **Đề xuất** (Oct 2026). Các mục đánh dấu ⏳ sẽ ch�
 | Python | 3.11, uv, torch 2.8 (CUDA 12.8 / MPS) | ⏳ |
 | TTS | F5-TTS 1.1.x, vocos 24 kHz | output 24 kHz |
 | VC | RVC v2 + RMVPE, code vendored ở `engine/third_party/rvc` | |
-| Tách vocal | **Demucs (htdemucs)** — MIT | Model UVR/MDX license không đồng nhất; chỉ dùng nếu Demucs quá chậm. ⏳ |
+| Tách vocal | **Demucs (htdemucs)** — MIT | Dùng cho tiền xử lý train và STS offline (tách → đổi giọng → trộn lại). Nạp từ thư mục model của app. ⏳ tốc độ trên máy thật. |
 | ASR transcript | faster-whisper, model `small` (đa ngôn ngữ) | MIT |
 | Chuẩn hóa văn bản | Module rule-based tự viết + từ điển người dùng | ≥ 50 test case (Phase 1) |
 | App shell | Electron + React 18 + Vite + Tailwind + Zustand + i18next | |

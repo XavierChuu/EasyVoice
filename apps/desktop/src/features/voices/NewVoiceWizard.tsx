@@ -11,6 +11,7 @@ import { formatDuration, pad2 } from '../../lib/text';
 import { defaultCountry } from '../../lib/voiceTags';
 import { useSettings } from '../../stores/settings';
 import { useUi } from '../../stores/ui';
+import { useSeparatorReady } from '../../lib/models';
 import { TagFields } from './TagFields';
 import { draftReady, newDraft, VariantEditor, type VariantDraft } from './VariantEditor';
 
@@ -32,6 +33,7 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
   const [dataset, setDataset] = useState<DatasetFile[]>([]);
   const [analyzing, setAnalyzing] = useState(false);
   const [separate, setSeparate] = useState(true);
+  const sepReady = useSeparatorReady();
   const [preset, setPreset] = useState<TrainPreset>('balanced');
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -65,7 +67,7 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
     try {
       const profile = isQuick && quick
         ? await engine().createQuickVoice({ name: name.trim(), language, file: quick.ref, transcript: transcript.trim(), consent: true, tags })
-        : await engine().startTraining({ name: name.trim(), language, files: dataset.map((d) => d.ref), separate, preset, consent: true });
+        : await engine().startTraining({ name: name.trim(), language, files: dataset.map((d) => d.ref), separate: separate && sepReady, preset, consent: true, tags });
       // Biến thể tạo sau giọng chuẩn; một biến thể lỗi không làm mất giọng đã tạo.
       const failed: string[] = [];
       for (const v of variants) {
@@ -157,7 +159,8 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
             {totalSec >= MIN_MIN * 60 && totalSec < REC_MIN * 60 && (
               <Alert tone="line" title={t('wizard.hq.okTitle')}>{t('wizard.hq.okBody')}</Alert>
             )}
-            <Check id="sep" checked={separate} onChange={setSeparate}>{t('wizard.hq.separate')}</Check>
+            <Check id="sep" checked={separate && sepReady} disabled={!sepReady} onChange={setSeparate}
+              sub={sepReady ? undefined : t('models.separatorMissing')}>{t('wizard.hq.separate')}</Check>
             <div className="flex flex-col gap-2">
               <Label>{t('wizard.hq.preset')}</Label>
               <Segmented value={preset} onChange={setPreset} options={(['fast', 'balanced', 'thorough'] as const).map((id) => ({

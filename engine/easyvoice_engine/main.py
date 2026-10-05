@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from . import __version__
-from .api import files, jobs, sts, system, tts, voices, ws
+from .api import files, jobs, sts, system, train, tts, voices, ws
 from .core.errors import EngineError, from_exception
 from .core.state import EngineState
 
@@ -31,6 +31,7 @@ def create_app(state: EngineState) -> FastAPI:
     app = FastAPI(title="EasyVoice Engine", version=__version__,
                   description="API local của EasyVoice. Mọi request cần header `Authorization: Bearer <token>`.")
     app.state.engine = state
+    train.recover_interrupted(state)
     # Renderer Electron (file:// hoặc Vite dev) gọi sang 127.0.0.1 — token mới là lớp bảo vệ.
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
@@ -54,7 +55,7 @@ def create_app(state: EngineState) -> FastAPI:
         err = from_exception(exc)
         return JSONResponse(err.to_dict(), status_code=err.status)
 
-    for r in (system.router, voices.router, tts.router, sts.router, jobs.router, files.router, ws.router):
+    for r in (system.router, voices.router, train.router, tts.router, sts.router, jobs.router, files.router, ws.router):
         app.include_router(r)
     return app
 

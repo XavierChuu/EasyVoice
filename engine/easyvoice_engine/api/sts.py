@@ -11,7 +11,7 @@ from ..core.job_queue import JobContext
 from ..core.state import EngineState
 from ..schemas import JobRef
 from ..services import audio_io
-from ..services.registry import CONTENTVEC_KEY, RMVPE_KEY, ensure_rvc_voice
+from ..services.registry import CONTENTVEC_KEY, DEMUCS_ID, RMVPE_KEY, SEP_KEY, ensure_rvc_voice
 from .deps import get_state, save_upload
 
 router = APIRouter(tags=["sts"])
@@ -27,6 +27,8 @@ def start_offline(
     profile = state.voices.get(profile_id)
     if not profile.rvc_model:
         raise EngineError("NO_STS_VOICE")
+    if separate:
+        state.catalog.require(DEMUCS_ID)  # báo thiếu model ngay, không phải giữa chừng
     src = save_upload(state, file)
 
     def run(ctx: JobContext) -> None:
@@ -35,24 +37,31 @@ def start_offline(
         out_dir = state.job_dir(ctx.job)
         ctx.progress(0.02, "demux")
         _, in_sr, _ = audio_io.info(src)
-        audio16k, _ = audio_io.load(src, SR_16K)
-        ctx.log(f"Input {len(audio16k) / SR_16K:.1f}s @ {in_sr} Hz · {ctx.job.device}")
-        if separate:
-            ctx.progress(0.08, "separate")
-            ctx.log("Tách nhạc nền chưa có trong bản engine này (Demucs, cập nhật sau) — đổi giọng trên toàn bộ audio")
+        audio, _ = audio_io.load(src, in_sr)
+        ctx.log(f"Input {len(audio) / in_sr:.1f}s @ {in_sr} Hz · {ctx.job.device}")
+        accompaniment = None
+        if separate:  # spec 3.3: tách vocal, đổi giọng, trộn lại với nhạc nền gốc
+            ctx.progress(0.05, "separate")
+            audio, accompaniment = state.models.get(SEP_KEY).separate(audio, in_sr)
+            ctx.log("Đã tách nhạc nền (Demucs)")
         else:
-            ctx.progress(0.08, "prep")
+            ctx.progress(0.05, "prep")
+        audio16k = audio_io.resample(audio, in_sr, SR_16K)
         model = ensure_rvc_voice(state, profile.id)
         encoder = state.models.get(CONTENTVEC_KEY)
         f0x = state.models.get(RMVPE_KEY)
         d = state.voices.dir(profile.id)
         index = Index(d / profile.rvc_index) if profile.rvc_index and (d / profile.rvc_index).exists() else None
         params = ConvertParams(pitch_shift=pitch, index_rate=index_rate, protect=protect)
-        ctx.progress(0.1, "convert")
+        ctx.progress(0.2, "convert")
         y = convert_long(model, encoder, f0x, index, audio16k, params,
-                         on_progress=lambda p: ctx.progress(0.1 + 0.85 * p, "convert"))
+                         on_progress=lambda p: ctx.progress(0.2 + 0.75 * p, "convert"))
         ctx.progress(0.96, "remix" if separate else "join")
-        y = audio_io.peak_normalize(audio_io.resample(y, model.sr, in_sr))  # spec 3.3: cùng sample rate với input
+        y = audio_io.resample(y, model.sr, in_sr)  # spec 3.3: cùng sample rate với input
+        if accompaniment is not None:
+            n = min(len(y), len(accompaniment))
+            y = y[:n] + accompaniment[:n]
+        y = audio_io.peak_normalize(y)
         out = audio_io.save(out_dir / "converted.wav", y, in_sr)
         ctx.job.files["source"] = state.register_file(src, file.filename or "source")
         ctx.job.files["output"] = state.register_file(out, f"{(file.filename or 'audio').rsplit('.', 1)[0]}-converted.wav")

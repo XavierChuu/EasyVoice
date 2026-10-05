@@ -15,6 +15,9 @@ TTS_KEY = "tts"
 CONTENTVEC_KEY = "rvc:contentvec"
 RMVPE_KEY = "rvc:rmvpe"
 ASR_KEY = "asr:whisper"
+SEP_KEY = "sep:demucs"
+PRETRAINED_ID = "rvc-pretrained-v2-40k"
+DEMUCS_ID = "demucs-htdemucs"
 
 
 def tts_key(state: "EngineState", model_id: str) -> str:
@@ -82,6 +85,15 @@ def register_default_models(state: "EngineState") -> None:
     state.models.register(RMVPE_KEY, load_rmvpe, "rvc")
     state.models.register(ASR_KEY, load_asr, "asr")
 
+    def load_separator(device: str):
+        from .preprocess.separate import Separator
+
+        cat.require(DEMUCS_ID)
+        return Separator(cat.dir(DEMUCS_ID), device)
+
+    # Nhóm "sep": tách nhạc dùng trước khi train/đổi giọng → được gỡ khi chuyển sang model khác
+    state.models.register(SEP_KEY, load_separator, "sep")
+
 
 def ensure_rvc_voice(state: "EngineState", voice_id: str):
     """Nạp synthesizer RVC của một giọng (qua ModelManager)."""
@@ -99,3 +111,22 @@ def ensure_rvc_voice(state: "EngineState", voice_id: str):
 
         state.models.register(key, load, "rvc")
     return state.models.get(key)
+
+
+def ensure_train_nets(state: "EngineState", voice_id: str) -> None:
+    """Đăng ký bộ mạng huấn luyện (generator + discriminator từ pretrained) của một giọng vào ModelManager."""
+    key = f"train:{voice_id}"
+    if state.models.is_registered(key):
+        return
+
+    def load(device: str):
+        from .rvc.train.config import CONFIG_40K
+        from .rvc.train.trainer import build_nets, load_pretrained
+
+        cat = state.catalog
+        cat.require(PRETRAINED_ID)
+        nets = build_nets(CONFIG_40K, device)
+        load_pretrained(nets, cat.path(PRETRAINED_ID, 0), cat.path(PRETRAINED_ID, 1))
+        return nets
+
+    state.models.register(key, load, "train")

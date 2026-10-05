@@ -64,7 +64,20 @@ def update(voice_id: str, req: VoiceUpdate, state: EngineState = Depends(get_sta
 
 @router.delete("/voices/{voice_id}", status_code=204)
 def delete(voice_id: str, state: EngineState = Depends(get_state)) -> None:
-    state.models.unload(f"rvc:voice:{voice_id}")
+    import time
+
+    p = state.voices.get(voice_id)
+    job = state.queue.jobs.get(p.train_job_id or "")
+    if job and job.status in ("queued", "running"):  # đang train: dừng hẳn rồi mới xóa thư mục
+        state.queue.cancel(job.id)
+        deadline = time.time() + 30
+        while job.status == "running" and time.time() < deadline:
+            time.sleep(0.1)
+    if job:
+        job.status = "cancelled"
+        state.queue.emit(job)
+    for key in (f"rvc:voice:{voice_id}", f"train:{voice_id}"):
+        state.models.unload(key)
     state.voices.delete(voice_id)
 
 
@@ -150,6 +163,3 @@ def export_voice(voice_id: str, state: EngineState = Depends(get_state)) -> None
     raise EngineError("NOT_IMPLEMENTED", "xuất .evoice có ở Phase 5")
 
 
-@router.post("/train")
-def train() -> None:
-    raise EngineError("NOT_IMPLEMENTED", "huấn luyện RVC có ở Phase 3")

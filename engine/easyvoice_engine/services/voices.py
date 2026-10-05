@@ -93,6 +93,7 @@ class Profile(ApiModel):
     author: str | None
     license: License
     has_ref: bool
+    has_preview: bool = False  # có đoạn nghe thử (ref.wav hoặc preview.wav sau khi train)
     sample_rate: int | None
     variants: list[VariantInfo] = []
     gender: Gender | None = None
@@ -186,9 +187,10 @@ class VoiceStore:
         items = [p for d in self.root.iterdir() if d.is_dir() and (p := self._read(d))] if self.root.exists() else []
         return sorted(items, key=lambda p: p.created_at, reverse=True)
 
-    @staticmethod
-    def to_api(p: VoiceProfile) -> Profile:
+    def to_api(self, p: VoiceProfile) -> Profile:
+        d = self.dir(p.id)
         return Profile(id=p.id, name=p.name, language=p.language, created_at=p.created_at, capabilities=p.capabilities,
+                       has_preview=bool(p.ref_audio) or (d / "preview.wav").exists(),
                        train_job_id=p.train_job_id, imported=p.imported, author=p.author, license=p.license,
                        has_ref=bool(p.ref_audio), sample_rate=p.rvc_sample_rate,
                        variants=[VariantInfo(id=v.id, name=v.name, emotion=v.emotion, created_at=v.created_at)
@@ -235,6 +237,43 @@ class VoiceStore:
         self._write(p)
         self.on_change()
         return p
+
+    # ---------- huấn luyện (Phase 3) ----------
+    def create_training(self, name: str, language: Lang, consent: bool, tags: dict | None = None) -> VoiceProfile:
+        """Giọng "Chất lượng cao": chưa có năng lực nào cho tới khi train xong (TTS có sau bước chọn ref)."""
+        if not consent:
+            raise EngineError("BAD_REQUEST", "cần xác nhận quyền sử dụng giọng")
+        p = self._new(name, language, capabilities=[], consent_confirmed=True, **(tags or {}))
+        (self.dir(p.id) / "train" / "sources").mkdir(parents=True)
+        self._write(p)
+        return p
+
+    def set_train_job(self, voice_id: str, job_id: str | None) -> None:
+        with self._lock:
+            p = self.get(voice_id)
+            p.train_job_id = job_id
+            self._write(p)
+        self.on_change()
+
+    def set_tts_ref(self, voice_id: str, ref: str, text: str) -> None:
+        with self._lock:
+            p = self.get(voice_id)
+            p.ref_audio, p.ref_text = ref, text
+            if "tts" not in p.capabilities:
+                p.capabilities = ["tts", *p.capabilities]
+            (self.dir(voice_id) / "ref.txt").write_text(text, encoding="utf-8")
+            self._write(p)
+        self.on_change()
+
+    def finish_training(self, voice_id: str, sample_rate: int) -> None:
+        with self._lock:
+            p = self.get(voice_id)
+            p.rvc_model, p.rvc_index, p.rvc_sample_rate = "model.safetensors", "model.index", sample_rate
+            if "sts" not in p.capabilities:
+                p.capabilities = [*p.capabilities, "sts"]
+            p.train_job_id = None
+            self._write(p)
+        self.on_change()
 
     def update(self, voice_id: str, name: str | None = None, tags: dict | None = None) -> VoiceProfile:
         """Đổi tên và/hoặc thẻ phân loại. tags chỉ chứa các khóa người dùng gửi (gửi null = xóa thẻ)."""

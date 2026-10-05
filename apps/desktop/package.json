@@ -12,7 +12,7 @@
     "electron:dev": "npm run build:electron && concurrently -k \"vite\" \"wait-on tcp:127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
     "test": "vitest run",
-    "gen:api": "openapi-typescript ../../packages/api-types/openapi.json -o ../../packages/api-types/src/schema.d.ts"
+    "gen:api": "npx -y openapi-typescript@7 ../../packages/api-types/openapi.json -o ../../packages/api-types/src/schema.d.ts"
   },
   "dependencies": {
     "@fontsource/chakra-petch": "^5.3.0",

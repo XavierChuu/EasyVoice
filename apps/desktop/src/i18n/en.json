@@ -89,7 +89,8 @@
     "NOT_IMPLEMENTED": "This feature is not in this engine version yet ({{detail}}).",
     "NOT_FOUND": "Not found ({{detail}}).",
     "BAD_REQUEST": "Invalid request: {{detail}}",
-    "UNAUTHORIZED": "The app could not authenticate with the engine. Restart EasyVoice."
+    "UNAUTHORIZED": "The app could not authenticate with the engine. Restart EasyVoice.",
+    "GPU_REQUIRED": "Voice training needs an NVIDIA GPU or Apple Silicon. This computer can only use Quick voices."
   },
   "voices": {
     "code": "01 / VOICE PROFILES",
@@ -648,5 +649,8 @@
     "scottish": "Scottish",
     "welsh": "Welsh",
     "irish": "Northern Irish"
+  },
+  "models": {
+    "separatorMissing": "Needs the music-separation model (Demucs). Download it in Settings → Re-run first-time setup."
   }
 }

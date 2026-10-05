@@ -3,12 +3,13 @@
 
 import { decodeDuration, estimateDuration } from '../lib/audioMeta';
 import { normalizePreview } from '../lib/normalize';
+import { isElectron } from '../lib/platform';
 import type { EngineClient } from './engine';
 import {
   EngineError,
   type AudioDevice, type DatasetFile, type DictEntry, type EngineErrorCode, type EngineEvent, type ExportOptions,
   type FileRef, type ImportInspection, type Job, type PlaySource, type Profile, type RefAnalysis, type StsRequest,
-  type SystemInfo, type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
+  type SystemInfo, type TrainPreset, type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
 } from './types';
 
 const notYet = (phase: number) => Promise.reject(new EngineError('NOT_IMPLEMENTED', `Phase ${phase}`));
@@ -137,7 +138,19 @@ export class HttpEngine implements EngineClient {
     ));
   };
 
-  startTraining = () => notYet(3) as Promise<Profile>;
+  /** App desktop gửi đường dẫn file (engine chạy cùng máy, file dataset có thể rất lớn); trình duyệt thì upload. */
+  startTraining = (input: {
+    name: string; language: VoiceLang; files: FileRef[]; separate: boolean; preset: TrainPreset; consent: true; tags?: VoiceTags;
+  }) => {
+    const local = isElectron() ? input.files.filter((f) => /^([a-zA-Z]:[\\/]|\/)/.test(f.path)) : [];
+    const upload = input.files.filter((f) => !local.includes(f));
+    const tags = Object.fromEntries(Object.entries(input.tags ?? {}).filter(([, v]) => v)) as Record<string, string>;
+    return this.req<Profile>('POST', '/train', this.form(
+      { name: input.name, language: input.language, preset: input.preset, separate: input.separate, consent: true,
+        paths: JSON.stringify(local.map((f) => f.path)), ...tags },
+      upload.map((f) => ['files', f]),
+    ));
+  };
   updateVoice = async (id: string, patch: VoiceUpdate) => { await this.req('PATCH', `/voices/${id}`, patch); };
   deleteVoice = async (id: string) => { await this.req('DELETE', `/voices/${id}`); };
   previewVoice = async (id: string, variantId?: string): Promise<PlaySource> =>

@@ -22,7 +22,7 @@ export interface EngineClient {
   transcribe(file: FileRef, lang: VoiceLang): Promise<string>;
   createQuickVoice(input: { name: string; language: VoiceLang; file: FileRef; transcript: string; consent: true; tags?: VoiceTags }): Promise<Profile>;
   startTraining(input: {
-    name: string; language: VoiceLang; files: FileRef[]; separate: boolean; preset: TrainPreset; consent: true;
+    name: string; language: VoiceLang; files: FileRef[]; separate: boolean; preset: TrainPreset; consent: true; tags?: VoiceTags;
   }): Promise<Profile>;
   /** Đổi tên và/hoặc thẻ; chỉ trường có trong patch được đổi (null = xóa thẻ). */
   updateVoice(id: string, patch: VoiceUpdate): Promise<void>;

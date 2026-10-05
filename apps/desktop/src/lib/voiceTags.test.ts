@@ -5,7 +5,7 @@ import { EMPTY_FILTER, filterCount, matchVoice } from './voiceTags';
 
 const voice = (p: Partial<Profile>): Profile => ({
   id: 'x', name: 'X', language: 'vi', createdAt: '', capabilities: ['tts'], trainJobId: null, imported: false, author: null,
-  license: 'personal', hasRef: true, sampleRate: null, variants: [], gender: null, country: null, region: null, ...p,
+  license: 'personal', hasRef: true, hasPreview: true, sampleRate: null, variants: [], gender: null, country: null, region: null, ...p,
 });
 const words = (p: Profile) => [p.name, p.gender === 'female' ? 'Nữ' : p.gender === 'male' ? 'Nam' : '', p.region ?? ''];
 

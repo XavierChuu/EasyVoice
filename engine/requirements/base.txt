@@ -1,4 +1,4 @@
 # Cài SAU cuda.txt / mps.txt. Ghim torch để f5-tts không kéo bản khác.
 torch==2.8.0
 torchaudio==2.8.0
--e .[tts,asr,realtime,dev]
+-e .[tts,asr,train,realtime,dev]

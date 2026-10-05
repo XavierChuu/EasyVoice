@@ -118,6 +118,7 @@ export type EngineErrorCode =
   | 'ENGINE_OFFLINE'
   | 'MODEL_MISSING'
   | 'NOT_IMPLEMENTED'
+  | 'GPU_REQUIRED'
   | 'NOT_FOUND'
   | 'BAD_REQUEST'
   | 'UNAUTHORIZED'

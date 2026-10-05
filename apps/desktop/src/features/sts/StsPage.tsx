@@ -8,6 +8,7 @@ import { errorText } from '../../lib/errors';
 import { MEDIA_FILTER, platform } from '../../lib/platform';
 import { formatDuration, pad2 } from '../../lib/text';
 import { canSts, useEngine } from '../../stores/engine';
+import { useSeparatorReady } from '../../lib/models';
 import { usePlayer } from '../../stores/player';
 import { useSettings } from '../../stores/settings';
 import { RT_PRESETS, useSts, type RtPreset } from '../../stores/sts';
@@ -81,6 +82,7 @@ export function StsPage() {
 function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName: string }) {
   const { t } = useTranslation();
   const s = useSts();
+  const sepReady = useSeparatorReady();
   const jobs = useEngine((x) => x.jobs);
   const { setNotice, toast } = useUi();
   const player = usePlayer();
@@ -102,7 +104,7 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
   const start = async () => {
     if (!s.file || !targetId) return;
     try {
-      const jobId = await engine().startSts({ profileId: targetId, file: s.file, pitch: s.pitch, indexRate: s.indexRate, protect: s.protect, separate: s.separate });
+      const jobId = await engine().startSts({ profileId: targetId, file: s.file, pitch: s.pitch, indexRate: s.indexRate, protect: s.protect, separate: s.separate && sepReady });
       s.set({ jobId });
       setNotice('');
     } catch (err) {
@@ -114,7 +116,7 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
     toast(t('sts.exported'), (await engine().exportSts(job.id)) || undefined);
   };
 
-  const stageNames = s.separate ? ['demux', 'separate', 'convert', 'remix'] : ['demux', 'prep', 'convert', 'join'];
+  const stageNames = s.separate && sepReady ? ['demux', 'separate', 'convert', 'remix'] : ['demux', 'prep', 'convert', 'join'];
   const stageIdx = job ? Math.min(3, Math.floor(job.progress * 4)) : 0;
   const ab = player.key?.startsWith('sts:') ? player.key.slice(4) : null;
   const playAb = async (which: 'a' | 'b') => {
@@ -157,7 +159,8 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
                   onSeek={job ? (f) => void seekAb('a', f) : undefined} />
               </div>
             </div>
-            <Check id="stssep" checked={s.separate} onChange={(separate) => s.set({ separate })}>{t('sts.separate')}</Check>
+            <Check id="stssep" checked={s.separate && sepReady} disabled={!sepReady} onChange={(separate) => s.set({ separate })}
+              sub={sepReady ? undefined : t('models.separatorMissing')}>{t('sts.separate')}</Check>
             <button type="button" onClick={() => setAdvanced(!advanced)} aria-expanded={advanced}
               className="bg-transparent border-0 p-0 text-left text-mute hover:text-fg cursor-pointer font-mono text-[11px] tracking-label">
               {advanced ? '▾' : '▸'} {t('common.advanced')}

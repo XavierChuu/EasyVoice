@@ -10,7 +10,7 @@ from ..core.job_queue import TtsSentence
 from ..core.state import EngineState
 from ..schemas import JobRef, RedoRequest, TtsRequest
 from ..services import audio_io
-from ..services.registry import ASR_KEY, pick_tts_model, tts_key
+from ..services.registry import ASR_KEY, CONTENTVEC_KEY, RMVPE_KEY, ensure_rvc_voice, pick_tts_model, tts_key
 from ..services.tts.pipeline import TtsRender, VoiceRef, plan_parts, run_tts, text_language
 from ..services.tts.ref_prep import prepare_ref
 from .deps import get_state
@@ -31,8 +31,6 @@ def _runner(state: EngineState, render: TtsRender):
 
 @router.post("/tts", response_model=JobRef)
 def start_tts(req: TtsRequest, state: EngineState = Depends(get_state)) -> JobRef:
-    if req.mode == "chain":
-        raise EngineError("NOT_IMPLEMENTED", "chế độ Qua RVC có ở Phase 3")
     default = (req.profile_id, req.variant_id or None)
     parts = [(p.text, (p.profile_id, p.variant_id or None)) for p in req.parts] or [(req.text, default)]
     planned = plan_parts(parts)
@@ -50,6 +48,11 @@ def start_tts(req: TtsRequest, state: EngineState = Depends(get_state)) -> JobRe
     render = TtsRender(state.paths.jobs, lang, refs, default, req.speed, req.seed, max(0, min(2000, req.pause_ms)),
                        [tuple(x) for x in req.user_dict])
     render.model_id = pick_tts_model(state, lang)
+    if req.mode == "chain":
+        if not profile.rvc_model:
+            raise EngineError("NO_STS_VOICE", "chế độ Qua RVC cần giọng đã huấn luyện")
+        render.chain = _chain_converter(state)
+        render.out_sr = profile.rvc_sample_rate or 40000
 
     def run(ctx):
         render.out_dir = state.job_dir(ctx.job)
@@ -67,6 +70,25 @@ def start_tts(req: TtsRequest, state: EngineState = Depends(get_state)) -> JobRe
     job = state.queue.submit("tts", profile.name, run, profile_id=profile.id, sentences=sentences)
     state.extras[f"tts:{job.id}"] = render
     return JobRef(job_id=job.id)
+
+
+def _chain_converter(state: EngineState):
+    """Chế độ "Qua RVC" (spec mục 2): F5-TTS đọc bằng giọng mẫu, rồi đưa qua RVC của giọng để giống và ổn định hơn.
+    Giọng không có RVC (khi đọc nhiều giọng) giữ nguyên bản F5-TTS."""
+    from ..services.rvc.infer import SR_16K, ConvertParams, Index, convert_long
+
+    def convert(wav, sr, profile_id):
+        p = state.voices.get(profile_id)
+        if not p.rvc_model:
+            return wav, sr
+        model = ensure_rvc_voice(state, profile_id)
+        d = state.voices.dir(profile_id)
+        index = Index(d / p.rvc_index) if p.rvc_index and (d / p.rvc_index).exists() else None
+        y = convert_long(model, state.models.get(CONTENTVEC_KEY), state.models.get(RMVPE_KEY), index,
+                         audio_io.resample(wav, sr, SR_16K), ConvertParams(pitch_shift=p.pitch_shift))
+        return y, model.sr
+
+    return convert
 
 
 @router.post("/tts/{job_id}/redo", response_model=JobRef)

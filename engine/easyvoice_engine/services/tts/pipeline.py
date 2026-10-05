@@ -59,9 +59,18 @@ class TtsRender:
         self.sr = 24000
         self.attempts: dict[int, int] = {}
         self.model_id = ""
+        # Chế độ "Qua RVC": (wav, sr, profile_id) → (wav, sr). None = đọc trực tiếp.
+        self.chain: Callable[[np.ndarray, int, str], tuple[np.ndarray, int]] | None = None
+        self.out_sr: int | None = None  # chain: mọi câu đưa về cùng sample rate của model RVC
 
     def sentence_path(self, i: int) -> Path:
         return self.out_dir / f"s{i:03d}.wav"
+
+    def raw_path(self, i: int) -> Path:
+        return self.out_dir / f"s{i:03d}.f5.wav"
+
+    def profile_of(self, s: TtsSentence) -> str:
+        return s.profile_id or self.default[0]
 
     def ref_for(self, s: TtsSentence) -> VoiceRef:
         return self.refs[(s.profile_id, s.variant_id) if s.profile_id else self.default]
@@ -71,9 +80,23 @@ class TtsRender:
         text = normalize(s.text, self.lang, self.user_dict)
         ref = self.ref_for(s)
         wav = backend.synthesize(text, ref.ref_audio, ref.ref_text, self.speed, self.seed + 7919 * attempt + s.index)
+        if self.chain is not None:  # lượt 1: chỉ lưu bản F5-TTS, lượt 2 mới đổi giọng
+            audio_io.save(self.raw_path(s.index), wav, backend.sample_rate)
+            return
         self.sr = backend.sample_rate
         audio_io.save(self.sentence_path(s.index), audio_io.peak_normalize(wav), self.sr)
         s.duration_sec = len(wav) / self.sr
+
+    def convert_one(self, s: TtsSentence) -> None:
+        """Lượt 2 của chế độ "Qua RVC": đưa câu qua model RVC của giọng đọc câu đó."""
+        assert self.chain is not None
+        wav, sr = audio_io.load(self.raw_path(s.index))
+        y, y_sr = self.chain(wav, sr, self.profile_of(s))
+        out_sr = self.out_sr or y_sr
+        y = audio_io.resample(y, y_sr, out_sr)
+        self.sr = out_sr
+        audio_io.save(self.sentence_path(s.index), audio_io.peak_normalize(y), out_sr)
+        s.duration_sec = len(y) / out_sr
 
     def join(self, sentences: list[TtsSentence], only_done: bool = False) -> np.ndarray:
         parts = [audio_io.load(self.sentence_path(s.index))[0] for s in sentences
@@ -87,20 +110,34 @@ def run_tts(ctx: JobContext, render: TtsRender, backend_fn: Callable[[], TtsBack
     todo = [s for s in sentences if s.status in ("queued", "redo", "rendering")]
     ctx.log(f"{len(todo)} câu cần render · {ctx.job.device}")
     backend = backend_fn()
+    chain = render.chain is not None
+
+    def finish(s: TtsSentence) -> None:
+        s.status, s.progress = "done", 1.0
+        ctx.job.files[f"sentence:{s.index}"] = register_file(render.sentence_path(s.index), f"sentence-{s.index + 1}.wav")
+        done = sum(1 for x in sentences if x.status == "done")
+        ctx.progress(done / len(sentences))
+
     for s in todo:
         ctx.check_cancel()
         redo = s.status == "redo"
         if redo:
             render.attempts[s.index] = render.attempts.get(s.index, 0) + 1
-        else:
-            s.status = "rendering"
+        s.status = "rendering"
         s.progress = 0.1
         ctx.emit()
         render.render_one(backend, s)
-        s.status, s.progress = "done", 1.0
-        ctx.job.files[f"sentence:{s.index}"] = register_file(render.sentence_path(s.index), f"sentence-{s.index + 1}.wav")
-        done = sum(1 for x in sentences if x.status == "done")
-        ctx.progress(done / len(sentences))
+        if chain:
+            s.progress = 0.5
+            ctx.emit()
+        else:
+            finish(s)
+    if chain:  # lượt 2: nạp RVC một lần (model TTS được gỡ theo LRU) rồi đổi giọng mọi câu
+        ctx.log("Đổi giọng các câu qua RVC")
+        for s in todo:
+            ctx.check_cancel()
+            render.convert_one(s)
+            finish(s)
     out = render.join(sentences)
     path = audio_io.save(render.out_dir / "output.wav", out, render.sr)
     ctx.job.files["output"] = register_file(path, "output.wav")

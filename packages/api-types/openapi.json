@@ -645,16 +645,38 @@
     "/train": {
       "post": {
         "tags": [
-          "voices"
+          "train"
         ],
-        "summary": "Train",
-        "operationId": "train_train_post",
+        "summary": "Start Training",
+        "operationId": "start_training_train_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_start_training_train_post"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -1415,6 +1437,108 @@
         ],
         "title": "Body_start_offline_sts_offline_post"
       },
+      "Body_start_training_train_post": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en"
+            ],
+            "title": "Language",
+            "default": "vi"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "fast",
+              "balanced",
+              "thorough"
+            ],
+            "title": "Preset",
+            "default": "balanced"
+          },
+          "separate": {
+            "type": "boolean",
+            "title": "Separate",
+            "default": true
+          },
+          "consent": {
+            "type": "boolean",
+            "title": "Consent"
+          },
+          "paths": {
+            "type": "string",
+            "title": "Paths",
+            "description": "JSON: đường dẫn file trên máy (app desktop gửi đường dẫn thay vì upload)",
+            "default": "[]"
+          },
+          "epochs": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epochs",
+            "description": "Ghi đè số epoch của preset (nâng cao)"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "consent"
+        ],
+        "title": "Body_start_training_train_post"
+      },
       "Body_transcribe_voices_transcribe_post": {
         "properties": {
           "file": {
@@ -1980,6 +2104,11 @@
             "type": "boolean",
             "title": "Hasref"
           },
+          "hasPreview": {
+            "type": "boolean",
+            "title": "Haspreview",
+            "default": false
+          },
           "sampleRate": {
             "anyOf": [
               {
@@ -2050,6 +2179,7 @@
           "author",
           "license",
           "hasRef",
+          "hasPreview",
           "sampleRate",
           "variants",
           "gender",

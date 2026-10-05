@@ -24,6 +24,8 @@ dependencies = [
 # datasets: f5-tts import nó; không chặn dưới thì resolver lùi về 1.1.1 (hỏng với pyarrow mới) để lấy fsspec mới nhất.
 tts = ["f5-tts==1.1.22", "datasets>=3"]
 asr = ["faster-whisper>=1.0"]
+# Huấn luyện (Phase 3): tách nhạc nền, khử nhiễu nhẹ, gom cụm khi build index cho dataset lớn
+train = ["demucs>=4.0", "noisereduce>=3.0", "scikit-learn"]
 realtime = ["sounddevice"]
 dev = ["pytest", "httpx"]
 

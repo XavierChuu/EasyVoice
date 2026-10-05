@@ -27,5 +27,9 @@ def cancel_job(job_id: str, state: EngineState = Depends(get_state)) -> Job:
 
 @router.post("/jobs/{job_id}/resume", response_model=Job)
 def resume_job(job_id: str, state: EngineState = Depends(get_state)) -> Job:
-    state.queue.get(job_id)
-    raise EngineError("NOT_IMPLEMENTED", "tiếp tục huấn luyện có ở Phase 3")
+    from .train import resume_training
+
+    job = state.queue.get(job_id)
+    if job.kind != "train":
+        raise EngineError("BAD_REQUEST", "chỉ tiếp tục được job huấn luyện")
+    return resume_training(state, job)

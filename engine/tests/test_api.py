@@ -89,7 +89,6 @@ def test_tts_rejected_while_realtime(client, state, wav_file):
 
 
 def test_not_implemented_features(client):
-    assert client.post("/train").json()["code"] == "NOT_IMPLEMENTED"
     assert client.post("/realtime/start").status_code == 501
 
 
@@ -120,14 +119,17 @@ def test_import_rvc_and_convert_offline(client, dummy_rvc_assets, tmp_path):
     src = tmp_path / "talk.wav"
     sf.write(src, voice_like(22050, 3.0), 22050)
     with src.open("rb") as f:
-        r = client.post("/sts/offline", data={"profileId": v["id"], "pitch": "2", "separate": "true"}, files={"file": ("talk.wav", f)})
+        # Bật tách nhạc mà chưa tải Demucs → báo thiếu model ngay, không nhận job
+        r = client.post("/sts/offline", data={"profileId": v["id"], "separate": "true"}, files={"file": ("talk.wav", f)})
+        assert r.status_code == 424 and r.json()["code"] == "MODEL_MISSING"
+        f.seek(0)
+        r = client.post("/sts/offline", data={"profileId": v["id"], "pitch": "2"}, files={"file": ("talk.wav", f)})
     job = wait_job(client, r.json()["jobId"], timeout=300)
     assert job["status"] == "done", job
     out, sr = sf.read(io.BytesIO(client.get(f"/sts/{job['id']}/audio?which=b").content))
     assert sr == 22050 and abs(len(out) / sr - 3.0) < 0.05  # cùng sample rate + độ dài với input (spec 3.3)
     assert np.isfinite(out).all()
     assert client.get(f"/sts/{job['id']}/audio?which=a").status_code == 200
-    assert any("Tách nhạc nền chưa có" in line for line in job["log"])
 
 
 def test_variants_and_multi_voice_tts(client, state, wav_file):

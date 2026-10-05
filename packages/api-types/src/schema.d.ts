@@ -270,8 +270,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Train */
-        post: operations["train_train_post"];
+        /** Start Training */
+        post: operations["start_training_train_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -577,6 +577,52 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_start_training_train_post */
+        Body_start_training_train_post: {
+            /** Name */
+            name: string;
+            /**
+             * Language
+             * @default vi
+             * @enum {string}
+             */
+            language: "vi" | "en";
+            /**
+             * Preset
+             * @default balanced
+             * @enum {string}
+             */
+            preset: "fast" | "balanced" | "thorough";
+            /**
+             * Separate
+             * @default true
+             */
+            separate: boolean;
+            /** Consent */
+            consent: boolean;
+            /**
+             * Paths
+             * @description JSON: đường dẫn file trên máy (app desktop gửi đường dẫn thay vì upload)
+             * @default []
+             */
+            paths: string;
+            /**
+             * Epochs
+             * @description Ghi đè số epoch của preset (nâng cao)
+             */
+            epochs?: number | null;
+            /** Gender */
+            gender?: string | null;
+            /** Country */
+            country?: string | null;
+            /** Region */
+            region?: string | null;
+            /**
+             * Files
+             * @default []
+             */
+            files: string[];
+        };
         /** Body_transcribe_voices_transcribe_post */
         Body_transcribe_voices_transcribe_post: {
             /** File */
@@ -773,6 +819,11 @@ export interface components {
             license: "personal" | "commercial" | "noredist" | "unknown";
             /** Hasref */
             hasRef: boolean;
+            /**
+             * Haspreview
+             * @default false
+             */
+            hasPreview: boolean;
             /** Samplerate */
             sampleRate: number | null;
             /**
@@ -1460,14 +1511,18 @@ export interface operations {
             };
         };
     };
-    train_train_post: {
+    start_training_train_post: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_start_training_train_post"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -1475,7 +1530,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Profile"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

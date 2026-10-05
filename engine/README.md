@@ -20,8 +20,23 @@ chỉ lắng nghe trên `127.0.0.1`, mọi request phải kèm token.
 | Nhập `.pth` an toàn: `weights_only` trong process riêng → safetensors; chặn pickle độc | `services/rvc/import_pth.py` |
 | Whisper (faster-whisper) cho transcript | `services/preprocess/asr.py` |
 
-Chưa có (trả lỗi `NOT_IMPLEMENTED`, UI báo rõ): train RVC + TTS "Qua RVC" (Phase 3), real-time (Phase 4),
-nhập/xuất `.evoice` (Phase 5), tách nhạc nền Demucs (bỏ qua kèm ghi log).
+## Phase 3 — đã có
+
+| Phần | File |
+|---|---|
+| Huấn luyện giọng "Chất lượng cao" chạy dạng job: tiền xử lý → kiểm tra dataset → ContentVec + RMVPE → train → faiss index + file nghe thử | `services/rvc/train/pipeline.py` |
+| Tiền xử lý: FFmpeg, tách nhạc nền Demucs, khử nhiễu nhẹ (theo cửa sổ 20 s), cắt câu theo khoảng lặng, đoạn 3,7 s | `services/preprocess/` |
+| Vòng lặp train RVC v2 40k (GAN: mel ×45 + KL + feature matching + adversarial), từ pretrained f0G/f0D, fp16 trên CUDA, batch tự chọn theo VRAM | `services/rvc/train/trainer.py` |
+| Preset Nhanh / Cân bằng / Kỹ (100 / 200 / 400 epoch) | `services/rvc/train/config.py` |
+| Tạm dừng = lưu checkpoint; Tiếp tục bỏ qua bước đã xong và train tiếp từ checkpoint; tắt app giữa chừng → mở lại vẫn tiếp tục được | `api/train.py` |
+| Giọng train xong dùng được cho cả TTS: tự chọn đoạn sạch 5-12 s + transcript Whisper | `pipeline._make_tts_ref` |
+| TTS chế độ "Qua RVC": F5-TTS đọc hết rồi đổi giọng từng câu bằng RVC (2 lượt, không nạp/gỡ model liên tục) | `services/tts/pipeline.py` |
+| Đổi giọng file: tách nhạc nền → đổi giọng → trộn lại với nhạc gốc | `api/sts.py` |
+
+Huấn luyện cần GPU (NVIDIA hoặc Apple Silicon) — CPU bị từ chối (`GPU_REQUIRED`) theo bảng phần cứng của spec.
+Cần các model: ContentVec, RMVPE, RVC pretrained v2 40k; thêm Demucs nếu bật tách nhạc nền.
+
+Chưa có (trả lỗi `NOT_IMPLEMENTED`, UI báo rõ): real-time (Phase 4), nhập/xuất `.evoice` (Phase 5).
 
 ## Cài đặt (dev)
 
@@ -69,7 +84,7 @@ rồi đặt `"tts_model": "<id>"` trong `settings.json` của thư mục dữ l
 ## Test
 
 ```bash
-python -m pytest -q                      # 113 test, chạy trên CPU, không cần tải model
+python -m pytest -q                      # chạy trên CPU, không cần tải model (2 bài train thật ~20 phút)
 EASYVOICE_SLOW=1 python -m pytest -q tests/test_f5_integration.py   # chạy thật thư viện f5-tts (trọng số ngẫu nhiên)
 ```
 

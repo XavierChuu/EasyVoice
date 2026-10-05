@@ -88,7 +88,8 @@
     "NOT_IMPLEMENTED": "Tính năng này chưa có trong bản engine hiện tại ({{detail}}).",
     "NOT_FOUND": "Không tìm thấy ({{detail}}).",
     "BAD_REQUEST": "Yêu cầu không hợp lệ: {{detail}}",
-    "UNAUTHORIZED": "App không xác thực được với engine. Hãy mở lại EasyVoice."
+    "UNAUTHORIZED": "App không xác thực được với engine. Hãy mở lại EasyVoice.",
+    "GPU_REQUIRED": "Huấn luyện giọng cần GPU NVIDIA hoặc Apple Silicon. Máy này chỉ dùng được giọng Nhanh."
   },
   "voices": {
     "code": "01 / HỒ SƠ GIỌNG",
@@ -646,5 +647,8 @@
     "scottish": "Scotland",
     "welsh": "Wales",
     "irish": "Bắc Ireland"
+  },
+  "models": {
+    "separatorMissing": "Cần model tách nhạc (Demucs). Tải trong Cài đặt → Chạy lại thiết lập ban đầu."
   }
 }

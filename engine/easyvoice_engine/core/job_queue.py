@@ -157,6 +157,20 @@ class JobQueue:
         self.emit(job)
         return job
 
+    def restore(self, job: Job, fn: JobFn) -> None:
+        """Đưa lại một job (vd. train bị gián đoạn khi tắt app) vào danh sách, trạng thái giữ nguyên, chưa chạy."""
+        with self._cv:
+            self.jobs[job.id] = job
+            self._fns[job.id] = fn
+        self.emit(job)
+
+    def resume(self, job_id: str) -> Job:
+        """Chạy tiếp job đã tạm dừng / lỗi (train tiếp từ checkpoint)."""
+        job = self.get(job_id)
+        if job.status not in ("paused", "failed"):
+            raise EngineError("BAD_REQUEST", "job không ở trạng thái tạm dừng")
+        return self.requeue(job_id, self._fns[job_id])
+
     def get(self, job_id: str) -> Job:
         job = self.jobs.get(job_id)
         if job is None:

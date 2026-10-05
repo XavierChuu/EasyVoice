@@ -26,8 +26,8 @@ const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toStri
 const daysAgo = (d: number) => new Date(Date.now() - d * 86400_000).toISOString();
 
 const mkProfile = (p: Partial<Profile> & Pick<Profile, 'id' | 'name' | 'language' | 'createdAt' | 'capabilities'>): Profile => ({
-  trainJobId: null, imported: false, author: null, license: 'personal', hasRef: true, sampleRate: null, variants: [],
-  gender: null, country: null, region: null, ...p,
+  trainJobId: null, imported: false, author: null, license: 'personal', hasRef: true, hasPreview: p.hasRef ?? true, sampleRate: null,
+  variants: [], gender: null, country: null, region: null, ...p,
 });
 
 const ok = (key: string, value: string, bad = false) => ({ key, value, bad });
