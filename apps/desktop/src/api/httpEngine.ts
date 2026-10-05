@@ -7,7 +7,8 @@ import { isElectron } from '../lib/platform';
 import type { EngineClient } from './engine';
 import {
   EngineError,
-  type AudioDevice, type DatasetFile, type DictEntry, type EngineErrorCode, type EngineEvent, type ExportOptions,
+  type AudioDevice, type DatasetFile, type DictEntry, type EditAsset, type EditOp, type EditProject, type EditProjectSummary,
+  type EditTimeline, type EngineErrorCode, type EngineEvent, type ExportOptions,
   type FileRef, type ImportInspection, type Job, type PlaySource, type Profile, type RefAnalysis, type StsRequest,
   type SystemInfo, type TrainPreset, type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
 } from './types';
@@ -199,6 +200,28 @@ export class HttpEngine implements EngineClient {
   }
 
   stsAudio = async (jobId: string, which: 'a' | 'b'): Promise<PlaySource> => ({ durationSec: 0, url: this.mediaUrl(`/sts/${jobId}/audio`, { which }) });
+
+  // ---------- Edit Audio ----------
+  listEditProjects = () => this.req<EditProjectSummary[]>('GET', '/edit/projects');
+  createEditProject = (name: string) => this.req<EditProject>('POST', '/edit/projects', { name });
+  getEditProject = (id: string, gc = false) => this.req<EditProject>('GET', `/edit/projects/${id}${gc ? '?gc=true' : ''}`);
+  saveEditProject = (id: string, timeline: EditTimeline) => this.req<EditProject>('PUT', `/edit/projects/${id}`, timeline);
+  deleteEditProject = async (id: string) => { await this.req('DELETE', `/edit/projects/${id}`); };
+  editAssets = (id: string) => this.req<EditAsset[]>('GET', `/edit/projects/${id}/assets`);
+
+  /** Như train: app desktop gửi đường dẫn file trên máy (video dài không cần đọc vào renderer), còn lại upload. */
+  addEditAssets = (id: string, files: FileRef[], source: 'import' | 'record') => {
+    const local = isElectron() ? files.filter((f) => !f.file && /^([a-zA-Z]:[\\/]|\/)/.test(f.path)) : [];
+    const upload = files.filter((f) => !local.includes(f));
+    return this.req<EditAsset[]>('POST', `/edit/projects/${id}/assets`, this.form(
+      { source, paths: JSON.stringify(local.map((f) => f.path)) }, upload.map((f) => ['files', f]),
+    ));
+  };
+
+  editAssetUrl = (projectId: string, assetId: string) => this.mediaUrl(`/edit/projects/${projectId}/assets/${assetId}/audio`);
+  editFromJob = (jobId: string) => this.req<EditProject>('POST', '/edit/projects/from-job', { jobId });
+  editOp = async (projectId: string, op: EditOp) => (await this.req<{ jobId: string }>('POST', `/edit/projects/${projectId}/ops`, op)).jobId;
+  downloadFile = async (fileId: string) => this.download(`/files/${fileId}`, { download: 'true' });
 
   // ---------- jobs ----------
   cancelJob = async (id: string) => { await this.req('DELETE', `/jobs/${id}`); };

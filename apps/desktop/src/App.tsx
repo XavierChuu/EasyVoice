@@ -7,6 +7,7 @@ import { EngineBanner, Footer, Header, NoticeBar, Sidebar, Toasts } from './comp
 import { FirstRunModal } from './features/settings/FirstRunModal';
 import { LicensesPage } from './features/settings/LicensesPage';
 import { SettingsPage } from './features/settings/SettingsPage';
+import { EditPage } from './features/edit/EditPage';
 import { StsPage } from './features/sts/StsPage';
 import { TtsPage } from './features/tts/TtsPage';
 import { VoicesPage } from './features/voices/VoicesPage';
@@ -47,6 +48,7 @@ export function App() {
           {tab === 'voices' && <VoicesPage />}
           {tab === 'tts' && <TtsPage />}
           {tab === 'sts' && <StsPage />}
+          {tab === 'edit' && <EditPage />}
           {tab === 'settings' && <SettingsPage />}
           {tab === 'licenses' && <LicensesPage />}
         </main>

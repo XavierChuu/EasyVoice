@@ -30,6 +30,15 @@ class FakeTts:
         t = np.arange(n) / self.sample_rate
         return (0.3 * np.sin(2 * np.pi * (180 + seed % 50) * t)).astype(np.float32)
 
+    def edit(self, audio, text, start, end, new_duration, seed):
+        """Sửa lời giả: giữ phần ngoài vùng sửa, thay vùng [start, end] bằng sóng sin dài new_duration."""
+        self.calls.append((text, seed, "edit"))
+        sr = self.sample_rate
+        a, b = int(start * sr), int(end * sr)
+        t = np.arange(int(new_duration * sr)) / sr
+        mid = (0.2 * np.sin(2 * np.pi * 300 * t)).astype(np.float32)
+        return np.concatenate([audio[:a], mid, audio[b:]]).astype(np.float32)
+
 
 def voice_like(sr: int, seconds: float) -> np.ndarray:
     t = np.arange(int(sr * seconds)) / sr

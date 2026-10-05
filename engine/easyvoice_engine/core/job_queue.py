@@ -11,7 +11,7 @@ import traceback
 import uuid
 from collections import deque
 from collections.abc import Callable
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
@@ -20,9 +20,10 @@ from .errors import EngineError, from_exception
 
 log = logging.getLogger(__name__)
 
-JobKind = Literal["tts", "sts", "train", "download"]
+# edit: tác vụ AI của trang Edit Audio (GPU, xếp hàng); mix: lọc / trộn / xuất (chỉ CPU, chạy ngay cả khi GPU bận).
+JobKind = Literal["tts", "sts", "train", "download", "edit", "mix"]
 JobStatus = Literal["queued", "running", "paused", "done", "failed", "cancelled"]
-HEAVY: set[str] = {"tts", "sts", "train"}
+HEAVY: set[str] = {"tts", "sts", "train", "edit"}
 
 
 class ApiModel(BaseModel):
@@ -57,6 +58,7 @@ class Job(ApiModel):
     sentences: list[TtsSentence] | None = None
     files: dict[str, str] = Field(default_factory=dict)  # tên → file id (GET /files/{id})
     output_duration_sec: float | None = None
+    result: dict[str, Any] | None = None  # kết quả dạng dữ liệu (vd. asset mới của Edit Audio)
     created_at: float = Field(default_factory=time.time)
 
 

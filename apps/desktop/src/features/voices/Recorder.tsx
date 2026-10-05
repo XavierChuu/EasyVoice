@@ -21,7 +21,11 @@ function classify(err: unknown): MicError {
   return 'other';
 }
 
-export function Recorder({ onDone, onClose }: { onDone: (ref: FileRef) => void; onClose: () => void }) {
+/** Mặc định thu đoạn ref 5–12 s (có câu mẫu để đọc); Edit Audio truyền maxSec/minSec để thu dài tùy ý. */
+export function Recorder({ onDone, onClose, maxSec = MAX_SEC, minSec = MIN_SEC }: {
+  onDone: (ref: FileRef) => void; onClose: () => void; maxSec?: number; minSec?: number;
+}) {
+  const refMode = maxSec <= MAX_SEC;
   const { t } = useTranslation();
   const player = usePlayer();
   const [state, setState] = useState<'idle' | 'recording' | 'done'>('idle');
@@ -88,7 +92,7 @@ export function Recorder({ onDone, onClose }: { onDone: (ref: FileRef) => void; 
         setLevel(Math.max(0, Math.min(100, ((db + 60) / 60) * 100)));
         const sec = (performance.now() - t0) / 1000;
         setElapsed(sec);
-        if (sec >= MAX_SEC) {
+        if (sec >= maxSec) {
           if (r.state === 'recording') r.stop();
         } else {
           raf.current = requestAnimationFrame(loop);
@@ -123,7 +127,7 @@ export function Recorder({ onDone, onClose }: { onDone: (ref: FileRef) => void; 
       state === 'done' ? (
         <>
           <Btn variant="ghost" onClick={again}>{t('recorder.again')}</Btn>
-          <Btn variant="primary" onClick={use} disabled={elapsed < MIN_SEC}>{t('recorder.use')}</Btn>
+          <Btn variant="primary" onClick={use} disabled={elapsed < minSec}>{t('recorder.use')}</Btn>
         </>
       ) : state === 'recording' ? (
         <Btn variant="inverse" onClick={stop}>■ {t('recorder.stop')}</Btn>
@@ -131,8 +135,8 @@ export function Recorder({ onDone, onClose }: { onDone: (ref: FileRef) => void; 
         <Btn variant="primary" onClick={() => void start()}>● {t('recorder.start')}</Btn>
       )
     }>
-      <p className="m-0 text-soft">{t('recorder.hint')}</p>
-      <div className="border border-line p-3.5 italic text-soft">“{t('recorder.script')}”</div>
+      {refMode && <p className="m-0 text-soft">{t('recorder.hint')}</p>}
+      {refMode && <div className="border border-line p-3.5 italic text-soft">“{t('recorder.script')}”</div>}
       {devices.length > 0 && state === 'idle' && (
         <label className="flex flex-col gap-1.5">
           <Label>{t('recorder.device')}</Label>
@@ -149,7 +153,7 @@ export function Recorder({ onDone, onClose }: { onDone: (ref: FileRef) => void; 
         <div className="flex items-center gap-3 font-mono text-[11px]">
           <span className="w-10 text-mute">IN</span>
           <Segs level={state === 'recording' ? level : 0} />
-          <span className="w-20 text-right">{elapsed.toFixed(1)}s / {MAX_SEC}s</span>
+          <span className="w-24 text-right">{elapsed.toFixed(1)}s{refMode ? ` / ${maxSec}s` : ''}</span>
         </div>
       ) : (
         <div className="border border-line">
@@ -164,7 +168,7 @@ export function Recorder({ onDone, onClose }: { onDone: (ref: FileRef) => void; 
         </div>
       )}
       {state === 'recording' && elapsed > 1.5 && level < 5 && <Alert tone="line" title={t('recorder.silent')}>{t('recorder.silentBody')}</Alert>}
-      {state === 'done' && elapsed < MIN_SEC && <Alert title={t('recorder.tooShort', { min: MIN_SEC })} />}
+      {state === 'done' && elapsed < minSec && <Alert title={t('recorder.tooShort', { min: minSec })} />}
       {player.error && playing === false && state === 'done' && <Alert title={t('recorder.playFail')} />}
       {error && (
         <Alert title={t(`recorder.err.${error}.title`)}>

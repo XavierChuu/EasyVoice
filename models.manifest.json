@@ -190,6 +190,36 @@
           "size_mb": 80
         }
       ]
+    },
+    {
+      "_comment": "Vector giọng cho nhận diện người nói (Edit Audio). Không bắt buộc: chưa tải thì engine dùng đặc trưng log-mel. License của checkpoint cần xác minh lại tại trang gốc (mã WavLM của Microsoft là MIT).",
+      "id": "wavlm-base-plus-sv",
+      "name": "WavLM Base+ SV (nhận diện người nói)",
+      "role": "Speaker diarization",
+      "group": "common",
+      "license": "MIT",
+      "commercial": true,
+      "required": false,
+      "files": [
+        {
+          "path": "wavlm-base-plus-sv/config.json",
+          "url": "https://huggingface.co/microsoft/wavlm-base-plus-sv/resolve/main/config.json",
+          "sha256": null,
+          "size_mb": 0.01
+        },
+        {
+          "path": "wavlm-base-plus-sv/preprocessor_config.json",
+          "url": "https://huggingface.co/microsoft/wavlm-base-plus-sv/resolve/main/preprocessor_config.json",
+          "sha256": null,
+          "size_mb": 0.01
+        },
+        {
+          "path": "wavlm-base-plus-sv/pytorch_model.bin",
+          "url": "https://huggingface.co/microsoft/wavlm-base-plus-sv/resolve/main/pytorch_model.bin",
+          "sha256": null,
+          "size_mb": 378
+        }
+      ]
     }
   ]
 }

@@ -5,8 +5,9 @@ import type { EngineInfo } from '../lib/platform';
 import { HttpEngine } from './httpEngine';
 import { MockEngine } from './mockEngine';
 import type {
-  AudioDevice, DatasetFile, DictEntry, EngineEvent, ExportOptions, FileRef, ImportInspection, PlaySource, Profile, VoiceTags, VoiceUpdate,
-  RealtimeConfig, RefAnalysis, StsRequest, SystemInfo, TrainPreset, TtsRequest, VoiceLang,
+  AudioDevice, DatasetFile, DictEntry, EditAsset, EditOp, EditProject, EditProjectSummary, EditTimeline, EngineEvent, ExportOptions,
+  FileRef, ImportInspection, PlaySource, Profile, VoiceTags, VoiceUpdate, RealtimeConfig, RefAnalysis, StsRequest, SystemInfo,
+  TrainPreset, TtsRequest, VoiceLang,
 } from './types';
 
 export interface EngineClient {
@@ -49,6 +50,24 @@ export interface EngineClient {
   exportSts(jobId: string): Promise<string>;
   /** a = audio gốc, b = audio đã đổi giọng. */
   stsAudio(jobId: string, which: 'a' | 'b'): Promise<PlaySource>;
+
+  // ---------- Edit Audio ----------
+  listEditProjects(): Promise<EditProjectSummary[]>;
+  createEditProject(name: string): Promise<EditProject>;
+  /** gc: dọn asset không còn dùng (chỉ khi mở dự án, lúc chưa có lịch sử hoàn tác). */
+  getEditProject(id: string, gc?: boolean): Promise<EditProject>;
+  saveEditProject(id: string, timeline: EditTimeline): Promise<EditProject>;
+  deleteEditProject(id: string): Promise<void>;
+  editAssets(id: string): Promise<EditAsset[]>;
+  addEditAssets(id: string, files: FileRef[], source: 'import' | 'record'): Promise<EditAsset[]>;
+  /** URL file WAV của asset (để giải mã và phát trong app). */
+  editAssetUrl(projectId: string, assetId: string): string;
+  /** Mở kết quả TTS / đổi giọng thành một dự án Edit Audio. */
+  editFromJob(jobId: string): Promise<EditProject>;
+  /** Chạy một thao tác (job); kết quả nằm ở job.result. */
+  editOp(projectId: string, op: EditOp): Promise<string>;
+  /** Tải về file engine đã tạo (vd. bản xuất của Edit Audio). */
+  downloadFile(fileId: string): Promise<void>;
 
   cancelJob(id: string): Promise<void>;
   resumeJob(id: string): Promise<void>;

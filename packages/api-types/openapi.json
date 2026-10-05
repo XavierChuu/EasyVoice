@@ -1017,6 +1017,490 @@
         }
       }
     },
+    "/edit/projects": {
+      "get": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "List Projects",
+        "operationId": "list_projects_edit_projects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EditProjectSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Projects Edit Projects Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Create Project",
+        "operationId": "create_project_edit_projects_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewProject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditProject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit/projects/{pid}": {
+      "get": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Get Project",
+        "operationId": "get_project_edit_projects__pid__get",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          },
+          {
+            "name": "gc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Gc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditProject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Save Project",
+        "operationId": "save_project_edit_projects__pid__put",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditTimeline"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditProject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Delete Project",
+        "operationId": "delete_project_edit_projects__pid__delete",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit/projects/{pid}/assets": {
+      "get": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "List Assets",
+        "operationId": "list_assets_edit_projects__pid__assets_get",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EditAsset"
+                  },
+                  "title": "Response List Assets Edit Projects  Pid  Assets Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Add Assets",
+        "description": "Nhập audio/video (upload, hoặc đường dẫn file trên máy khi chạy trong app desktop).",
+        "operationId": "add_assets_edit_projects__pid__assets_post",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_add_assets_edit_projects__pid__assets_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EditAsset"
+                  },
+                  "title": "Response Add Assets Edit Projects  Pid  Assets Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit/projects/{pid}/assets/{aid}/audio": {
+      "get": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Asset Audio",
+        "operationId": "asset_audio_edit_projects__pid__assets__aid__audio_get",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          },
+          {
+            "name": "aid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Aid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit/projects/from-job": {
+      "post": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Project From Job",
+        "description": "Mở kết quả của trang Đọc văn bản / Đổi giọng trong Edit Audio (TTS kèm lời thoại theo từng câu).",
+        "operationId": "project_from_job_edit_projects_from_job_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FromJob"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditProject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit/projects/{pid}/ops": {
+      "post": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Run Op",
+        "operationId": "run_op_edit_projects__pid__ops_post",
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TranscribeOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DiarizeOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SeparateOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FilterOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ConvertOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RetextOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SpeakOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SilencesOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DuckOp"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RenderOp"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "op",
+                  "mapping": {
+                    "transcribe": "#/components/schemas/TranscribeOp",
+                    "diarize": "#/components/schemas/DiarizeOp",
+                    "separate": "#/components/schemas/SeparateOp",
+                    "filter": "#/components/schemas/FilterOp",
+                    "convert": "#/components/schemas/ConvertOp",
+                    "retext": "#/components/schemas/RetextOp",
+                    "speak": "#/components/schemas/SpeakOp",
+                    "silences": "#/components/schemas/SilencesOp",
+                    "duck": "#/components/schemas/DuckOp",
+                    "render": "#/components/schemas/RenderOp"
+                  }
+                },
+                "title": "Req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/jobs": {
       "get": {
         "tags": [
@@ -1260,6 +1744,35 @@
           "outputs"
         ],
         "title": "AudioDevices"
+      },
+      "Body_add_assets_edit_projects__pid__assets_post": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files",
+            "default": []
+          },
+          "paths": {
+            "type": "string",
+            "title": "Paths",
+            "default": "[]"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "import",
+              "record"
+            ],
+            "title": "Source",
+            "default": "import"
+          }
+        },
+        "type": "object",
+        "title": "Body_add_assets_edit_projects__pid__assets_post"
       },
       "Body_add_variant_voices__voice_id__variants_post": {
         "properties": {
@@ -1558,6 +2071,71 @@
         ],
         "title": "Body_transcribe_voices_transcribe_post"
       },
+      "ConvertOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "convert",
+            "title": "Op"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "type": "array",
+            "title": "Segments"
+          },
+          "profileId": {
+            "type": "string",
+            "title": "Profileid"
+          },
+          "pitch": {
+            "type": "number",
+            "title": "Pitch",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "segments",
+          "profileId"
+        ],
+        "title": "ConvertOp"
+      },
+      "DiarizeOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "diarize",
+            "title": "Op"
+          },
+          "assetIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assetids"
+          },
+          "numSpeakers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numspeakers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "assetIds"
+        ],
+        "title": "DiarizeOp"
+      },
       "DownloadRequest": {
         "properties": {
           "ids": {
@@ -1573,6 +2151,666 @@
           "ids"
         ],
         "title": "DownloadRequest"
+      },
+      "DuckOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "duck",
+            "title": "Op"
+          },
+          "timeline": {
+            "$ref": "#/components/schemas/EditTimeline"
+          },
+          "musicTrackIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Musictrackids"
+          },
+          "voiceTrackIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Voicetrackids"
+          },
+          "amountDb": {
+            "type": "number",
+            "title": "Amountdb",
+            "default": -12.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "timeline",
+          "musicTrackIds",
+          "voiceTrackIds"
+        ],
+        "title": "DuckOp"
+      },
+      "EditAsset": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "durationSec": {
+            "type": "number",
+            "title": "Durationsec"
+          },
+          "sampleRate": {
+            "type": "integer",
+            "title": "Samplerate",
+            "default": 48000
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "import",
+              "record",
+              "job",
+              "separate",
+              "filter",
+              "convert",
+              "retext",
+              "speak",
+              "duck"
+            ],
+            "title": "Source",
+            "default": "import"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "words": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EditWord"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Words"
+          },
+          "turns": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SpeakerTurn"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Turns"
+          },
+          "createdAt": {
+            "type": "number",
+            "title": "Createdat",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "durationSec",
+          "sampleRate",
+          "source",
+          "language",
+          "words",
+          "turns",
+          "createdAt"
+        ],
+        "title": "EditAsset"
+      },
+      "EditClip-Input": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "trackId": {
+            "type": "string",
+            "title": "Trackid"
+          },
+          "assetId": {
+            "type": "string",
+            "title": "Assetid"
+          },
+          "start": {
+            "type": "number",
+            "title": "Start"
+          },
+          "offset": {
+            "type": "number",
+            "title": "Offset"
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration"
+          },
+          "gainDb": {
+            "type": "number",
+            "title": "Gaindb",
+            "default": 0.0
+          },
+          "fadeIn": {
+            "type": "number",
+            "title": "Fadein",
+            "default": 0.0
+          },
+          "fadeOut": {
+            "type": "number",
+            "title": "Fadeout",
+            "default": 0.0
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "speaker": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "trackId",
+          "assetId",
+          "start",
+          "offset",
+          "duration"
+        ],
+        "title": "EditClip"
+      },
+      "EditClip-Output": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "trackId": {
+            "type": "string",
+            "title": "Trackid"
+          },
+          "assetId": {
+            "type": "string",
+            "title": "Assetid"
+          },
+          "start": {
+            "type": "number",
+            "title": "Start"
+          },
+          "offset": {
+            "type": "number",
+            "title": "Offset"
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration"
+          },
+          "gainDb": {
+            "type": "number",
+            "title": "Gaindb",
+            "default": 0.0
+          },
+          "fadeIn": {
+            "type": "number",
+            "title": "Fadein",
+            "default": 0.0
+          },
+          "fadeOut": {
+            "type": "number",
+            "title": "Fadeout",
+            "default": 0.0
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "speaker": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "trackId",
+          "assetId",
+          "start",
+          "offset",
+          "duration",
+          "gainDb",
+          "fadeIn",
+          "fadeOut",
+          "label",
+          "speaker"
+        ],
+        "title": "EditClip"
+      },
+      "EditProject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/EditTrack-Output"
+            },
+            "type": "array",
+            "title": "Tracks",
+            "default": []
+          },
+          "clips": {
+            "items": {
+              "$ref": "#/components/schemas/EditClip-Output"
+            },
+            "type": "array",
+            "title": "Clips",
+            "default": []
+          },
+          "speakers": {
+            "items": {
+              "$ref": "#/components/schemas/EditSpeaker"
+            },
+            "type": "array",
+            "title": "Speakers",
+            "default": []
+          },
+          "ripple": {
+            "type": "string",
+            "enum": [
+              "all",
+              "track",
+              "off"
+            ],
+            "title": "Ripple",
+            "default": "all"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "sampleRate": {
+            "type": "integer",
+            "title": "Samplerate",
+            "default": 48000
+          },
+          "createdAt": {
+            "type": "number",
+            "title": "Createdat"
+          },
+          "updatedAt": {
+            "type": "number",
+            "title": "Updatedat"
+          },
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/EditAsset"
+            },
+            "type": "array",
+            "title": "Assets",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "tracks",
+          "clips",
+          "speakers",
+          "ripple",
+          "id",
+          "sampleRate",
+          "createdAt",
+          "updatedAt",
+          "assets"
+        ],
+        "title": "EditProject"
+      },
+      "EditProjectSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "updatedAt": {
+            "type": "number",
+            "title": "Updatedat"
+          },
+          "durationSec": {
+            "type": "number",
+            "title": "Durationsec"
+          },
+          "tracks": {
+            "type": "integer",
+            "title": "Tracks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "updatedAt",
+          "durationSec",
+          "tracks"
+        ],
+        "title": "EditProjectSummary"
+      },
+      "EditSpeaker": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "color"
+        ],
+        "title": "EditSpeaker"
+      },
+      "EditTimeline": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/EditTrack-Input"
+            },
+            "type": "array",
+            "title": "Tracks",
+            "default": []
+          },
+          "clips": {
+            "items": {
+              "$ref": "#/components/schemas/EditClip-Input"
+            },
+            "type": "array",
+            "title": "Clips",
+            "default": []
+          },
+          "speakers": {
+            "items": {
+              "$ref": "#/components/schemas/EditSpeaker"
+            },
+            "type": "array",
+            "title": "Speakers",
+            "default": []
+          },
+          "ripple": {
+            "type": "string",
+            "enum": [
+              "all",
+              "track",
+              "off"
+            ],
+            "title": "Ripple",
+            "default": "all"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "EditTimeline"
+      },
+      "EditTrack-Input": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color",
+            "default": "#F2F2F2"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "audio",
+              "voice",
+              "music",
+              "speaker"
+            ],
+            "title": "Kind",
+            "default": "audio"
+          },
+          "gainDb": {
+            "type": "number",
+            "title": "Gaindb",
+            "default": 0.0
+          },
+          "mute": {
+            "type": "boolean",
+            "title": "Mute",
+            "default": false
+          },
+          "solo": {
+            "type": "boolean",
+            "title": "Solo",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "EditTrack"
+      },
+      "EditTrack-Output": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color",
+            "default": "#F2F2F2"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "audio",
+              "voice",
+              "music",
+              "speaker"
+            ],
+            "title": "Kind",
+            "default": "audio"
+          },
+          "gainDb": {
+            "type": "number",
+            "title": "Gaindb",
+            "default": 0.0
+          },
+          "mute": {
+            "type": "boolean",
+            "title": "Mute",
+            "default": false
+          },
+          "solo": {
+            "type": "boolean",
+            "title": "Solo",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "color",
+          "kind",
+          "gainDb",
+          "mute",
+          "solo"
+        ],
+        "title": "EditTrack"
+      },
+      "EditWord": {
+        "properties": {
+          "start": {
+            "type": "number",
+            "title": "Start"
+          },
+          "end": {
+            "type": "number",
+            "title": "End"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "text"
+        ],
+        "title": "EditWord"
+      },
+      "FilterOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "filter",
+            "title": "Op"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "type": "array",
+            "title": "Segments"
+          },
+          "filter": {
+            "type": "string",
+            "enum": [
+              "denoise",
+              "highpass",
+              "eq_voice",
+              "eq_warm",
+              "eq_bright",
+              "telephone",
+              "compress",
+              "normalize",
+              "loudness"
+            ],
+            "title": "Filter"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "segments",
+          "filter"
+        ],
+        "title": "FilterOp"
+      },
+      "FromJob": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "Jobid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId"
+        ],
+        "title": "FromJob"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1761,7 +2999,9 @@
               "tts",
               "sts",
               "train",
-              "download"
+              "download",
+              "edit",
+              "mix"
             ],
             "title": "Kind"
           },
@@ -1914,6 +3154,18 @@
             ],
             "title": "Outputdurationsec"
           },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
           "createdAt": {
             "type": "number",
             "title": "Createdat"
@@ -1938,6 +3190,7 @@
           "sentences",
           "files",
           "outputDurationSec",
+          "result",
           "createdAt"
         ],
         "title": "Job"
@@ -2029,6 +3282,17 @@
           "languages"
         ],
         "title": "ModelInfo"
+      },
+      "NewProject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "Dự án mới"
+          }
+        },
+        "type": "object",
+        "title": "NewProject"
       },
       "Profile": {
         "properties": {
@@ -2272,6 +3536,266 @@
         ],
         "title": "RefCheck"
       },
+      "RenderOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "render",
+            "title": "Op"
+          },
+          "timeline": {
+            "$ref": "#/components/schemas/EditTimeline"
+          },
+          "format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "wav",
+                  "mp3",
+                  "flac"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Format"
+          },
+          "targetLufs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetlufs"
+          },
+          "srt": {
+            "type": "boolean",
+            "title": "Srt",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "timeline"
+        ],
+        "title": "RenderOp"
+      },
+      "RetextOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "retext",
+            "title": "Op"
+          },
+          "assetId": {
+            "type": "string",
+            "title": "Assetid"
+          },
+          "offset": {
+            "type": "number",
+            "title": "Offset"
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "keepDuration": {
+            "type": "boolean",
+            "title": "Keepduration",
+            "default": false
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en",
+              "auto"
+            ],
+            "title": "Language",
+            "default": "auto"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 1234
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "assetId",
+          "offset",
+          "duration",
+          "text"
+        ],
+        "title": "RetextOp"
+      },
+      "Segment": {
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "title": "Assetid"
+          },
+          "offset": {
+            "type": "number",
+            "title": "Offset"
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration"
+          }
+        },
+        "type": "object",
+        "required": [
+          "assetId",
+          "offset",
+          "duration"
+        ],
+        "title": "Segment",
+        "description": "Một đoạn của asset (giây, theo thời gian trong asset)."
+      },
+      "SeparateOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "separate",
+            "title": "Op"
+          },
+          "assetIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assetids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "assetIds"
+        ],
+        "title": "SeparateOp"
+      },
+      "SilencesOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "silences",
+            "title": "Op"
+          },
+          "timeline": {
+            "$ref": "#/components/schemas/EditTimeline"
+          },
+          "trackIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trackids"
+          },
+          "thresholdDb": {
+            "type": "number",
+            "title": "Thresholddb",
+            "default": -45.0
+          },
+          "minSec": {
+            "type": "number",
+            "title": "Minsec",
+            "default": 0.8
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "timeline"
+        ],
+        "title": "SilencesOp"
+      },
+      "SpeakOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "speak",
+            "title": "Op"
+          },
+          "profileId": {
+            "type": "string",
+            "title": "Profileid"
+          },
+          "variantId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variantid"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "speed": {
+            "type": "number",
+            "title": "Speed",
+            "default": 1.0
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 1234
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "profileId",
+          "text"
+        ],
+        "title": "SpeakOp"
+      },
+      "SpeakerTurn": {
+        "properties": {
+          "start": {
+            "type": "number",
+            "title": "Start"
+          },
+          "end": {
+            "type": "number",
+            "title": "End"
+          },
+          "speaker": {
+            "type": "integer",
+            "title": "Speaker"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "speaker"
+        ],
+        "title": "SpeakerTurn"
+      },
       "SystemInfo": {
         "properties": {
           "appVersion": {
@@ -2335,6 +3859,38 @@
           "models"
         ],
         "title": "SystemInfo"
+      },
+      "TranscribeOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "transcribe",
+            "title": "Op"
+          },
+          "assetIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assetids"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "vi",
+              "en",
+              "auto"
+            ],
+            "title": "Language",
+            "default": "auto"
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "assetIds"
+        ],
+        "title": "TranscribeOp"
       },
       "Transcript": {
         "properties": {

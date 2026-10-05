@@ -14,7 +14,8 @@
     "save": "Lưu",
     "showInFolder": "Mở thư mục",
     "unknown": "Không rõ",
-    "working": "ĐANG XỬ LÝ…"
+    "working": "ĐANG XỬ LÝ…",
+    "openInEdit": "Mở trong Edit Audio"
   },
   "lang": {
     "vi": "Tiếng Việt",
@@ -34,7 +35,8 @@
     "tts": "Đọc văn bản",
     "sts": "Đổi giọng",
     "settings": "Cài đặt",
-    "licenses": "Giấy phép"
+    "licenses": "Giấy phép",
+    "edit": "Edit Audio"
   },
   "shell": {
     "mode": "CHẾ ĐỘ: OFFLINE",
@@ -53,7 +55,8 @@
       "rt": "ĐỔI GIỌNG TRỰC TIẾP",
       "tts": "ĐANG ĐỌC",
       "sts": "ĐANG ĐỔI GIỌNG",
-      "train": "ĐANG HUẤN LUYỆN"
+      "train": "ĐANG HUẤN LUYỆN",
+      "edit": "ĐANG XỬ LÝ AUDIO"
     },
     "queue": {
       "empty": "Hàng đợi trống.",
@@ -61,7 +64,8 @@
       "tts": "Đang đọc văn bản.",
       "sts": "Đang đổi giọng file.",
       "train": "Đang huấn luyện: {{name}}",
-      "waiting_other": "{{count}} tác vụ đang chờ."
+      "waiting_other": "{{count}} tác vụ đang chờ.",
+      "edit": "Edit Audio: {{name}}"
     }
   },
   "engineBanner": {
@@ -650,5 +654,223 @@
   },
   "models": {
     "separatorMissing": "Cần model tách nhạc (Demucs). Tải trong Cài đặt → Chạy lại thiết lập ban đầu."
+  },
+  "edit": {
+    "code": "04 / EDIT AUDIO",
+    "title": "Edit Audio",
+    "desc": "Cắt ghép nhiều track, lọc âm, tách nhạc, nhận diện người nói và sửa lời bằng văn bản.",
+    "drop": "Thả audio / video vào đây để bắt đầu một dự án",
+    "import": "Nhập file",
+    "record": "Thu âm",
+    "empty": "Dự án trống",
+    "nameOptional": "Tên dự án (tùy chọn)",
+    "untitled": "Dự án mới",
+    "recent": "DỰ ÁN GẦN ĐÂY",
+    "noProjects": "Chưa có dự án nào.",
+    "trackCount_other": "{{count}} track",
+    "deleteTitle": "XÓA DỰ ÁN",
+    "deleteBody": "Xóa dự án này cùng toàn bộ audio đã nhập và đã xử lý? Không hoàn tác được.",
+    "mockNote": "Đang chạy không có engine: dựng timeline, cắt ghép, nghe được; xử lý AI và xuất file cần engine thật.",
+    "projectName": "Tên dự án",
+    "projects": "Dự án",
+    "undo": "Hoàn tác",
+    "redo": "Làm lại",
+    "save": {
+      "saved": "Đã lưu",
+      "saving": "Đang lưu…",
+      "dirty": "Có thay đổi",
+      "error": "Lưu lỗi"
+    },
+    "zoom": "ZOOM",
+    "addTrack": "Track",
+    "tracks": "TRACK",
+    "trackName": "Tên track",
+    "trackGain": "Âm lượng track",
+    "mute": "Tắt tiếng",
+    "solo": "Chỉ nghe track này",
+    "kind": {
+      "audio": "AUDIO",
+      "voice": "GIỌNG",
+      "music": "NHẠC NỀN",
+      "speaker": "NGƯỜI NÓI"
+    },
+    "emptyTimeline": "Chưa có audio. Nhập file, thu âm hoặc thả file vào đây.",
+    "ripple": {
+      "all": "TẤT CẢ",
+      "track": "TRACK",
+      "off": "TẮT"
+    },
+    "rippleHint": "Khi xóa / chèn: dời mọi track cho khớp nhau, chỉ dời track đang sửa, hoặc không dời (để lại khoảng trống / ghi đè).",
+    "shortcuts": "SPACE phát/dừng · S tách tại đầu phát · DEL xóa vùng chọn/clip · CTRL+Z hoàn tác · CTRL+SHIFT+Z làm lại · CTRL+CUỘN zoom · kéo thanh trên clip để di chuyển, kéo mép để cắt bớt, kéo thân để chọn vùng",
+    "running": "ĐANG CHẠY",
+    "inspectorEmpty": "Chọn một track, clip, hoặc kéo trên timeline / lời thoại để chọn một vùng.",
+    "sel": {
+      "title": "VÙNG CHỌN",
+      "delete": "Xóa",
+      "split": "Tách clip",
+      "play": "Nghe",
+      "clear": "Bỏ chọn",
+      "process": "Xử lý vùng chọn",
+      "filter": "Lọc âm…",
+      "retext": "Sửa lời…",
+      "convert": "Đổi giọng RVC…",
+      "speak": "Đọc bằng giọng…",
+      "replace": "Thay bằng file / thu âm…"
+    },
+    "clip": {
+      "title": "CLIP",
+      "gain": "ÂM LƯỢNG",
+      "fadeIn": "FADE IN",
+      "fadeOut": "FADE OUT",
+      "speaker": "NGƯỜI NÓI",
+      "select": "Chọn cả clip",
+      "split": "Tách tại đầu phát",
+      "delete": "Xóa clip"
+    },
+    "track": {
+      "title": "TRACK",
+      "transcribe": "Chép lời",
+      "separate": "Tách nhạc nền",
+      "diarize": "Nhận diện người nói",
+      "people": "Số người",
+      "auto": "Tự đoán",
+      "silences": "Dọn khoảng lặng…",
+      "duck": "Hạ nhạc theo giọng…",
+      "splitHere": "Tách tại đầu phát",
+      "delete": "Xóa track"
+    },
+    "speaker": "Người",
+    "speakers": {
+      "title": "NGƯỜI NÓI",
+      "cut": "Cắt tại chỗ đổi giọng + tô màu",
+      "tracks": "Mỗi người một track (giữ đúng timeline)",
+      "hint": "Đổi tên / màu ở đây; tên được dùng trong phụ đề khi xuất."
+    },
+    "transcript": {
+      "title": "LỜI THOẠI",
+      "empty": "Chưa có lời thoại. Chép lời để sửa audio như sửa văn bản: chọn chữ để xóa hoặc sửa lời.",
+      "run": "Chép lời “{{name}}”",
+      "allTracks": "Mọi track",
+      "fillers_other": "Xóa {{count}} tiếng đệm",
+      "hint": "Bấm một từ để nghe từ đó · kéo hoặc Shift+bấm để chọn nhiều từ · tiếng đệm (ờ, ừm…) gạch chân chấm. Whisper có thể tự bỏ bớt tiếng đệm."
+    },
+    "preview": "Nghe thử",
+    "apply": "Áp dụng",
+    "ab": {
+      "original": "GỐC",
+      "processed": "ĐÃ XỬ LÝ"
+    },
+    "filter": {
+      "title": "LỌC ÂM",
+      "amount": "Mức",
+      "hint": "Bản gốc không bị sửa: bộ lọc tạo bản mới, hoàn tác được bằng Ctrl+Z.",
+      "denoise": {
+        "name": "Khử ồn",
+        "desc": "Giảm tiếng xì, quạt, ù nền"
+      },
+      "eq_voice": {
+        "name": "Giọng rõ",
+        "desc": "Bớt đục, tăng độ rõ lời"
+      },
+      "highpass": {
+        "name": "Lọc tần thấp",
+        "desc": "Bỏ tiếng ù, rung, gió"
+      },
+      "compress": {
+        "name": "Nén dải động",
+        "desc": "Đều âm lượng chỗ to chỗ nhỏ"
+      },
+      "loudness": {
+        "name": "Chuẩn loudness",
+        "desc": "Đưa về mức LUFS mong muốn"
+      },
+      "normalize": {
+        "name": "Chuẩn đỉnh",
+        "desc": "Đỉnh sóng về mức dBFS"
+      },
+      "eq_warm": {
+        "name": "Ấm",
+        "desc": "Dày tiếng trầm, dịu tiếng cao"
+      },
+      "eq_bright": {
+        "name": "Sáng",
+        "desc": "Tăng dải cao cho trong"
+      },
+      "telephone": {
+        "name": "Điện thoại",
+        "desc": "Hiệu ứng giọng qua điện thoại"
+      }
+    },
+    "retext": {
+      "title": "SỬA LỜI BẰNG VĂN BẢN",
+      "original": "Lời cũ",
+      "newText": "Lời mới",
+      "noWords": "(chưa có lời thoại — engine sẽ tự chép lời)",
+      "keep": "Giữ đúng độ dài đoạn cũ",
+      "keepHint": "Không làm lệch timeline (nên bật khi có nhạc nền / track khác).",
+      "generate": "Tạo",
+      "again": "Tạo lại",
+      "oneClip": "Vùng chọn phải nằm trong một clip.",
+      "tooLong": "Chọn đoạn ngắn hơn 15 giây.",
+      "hint": "F5-TTS đọc lời mới bằng chính giọng trong đoạn, lấy phần xung quanh làm mẫu. Sửa vài từ hoặc một câu ngắn cho kết quả liền mạch nhất."
+    },
+    "speak": {
+      "title": "ĐỌC BẰNG GIỌNG ĐÃ LƯU",
+      "text": "Văn bản",
+      "standard": "Chuẩn",
+      "noVoice": "Chưa có giọng dùng được cho Đọc văn bản.",
+      "replace": "Thay vùng chọn",
+      "insert": "Chèn tại đầu phát",
+      "at": "Chèn tại"
+    },
+    "convert": {
+      "title": "ĐỔI GIỌNG ĐOẠN CHỌN (RVC)"
+    },
+    "replace": {
+      "title": "THAY BẰNG FILE / THU ÂM",
+      "body": "Chọn một file hoặc thu âm mới để thay đoạn đã chọn.",
+      "choose": "Chọn file",
+      "match": "Khớp âm lượng với đoạn cũ",
+      "matchHint": "Tự chỉnh gain theo mức RMS của đoạn bị thay."
+    },
+    "silences": {
+      "title": "DỌN KHOẢNG LẶNG",
+      "body": "Tìm các khoảng lặng dài rồi rút ngắn (mỗi bên giữ 0,25 s cho tự nhiên).",
+      "thisTrack": "Track đang chọn",
+      "allTracks": "Mọi track",
+      "threshold": "Ngưỡng im lặng",
+      "min": "Dài tối thiểu",
+      "find": "Tìm",
+      "found_other": "Tìm thấy {{count}} khoảng · tổng {{sec}} s",
+      "none": "Không có khoảng lặng nào đủ dài.",
+      "remove_other": "Xóa {{count}} khoảng",
+      "rippleHint": "Ripple đang không ở chế độ TẤT CẢ: các track khác sẽ không được dời theo."
+    },
+    "duck": {
+      "title": "HẠ NHẠC NỀN THEO GIỌNG",
+      "body": "Nhạc nền tự nhỏ lại khi có người nói và lớn dần khi dừng.",
+      "music": "Track nhạc nền",
+      "amount": "Mức hạ"
+    },
+    "export": {
+      "title": "XUẤT FILE",
+      "format": "Định dạng",
+      "loudness": "Chuẩn âm lượng",
+      "srt": "Kèm phụ đề .srt",
+      "srtHint": "Từ lời thoại, có tên người nói nếu đã nhận diện.",
+      "srtNone": "Chưa có lời thoại (chép lời trước để có phụ đề).",
+      "measure": "Đo",
+      "go": "Xuất",
+      "done": "Đã xuất file",
+      "length": "ĐỘ DÀI",
+      "loud": {
+        "none": "Giữ nguyên",
+        "youtube": "YouTube / TikTok",
+        "podcast": "Podcast",
+        "broadcast": "Phát thanh EBU"
+      },
+      "hint": "Trộn mọi track đang bật (theo M/S, âm lượng, fade). Chuẩn loudness có giới hạn đỉnh −1 dBFS."
+    },
+    "importing": "Đang nhập audio…"
   }
 }

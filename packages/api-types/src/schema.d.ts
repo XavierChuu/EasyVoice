@@ -417,6 +417,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/edit/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Projects */
+        get: operations["list_projects_edit_projects_get"];
+        put?: never;
+        /** Create Project */
+        post: operations["create_project_edit_projects_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edit/projects/{pid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Project */
+        get: operations["get_project_edit_projects__pid__get"];
+        /** Save Project */
+        put: operations["save_project_edit_projects__pid__put"];
+        post?: never;
+        /** Delete Project */
+        delete: operations["delete_project_edit_projects__pid__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edit/projects/{pid}/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Assets */
+        get: operations["list_assets_edit_projects__pid__assets_get"];
+        put?: never;
+        /**
+         * Add Assets
+         * @description Nhập audio/video (upload, hoặc đường dẫn file trên máy khi chạy trong app desktop).
+         */
+        post: operations["add_assets_edit_projects__pid__assets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edit/projects/{pid}/assets/{aid}/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Asset Audio */
+        get: operations["asset_audio_edit_projects__pid__assets__aid__audio_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edit/projects/from-job": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Project From Job
+         * @description Mở kết quả của trang Đọc văn bản / Đổi giọng trong Edit Audio (TTS kèm lời thoại theo từng câu).
+         */
+        post: operations["project_from_job_edit_projects_from_job_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edit/projects/{pid}/ops": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run Op */
+        post: operations["run_op_edit_projects__pid__ops_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/jobs": {
         parameters: {
             query?: never;
@@ -505,6 +617,25 @@ export interface components {
             inputs: components["schemas"]["AudioDevice"][];
             /** Outputs */
             outputs: components["schemas"]["AudioDevice"][];
+        };
+        /** Body_add_assets_edit_projects__pid__assets_post */
+        Body_add_assets_edit_projects__pid__assets_post: {
+            /**
+             * Files
+             * @default []
+             */
+            files: string[];
+            /**
+             * Paths
+             * @default []
+             */
+            paths: string;
+            /**
+             * Source
+             * @default import
+             * @enum {string}
+             */
+            source: "import" | "record";
         };
         /** Body_add_variant_voices__voice_id__variants_post */
         Body_add_variant_voices__voice_id__variants_post: {
@@ -633,10 +764,343 @@ export interface components {
              */
             language: string;
         };
+        /** ConvertOp */
+        ConvertOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "convert";
+            /** Segments */
+            segments: components["schemas"]["Segment"][];
+            /** Profileid */
+            profileId: string;
+            /**
+             * Pitch
+             * @default 0
+             */
+            pitch: number;
+        };
+        /** DiarizeOp */
+        DiarizeOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "diarize";
+            /** Assetids */
+            assetIds: string[];
+            /** Numspeakers */
+            numSpeakers?: number | null;
+        };
         /** DownloadRequest */
         DownloadRequest: {
             /** Ids */
             ids: string[];
+        };
+        /** DuckOp */
+        DuckOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "duck";
+            timeline: components["schemas"]["EditTimeline"];
+            /** Musictrackids */
+            musicTrackIds: string[];
+            /** Voicetrackids */
+            voiceTrackIds: string[];
+            /**
+             * Amountdb
+             * @default -12
+             */
+            amountDb: number;
+        };
+        /** EditAsset */
+        EditAsset: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Durationsec */
+            durationSec: number;
+            /**
+             * Samplerate
+             * @default 48000
+             */
+            sampleRate: number;
+            /**
+             * Source
+             * @default import
+             * @enum {string}
+             */
+            source: "import" | "record" | "job" | "separate" | "filter" | "convert" | "retext" | "speak" | "duck";
+            /** Language */
+            language: string | null;
+            /** Words */
+            words: components["schemas"]["EditWord"][] | null;
+            /** Turns */
+            turns: components["schemas"]["SpeakerTurn"][] | null;
+            /**
+             * Createdat
+             * @default 0
+             */
+            createdAt: number;
+        };
+        /** EditClip */
+        "EditClip-Input": {
+            /** Id */
+            id: string;
+            /** Trackid */
+            trackId: string;
+            /** Assetid */
+            assetId: string;
+            /** Start */
+            start: number;
+            /** Offset */
+            offset: number;
+            /** Duration */
+            duration: number;
+            /**
+             * Gaindb
+             * @default 0
+             */
+            gainDb: number;
+            /**
+             * Fadein
+             * @default 0
+             */
+            fadeIn: number;
+            /**
+             * Fadeout
+             * @default 0
+             */
+            fadeOut: number;
+            /** Label */
+            label?: string | null;
+            /** Speaker */
+            speaker?: number | null;
+        };
+        /** EditClip */
+        "EditClip-Output": {
+            /** Id */
+            id: string;
+            /** Trackid */
+            trackId: string;
+            /** Assetid */
+            assetId: string;
+            /** Start */
+            start: number;
+            /** Offset */
+            offset: number;
+            /** Duration */
+            duration: number;
+            /**
+             * Gaindb
+             * @default 0
+             */
+            gainDb: number;
+            /**
+             * Fadein
+             * @default 0
+             */
+            fadeIn: number;
+            /**
+             * Fadeout
+             * @default 0
+             */
+            fadeOut: number;
+            /** Label */
+            label: string | null;
+            /** Speaker */
+            speaker: number | null;
+        };
+        /** EditProject */
+        EditProject: {
+            /** Name */
+            name: string;
+            /**
+             * Tracks
+             * @default []
+             */
+            tracks: components["schemas"]["EditTrack-Output"][];
+            /**
+             * Clips
+             * @default []
+             */
+            clips: components["schemas"]["EditClip-Output"][];
+            /**
+             * Speakers
+             * @default []
+             */
+            speakers: components["schemas"]["EditSpeaker"][];
+            /**
+             * Ripple
+             * @default all
+             * @enum {string}
+             */
+            ripple: "all" | "track" | "off";
+            /** Id */
+            id: string;
+            /**
+             * Samplerate
+             * @default 48000
+             */
+            sampleRate: number;
+            /** Createdat */
+            createdAt: number;
+            /** Updatedat */
+            updatedAt: number;
+            /**
+             * Assets
+             * @default []
+             */
+            assets: components["schemas"]["EditAsset"][];
+        };
+        /** EditProjectSummary */
+        EditProjectSummary: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Updatedat */
+            updatedAt: number;
+            /** Durationsec */
+            durationSec: number;
+            /** Tracks */
+            tracks: number;
+        };
+        /** EditSpeaker */
+        EditSpeaker: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Color */
+            color: string;
+        };
+        /** EditTimeline */
+        EditTimeline: {
+            /** Name */
+            name: string;
+            /**
+             * Tracks
+             * @default []
+             */
+            tracks: components["schemas"]["EditTrack-Input"][];
+            /**
+             * Clips
+             * @default []
+             */
+            clips: components["schemas"]["EditClip-Input"][];
+            /**
+             * Speakers
+             * @default []
+             */
+            speakers: components["schemas"]["EditSpeaker"][];
+            /**
+             * Ripple
+             * @default all
+             * @enum {string}
+             */
+            ripple: "all" | "track" | "off";
+        };
+        /** EditTrack */
+        "EditTrack-Input": {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Color
+             * @default #F2F2F2
+             */
+            color: string;
+            /**
+             * Kind
+             * @default audio
+             * @enum {string}
+             */
+            kind: "audio" | "voice" | "music" | "speaker";
+            /**
+             * Gaindb
+             * @default 0
+             */
+            gainDb: number;
+            /**
+             * Mute
+             * @default false
+             */
+            mute: boolean;
+            /**
+             * Solo
+             * @default false
+             */
+            solo: boolean;
+        };
+        /** EditTrack */
+        "EditTrack-Output": {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Color
+             * @default #F2F2F2
+             */
+            color: string;
+            /**
+             * Kind
+             * @default audio
+             * @enum {string}
+             */
+            kind: "audio" | "voice" | "music" | "speaker";
+            /**
+             * Gaindb
+             * @default 0
+             */
+            gainDb: number;
+            /**
+             * Mute
+             * @default false
+             */
+            mute: boolean;
+            /**
+             * Solo
+             * @default false
+             */
+            solo: boolean;
+        };
+        /** EditWord */
+        EditWord: {
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+            /** Text */
+            text: string;
+        };
+        /** FilterOp */
+        FilterOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "filter";
+            /** Segments */
+            segments: components["schemas"]["Segment"][];
+            /**
+             * Filter
+             * @enum {string}
+             */
+            filter: "denoise" | "highpass" | "eq_voice" | "eq_warm" | "eq_bright" | "telephone" | "compress" | "normalize" | "loudness";
+            /** Amount */
+            amount?: number | null;
+        };
+        /** FromJob */
+        FromJob: {
+            /** Jobid */
+            jobId: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -717,7 +1181,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "tts" | "sts" | "train" | "download";
+            kind: "tts" | "sts" | "train" | "download" | "edit" | "mix";
             /**
              * Status
              * @default queued
@@ -757,6 +1221,10 @@ export interface components {
             };
             /** Outputdurationsec */
             outputDurationSec: number | null;
+            /** Result */
+            result: {
+                [key: string]: unknown;
+            } | null;
             /** Createdat */
             createdAt: number;
         };
@@ -787,6 +1255,14 @@ export interface components {
             required: boolean;
             /** Languages */
             languages: string[] | null;
+        };
+        /** NewProject */
+        NewProject: {
+            /**
+             * Name
+             * @default Dự án mới
+             */
+            name: string;
         };
         /**
          * Profile
@@ -866,6 +1342,132 @@ export interface components {
             /** Ok */
             ok: boolean;
         };
+        /** RenderOp */
+        RenderOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "render";
+            timeline: components["schemas"]["EditTimeline"];
+            /** Format */
+            format?: ("wav" | "mp3" | "flac") | null;
+            /** Targetlufs */
+            targetLufs?: number | null;
+            /**
+             * Srt
+             * @default false
+             */
+            srt: boolean;
+        };
+        /** RetextOp */
+        RetextOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "retext";
+            /** Assetid */
+            assetId: string;
+            /** Offset */
+            offset: number;
+            /** Duration */
+            duration: number;
+            /** Text */
+            text: string;
+            /**
+             * Keepduration
+             * @default false
+             */
+            keepDuration: boolean;
+            /**
+             * Language
+             * @default auto
+             * @enum {string}
+             */
+            language: "vi" | "en" | "auto";
+            /**
+             * Seed
+             * @default 1234
+             */
+            seed: number;
+        };
+        /**
+         * Segment
+         * @description Một đoạn của asset (giây, theo thời gian trong asset).
+         */
+        Segment: {
+            /** Assetid */
+            assetId: string;
+            /** Offset */
+            offset: number;
+            /** Duration */
+            duration: number;
+        };
+        /** SeparateOp */
+        SeparateOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "separate";
+            /** Assetids */
+            assetIds: string[];
+        };
+        /** SilencesOp */
+        SilencesOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "silences";
+            timeline: components["schemas"]["EditTimeline"];
+            /** Trackids */
+            trackIds?: string[] | null;
+            /**
+             * Thresholddb
+             * @default -45
+             */
+            thresholdDb: number;
+            /**
+             * Minsec
+             * @default 0.8
+             */
+            minSec: number;
+        };
+        /** SpeakOp */
+        SpeakOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "speak";
+            /** Profileid */
+            profileId: string;
+            /** Variantid */
+            variantId?: string | null;
+            /** Text */
+            text: string;
+            /**
+             * Speed
+             * @default 1
+             */
+            speed: number;
+            /**
+             * Seed
+             * @default 1234
+             */
+            seed: number;
+        };
+        /** SpeakerTurn */
+        SpeakerTurn: {
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+            /** Speaker */
+            speaker: number;
+        };
         /** SystemInfo */
         SystemInfo: {
             /** Appversion */
@@ -888,6 +1490,22 @@ export interface components {
             loadedModels: string[];
             /** Models */
             models: components["schemas"]["ModelInfo"][];
+        };
+        /** TranscribeOp */
+        TranscribeOp: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "transcribe";
+            /** Assetids */
+            assetIds: string[];
+            /**
+             * Language
+             * @default auto
+             * @enum {string}
+             */
+            language: "vi" | "en" | "auto";
         };
         /** Transcript */
         Transcript: {
@@ -1775,6 +2393,320 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    list_projects_edit_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditProjectSummary"][];
+                };
+            };
+        };
+    };
+    create_project_edit_projects_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewProject"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditProject"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_project_edit_projects__pid__get: {
+        parameters: {
+            query?: {
+                gc?: boolean;
+            };
+            header?: never;
+            path: {
+                pid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditProject"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_project_edit_projects__pid__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditTimeline"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditProject"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_project_edit_projects__pid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_assets_edit_projects__pid__assets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditAsset"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_assets_edit_projects__pid__assets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_add_assets_edit_projects__pid__assets_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditAsset"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asset_audio_edit_projects__pid__assets__aid__audio_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pid: string;
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_from_job_edit_projects_from_job_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromJob"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditProject"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_op_edit_projects__pid__ops_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranscribeOp"] | components["schemas"]["DiarizeOp"] | components["schemas"]["SeparateOp"] | components["schemas"]["FilterOp"] | components["schemas"]["ConvertOp"] | components["schemas"]["RetextOp"] | components["schemas"]["SpeakOp"] | components["schemas"]["SilencesOp"] | components["schemas"]["DuckOp"] | components["schemas"]["RenderOp"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobRef"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

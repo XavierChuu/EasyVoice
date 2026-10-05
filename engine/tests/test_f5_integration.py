@@ -75,3 +75,20 @@ def test_f5_backend_through_api(tmp_path, monkeypatch, wav_file):
     assert job["outputDurationSec"] > 0.3
     assert "tts" in state.models.loaded()
     state.queue.shutdown()
+
+
+def test_f5_speech_edit_with_random_weights(tmp_path):
+    """Sửa lời (Edit Audio) gọi đúng API mức thấp của f5-tts: mel, edit_mask, vocoder; vùng giữ nguyên không đổi độ dài."""
+    pytest.importorskip("f5_tts")
+    import numpy as np
+
+    from conftest import voice_like
+    from easyvoice_engine.services.tts.f5_wrapper import F5Backend
+
+    make_random_f5(tmp_path)
+    be = F5Backend("cpu", tmp_path / "f5tts-v1-base" / "model_1250000.safetensors", None, "F5TTS_v1_Base",
+                   tmp_path / "vocos-mel-24khz", nfe_step=4)
+    audio = voice_like(24000, 3.0)
+    out = be.edit(audio, "some call me optimist, others call me realist", 1.0, 1.6, 1.0, seed=1)
+    assert out.dtype == np.float32 and np.isfinite(out).all()
+    assert abs(len(out) / 24000 - 3.4) < 0.05  # 3 s − 0,6 s bị thay + 1 s mới

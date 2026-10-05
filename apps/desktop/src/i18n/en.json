@@ -14,7 +14,8 @@
     "save": "Save",
     "showInFolder": "Show in folder",
     "unknown": "Unknown",
-    "working": "WORKING…"
+    "working": "WORKING…",
+    "openInEdit": "Open in Edit Audio"
   },
   "lang": {
     "vi": "Vietnamese",
@@ -34,7 +35,8 @@
     "tts": "Text to Speech",
     "sts": "Voice Changer",
     "settings": "Settings",
-    "licenses": "Licenses"
+    "licenses": "Licenses",
+    "edit": "Edit Audio"
   },
   "shell": {
     "mode": "MODE: OFFLINE",
@@ -53,7 +55,8 @@
       "rt": "RT LIVE",
       "tts": "TTS RUNNING",
       "sts": "STS RUNNING",
-      "train": "TRAINING"
+      "train": "TRAINING",
+      "edit": "EDITING AUDIO"
     },
     "queue": {
       "empty": "Queue empty.",
@@ -62,7 +65,8 @@
       "sts": "Converting file.",
       "train": "Training: {{name}}",
       "waiting_one": "{{count}} job waiting.",
-      "waiting_other": "{{count}} jobs waiting."
+      "waiting_other": "{{count}} jobs waiting.",
+      "edit": "Edit Audio: {{name}}"
     }
   },
   "engineBanner": {
@@ -652,5 +656,227 @@
   },
   "models": {
     "separatorMissing": "Needs the music-separation model (Demucs). Download it in Settings → Re-run first-time setup."
+  },
+  "edit": {
+    "code": "04 / EDIT AUDIO",
+    "title": "Edit Audio",
+    "desc": "Multitrack cutting, filters, music separation, speaker detection and text-based voice editing.",
+    "drop": "Drop audio / video here to start a project",
+    "import": "Import",
+    "record": "Record",
+    "empty": "Empty project",
+    "nameOptional": "Project name (optional)",
+    "untitled": "New project",
+    "recent": "RECENT PROJECTS",
+    "noProjects": "No projects yet.",
+    "trackCount_one": "{{count}} track",
+    "trackCount_other": "{{count}} tracks",
+    "deleteTitle": "DELETE PROJECT",
+    "deleteBody": "Delete this project and all its imported and processed audio? This cannot be undone.",
+    "mockNote": "Running without the engine: you can build the timeline, cut and listen; AI processing and export need the real engine.",
+    "projectName": "Project name",
+    "projects": "Projects",
+    "undo": "Undo",
+    "redo": "Redo",
+    "save": {
+      "saved": "Saved",
+      "saving": "Saving…",
+      "dirty": "Unsaved changes",
+      "error": "Save failed"
+    },
+    "zoom": "ZOOM",
+    "addTrack": "Track",
+    "tracks": "TRACKS",
+    "trackName": "Track name",
+    "trackGain": "Track volume",
+    "mute": "Mute",
+    "solo": "Solo",
+    "kind": {
+      "audio": "AUDIO",
+      "voice": "VOICE",
+      "music": "MUSIC",
+      "speaker": "SPEAKER"
+    },
+    "emptyTimeline": "No audio yet. Import, record or drop files here.",
+    "ripple": {
+      "all": "ALL",
+      "track": "TRACK",
+      "off": "OFF"
+    },
+    "rippleHint": "When deleting / inserting: shift every track to stay in sync, only the edited track, or nothing (leave a gap / overwrite).",
+    "shortcuts": "SPACE play/pause · S split at playhead · DEL delete selection/clip · CTRL+Z undo · CTRL+SHIFT+Z redo · CTRL+WHEEL zoom · drag a clip's top bar to move, edges to trim, body to select",
+    "running": "RUNNING",
+    "inspectorEmpty": "Pick a track or clip, or drag on the timeline / transcript to select a range.",
+    "sel": {
+      "title": "SELECTION",
+      "delete": "Delete",
+      "split": "Split clip",
+      "play": "Play",
+      "clear": "Clear",
+      "process": "Process selection",
+      "filter": "Filters…",
+      "retext": "Edit words…",
+      "convert": "RVC voice…",
+      "speak": "Read with a voice…",
+      "replace": "Replace with file / recording…"
+    },
+    "clip": {
+      "title": "CLIP",
+      "gain": "VOLUME",
+      "fadeIn": "FADE IN",
+      "fadeOut": "FADE OUT",
+      "speaker": "SPEAKER",
+      "select": "Select whole clip",
+      "split": "Split at playhead",
+      "delete": "Delete clip"
+    },
+    "track": {
+      "title": "TRACK",
+      "transcribe": "Transcribe",
+      "separate": "Separate music",
+      "diarize": "Detect speakers",
+      "people": "Speakers",
+      "auto": "Auto",
+      "silences": "Trim silences…",
+      "duck": "Duck music…",
+      "splitHere": "Split at playhead",
+      "delete": "Delete track"
+    },
+    "speaker": "Speaker",
+    "speakers": {
+      "title": "SPEAKERS",
+      "cut": "Cut at speaker changes + color",
+      "tracks": "One track per speaker (same timeline)",
+      "hint": "Rename / recolor here; names are used in exported subtitles."
+    },
+    "transcript": {
+      "title": "TRANSCRIPT",
+      "empty": "No transcript yet. Transcribe to edit audio like text: select words to delete or rewrite them.",
+      "run": "Transcribe “{{name}}”",
+      "allTracks": "All tracks",
+      "fillers_one": "Remove {{count}} filler",
+      "fillers_other": "Remove {{count}} fillers",
+      "hint": "Click a word to play from it · drag or Shift+click to select · fillers (um, uh…) have a dotted underline. Whisper may drop some fillers."
+    },
+    "preview": "Preview",
+    "apply": "Apply",
+    "ab": {
+      "original": "ORIGINAL",
+      "processed": "PROCESSED"
+    },
+    "filter": {
+      "title": "FILTERS",
+      "amount": "Amount",
+      "hint": "The original is untouched: filters create a new version, undo with Ctrl+Z.",
+      "denoise": {
+        "name": "Denoise",
+        "desc": "Reduce hiss, fan and room noise"
+      },
+      "eq_voice": {
+        "name": "Clear voice",
+        "desc": "Less mud, more clarity"
+      },
+      "highpass": {
+        "name": "High-pass",
+        "desc": "Remove rumble, hum and wind"
+      },
+      "compress": {
+        "name": "Compressor",
+        "desc": "Even out loud and quiet parts"
+      },
+      "loudness": {
+        "name": "Loudness",
+        "desc": "Match a target LUFS level"
+      },
+      "normalize": {
+        "name": "Normalize peak",
+        "desc": "Set the peak level"
+      },
+      "eq_warm": {
+        "name": "Warm",
+        "desc": "Fuller lows, softer highs"
+      },
+      "eq_bright": {
+        "name": "Bright",
+        "desc": "Lift the highs"
+      },
+      "telephone": {
+        "name": "Telephone",
+        "desc": "Phone-call effect"
+      }
+    },
+    "retext": {
+      "title": "EDIT WORDS WITH TEXT",
+      "original": "Original words",
+      "newText": "New words",
+      "noWords": "(no transcript yet — the engine will transcribe)",
+      "keep": "Keep the original length",
+      "keepHint": "Doesn't shift the timeline (recommended with music / other tracks).",
+      "generate": "Generate",
+      "again": "Regenerate",
+      "oneClip": "The selection must be inside one clip.",
+      "tooLong": "Select less than 15 seconds.",
+      "hint": "F5-TTS reads the new words in the same voice, using the surrounding audio as reference. A few words or one short sentence blend best."
+    },
+    "speak": {
+      "title": "READ WITH A SAVED VOICE",
+      "text": "Text",
+      "standard": "Standard",
+      "noVoice": "No voice is ready for Text to Speech.",
+      "replace": "Replace selection",
+      "insert": "Insert at playhead",
+      "at": "Insert at"
+    },
+    "convert": {
+      "title": "CONVERT SELECTION (RVC)"
+    },
+    "replace": {
+      "title": "REPLACE WITH FILE / RECORDING",
+      "body": "Pick a file or record a new take to replace the selection.",
+      "choose": "Choose file",
+      "match": "Match the original loudness",
+      "matchHint": "Sets the gain from the RMS of the replaced part."
+    },
+    "silences": {
+      "title": "TRIM SILENCES",
+      "body": "Find long silences and shorten them (keeps 0.25 s on each side).",
+      "thisTrack": "Selected track",
+      "allTracks": "All tracks",
+      "threshold": "Silence threshold",
+      "min": "Minimum length",
+      "find": "Find",
+      "found_one": "Found {{count}} gap · {{sec}} s total",
+      "found_other": "Found {{count}} gaps · {{sec}} s total",
+      "none": "No silence long enough.",
+      "remove_one": "Remove {{count}} gap",
+      "remove_other": "Remove {{count}} gaps",
+      "rippleHint": "Ripple is not set to ALL: other tracks won't shift."
+    },
+    "duck": {
+      "title": "DUCK MUSIC UNDER VOICE",
+      "body": "Music gets quieter while someone talks and comes back when they stop.",
+      "music": "Music tracks",
+      "amount": "Reduction"
+    },
+    "export": {
+      "title": "EXPORT",
+      "format": "Format",
+      "loudness": "Loudness",
+      "srt": "Include .srt subtitles",
+      "srtHint": "From the transcript, with speaker names if detected.",
+      "srtNone": "No transcript yet (transcribe first for subtitles).",
+      "measure": "Measure",
+      "go": "Export",
+      "done": "Exported",
+      "length": "LENGTH",
+      "loud": {
+        "none": "Keep as is",
+        "youtube": "YouTube / TikTok",
+        "podcast": "Podcast",
+        "broadcast": "EBU broadcast"
+      },
+      "hint": "Mixes every audible track (M/S, volume, fades). Loudness targets use a −1 dBFS peak ceiling."
+    },
+    "importing": "Importing audio…"
   }
 }

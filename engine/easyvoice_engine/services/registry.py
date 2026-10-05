@@ -16,8 +16,10 @@ CONTENTVEC_KEY = "rvc:contentvec"
 RMVPE_KEY = "rvc:rmvpe"
 ASR_KEY = "asr:whisper"
 SEP_KEY = "sep:demucs"
+SPK_KEY = "spk:embed"
 PRETRAINED_ID = "rvc-pretrained-v2-40k"
 DEMUCS_ID = "demucs-htdemucs"
+SPEAKER_ID = "wavlm-base-plus-sv"
 
 
 def tts_key(state: "EngineState", model_id: str) -> str:
@@ -93,6 +95,16 @@ def register_default_models(state: "EngineState") -> None:
 
     # Nhóm "sep": tách nhạc dùng trước khi train/đổi giọng → được gỡ khi chuyển sang model khác
     state.models.register(SEP_KEY, load_separator, "sep")
+
+    def load_speaker(device: str):
+        from .edit.diarize import MelStatsEmbedder, WavLMEmbedder
+
+        # Chưa tải model nhận diện giọng: vẫn chạy được bằng đặc trưng log-mel (kém chính xác hơn)
+        if SPEAKER_ID in cat.models and cat.installed(SPEAKER_ID):
+            return WavLMEmbedder(cat.dir(SPEAKER_ID), device)
+        return MelStatsEmbedder()
+
+    state.models.register(SPK_KEY, load_speaker, "asr")
 
 
 def ensure_rvc_voice(state: "EngineState", voice_id: str):

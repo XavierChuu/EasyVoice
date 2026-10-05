@@ -12,6 +12,7 @@ import { useSeparatorReady } from '../../lib/models';
 import { usePlayer } from '../../stores/player';
 import { useSettings } from '../../stores/settings';
 import { RT_PRESETS, useSts, type RtPreset } from '../../stores/sts';
+import { useEdit } from '../../stores/edit';
 import { useUi } from '../../stores/ui';
 import { Waveform } from '../../components/Waveform';
 import { HotkeyPanel } from './HotkeyPanel';
@@ -213,6 +214,9 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
                     {ab === 'a' ? '▶ B' : ab === 'b' ? '▶ A' : '▶ A/B'}
                   </Btn>
                   <Btn variant="ghost" className="!font-mono !text-[12px] !font-bold" onClick={() => void exportOut()}>{t('sts.export')}</Btn>
+                  {engine().mode !== 'mock' && job && (
+                    <Btn variant="ghost" className="!font-mono !text-[12px] !font-bold" onClick={() => void useEdit.getState().openFromJob(job.id)}>✂ {t('common.openInEdit')}</Btn>
+                  )}
                 </>
               )}
               {running && <Btn variant="ghost" onClick={() => job && void engine().cancelJob(job.id)}>{t('common.cancel')}</Btn>}

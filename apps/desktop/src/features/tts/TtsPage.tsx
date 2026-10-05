@@ -14,6 +14,7 @@ import { canSts, canTts, useEngine } from '../../stores/engine';
 import { usePlayer } from '../../stores/player';
 import { useSettings } from '../../stores/settings';
 import { useTts } from '../../stores/tts';
+import { useEdit } from '../../stores/edit';
 import { useUi } from '../../stores/ui';
 import { variantLabel } from '../voices/VariantEditor';
 import { DictionaryModal } from './DictionaryModal';
@@ -307,6 +308,9 @@ export function TtsPage() {
               {(['wav', 'mp3', 'flac', 'srt'] as const).map((f) => (
                 <button key={f} type="button" className={`${outBtn} ${f === ttsFormat ? '!border-fg' : ''}`} disabled={!complete} onClick={() => void exportAs(f)}>.{f.toUpperCase()}</button>
               ))}
+              {engine().mode !== 'mock' && (
+                <button type="button" className={outBtn} disabled={!complete} onClick={() => void useEdit.getState().openFromJob(job.id)}>✂ {t('common.openInEdit')}</button>
+              )}
             </div>
           </div>
           {failed && (

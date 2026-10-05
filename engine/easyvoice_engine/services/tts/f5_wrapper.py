@@ -46,6 +46,44 @@ class F5Backend:
         )
         return np.asarray(wav, dtype=np.float32)
 
+    def edit(self, audio: np.ndarray, text: str, start: float, end: float, new_duration: float, seed: int) -> np.ndarray:
+        """Sửa lời một đoạn (speech editing của F5-TTS, như f5_tts/infer/speech_edit.py): audio 24 kHz chứa ngữ cảnh,
+        text = lời thoại MỚI của cả đoạn. Vùng [start, end] (giây) bị che và sinh lại dài new_duration theo đúng
+        giọng xung quanh; phần còn lại giữ nguyên mel gốc. Trả audio 24 kHz của cả đoạn sau khi sửa."""
+        import torch
+        from f5_tts.model.utils import convert_char_to_pinyin
+
+        if self.lowercase:
+            text = text.lower()
+        tts = self._tts
+        model = tts.ema_model
+        hop = model.mel_spec.hop_length
+        sr = self.sample_rate
+        target_rms = 0.1
+        x = torch.from_numpy(np.ascontiguousarray(audio, dtype=np.float32)).unsqueeze(0)
+        rms = float(x.pow(2).mean().sqrt())
+        if 0 < rms < target_rms:
+            x = x * target_rms / rms
+        x = x.to(tts.device)
+        with torch.inference_mode():
+            mel = model.mel_spec(x).permute(0, 2, 1)
+            s_f = min(mel.shape[1], round(start * sr / hop))
+            e_f = min(mel.shape[1], max(s_f, round(end * sr / hop)))
+            d_f = max(1, round(new_duration * sr / hop))
+            zeros = torch.zeros(1, d_f, mel.shape[-1], device=mel.device, dtype=mel.dtype)
+            cond = torch.cat([mel[:, :s_f], zeros, mel[:, e_f:]], dim=1)
+            keep_after = cond.shape[1] - s_f - d_f
+            mask = torch.cat([torch.ones(1, s_f, dtype=torch.bool), torch.zeros(1, d_f, dtype=torch.bool),
+                              torch.ones(1, keep_after, dtype=torch.bool)], dim=-1).to(mel.device)
+            gen, _ = model.sample(cond=cond, text=convert_char_to_pinyin([text]), duration=cond.shape[1],
+                                  steps=self.nfe_step, cfg_strength=2.0, sway_sampling_coef=-1.0, seed=seed, edit_mask=mask)
+            gen = gen.to(torch.float32).permute(0, 2, 1)
+            wave = tts.vocoder.decode(gen) if tts.mel_spec_type == "vocos" else tts.vocoder(gen)
+        y = wave.squeeze().float().cpu().numpy()
+        if 0 < rms < target_rms:
+            y = y * (rms / target_rms)
+        return y.astype(np.float32)
+
 
 def ema_safetensors(pt: Path) -> Path:
     """Checkpoint huấn luyện .pt (kèm optimizer, vài GB) → chỉ trọng số EMA dạng safetensors, chuyển một lần.

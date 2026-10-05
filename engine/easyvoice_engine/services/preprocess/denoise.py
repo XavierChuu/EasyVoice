@@ -10,20 +10,20 @@ import numpy as np
 WINDOW_SEC, FADE_SEC = 20.0, 0.5
 
 
-def light_denoise(audio: np.ndarray, sr: int) -> tuple[np.ndarray, bool]:
+def light_denoise(audio: np.ndarray, sr: int, strength: float = 0.5) -> tuple[np.ndarray, bool]:
     try:
         import noisereduce
     except ImportError:
         return audio, False
     win, fade = int(WINDOW_SEC * sr), int(FADE_SEC * sr)
     if len(audio) <= win:
-        return np.asarray(noisereduce.reduce_noise(y=audio, sr=sr, stationary=False, prop_decrease=0.5), np.float32), True
+        return np.asarray(noisereduce.reduce_noise(y=audio, sr=sr, stationary=False, prop_decrease=strength), np.float32), True
     out = np.zeros_like(audio, dtype=np.float32)
     weight = np.zeros_like(audio, dtype=np.float32)
     ramp = np.linspace(0, 1, fade, dtype=np.float32)
     for start in range(0, len(audio), win - fade):
         seg = audio[start: start + win]
-        y = np.asarray(noisereduce.reduce_noise(y=seg, sr=sr, stationary=False, prop_decrease=0.5), np.float32)
+        y = np.asarray(noisereduce.reduce_noise(y=seg, sr=sr, stationary=False, prop_decrease=strength), np.float32)
         w = np.ones(len(y), np.float32)
         if start > 0:
             w[:fade] = ramp[: len(w[:fade])]

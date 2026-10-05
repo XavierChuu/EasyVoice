@@ -10,7 +10,8 @@ import { downloadBlob, encodeWav } from '../lib/wav';
 import type { EngineClient } from './engine';
 import {
   EngineError,
-  type AudioDevice, type DatasetFile, type DictEntry, type EngineEvent, type ExportOptions, type FileRef,
+  type AudioDevice, type DatasetFile, type DictEntry, type EditAsset, type EditOp, type EditProject, type EditProjectSummary,
+  type EditTimeline, type EngineEvent, type ExportOptions, type FileRef,
   type ImportInspection, type Job, type ModelInfo, type PlaySource, type Profile, type RealtimeConfig, type RealtimeStats,
   type RefAnalysis, type StsRequest, type StsStage, type SystemInfo, type TrainPreset, type TrainStage,
   type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
@@ -130,7 +131,7 @@ export class MockEngine implements EngineClient {
     const job: Job = {
       id: uid('j'), kind, status: 'queued', progress: 0, label, profileId: profileId ?? null, stage: null, waitingFor: null,
       log: [], error: null, errorDetail: null, device: null, epoch: null, totalEpochs: null, sentences: null, files: {},
-      outputDurationSec: null, createdAt: Date.now() / 1000,
+      outputDurationSec: null, result: null, createdAt: Date.now() / 1000,
     };
     this.jobs.set(job.id, job);
     return job;
@@ -614,6 +615,81 @@ export class MockEngine implements EngineClient {
     if (out) downloadBlob(out.blob, name); // mock: tải file WAV thật xuống
     const { downloads } = await platform.appPaths();
     return `${downloads}/${name}`;
+  }
+
+  // ---------- Edit Audio (mock: dựng timeline, nhập file, phát trong app; xử lý AI / xuất file cần engine thật) ----------
+  private editProjects = new Map<string, EditProject>();
+  private editUrls = new Map<string, string>();
+
+  private editGet(id: string): EditProject {
+    const p = this.editProjects.get(id);
+    if (!p) throw new EngineError('NOT_FOUND', id);
+    return p;
+  }
+
+  async listEditProjects(): Promise<EditProjectSummary[]> {
+    return [...this.editProjects.values()]
+      .map((p) => ({ id: p.id, name: p.name, updatedAt: p.updatedAt, tracks: p.tracks.length,
+        durationSec: Math.max(0, ...p.clips.map((c) => c.start + c.duration)) }))
+      .sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+
+  async createEditProject(name: string) {
+    const now = Date.now() / 1000;
+    const p: EditProject = { id: uid('e'), name: name || 'Dự án mới', tracks: [], clips: [], speakers: [], ripple: 'all',
+      sampleRate: 48000, createdAt: now, updatedAt: now, assets: [] };
+    this.editProjects.set(p.id, p);
+    return structuredClone(p);
+  }
+
+  async getEditProject(id: string) {
+    return structuredClone(this.editGet(id));
+  }
+
+  async saveEditProject(id: string, timeline: EditTimeline) {
+    const p = this.editGet(id);
+    Object.assign(p, structuredClone(timeline), { updatedAt: Date.now() / 1000 });
+    return structuredClone(p);
+  }
+
+  async deleteEditProject(id: string) {
+    this.editProjects.delete(id);
+  }
+
+  async editAssets(id: string) {
+    return structuredClone(this.editGet(id).assets);
+  }
+
+  async addEditAssets(id: string, files: FileRef[], source: 'import' | 'record') {
+    const p = this.editGet(id);
+    const out: EditAsset[] = [];
+    for (const ref of files) {
+      if (!ref.file) throw new EngineError('BAD_FILE', ref.name);
+      const meta = await decodeDuration(ref);
+      if (!meta) throw new EngineError('BAD_FILE', ref.name);
+      const a: EditAsset = { id: uid('a'), name: ref.name.replace(/\.[^.]+$/, ''), durationSec: meta.durationSec, sampleRate: meta.sampleRate,
+        source, language: null, words: null, turns: null, createdAt: Date.now() / 1000 };
+      this.editUrls.set(a.id, URL.createObjectURL(ref.file));
+      p.assets.push(a);
+      out.push(a);
+    }
+    return structuredClone(out);
+  }
+
+  editAssetUrl(_projectId: string, assetId: string) {
+    return this.editUrls.get(assetId) ?? '';
+  }
+
+  async editFromJob(_jobId: string): Promise<EditProject> {
+    throw new EngineError('NOT_IMPLEMENTED', 'mock engine');
+  }
+
+  async editOp(_projectId: string, _op: EditOp): Promise<string> {
+    throw new EngineError('NOT_IMPLEMENTED', 'mock engine');
+  }
+
+  async downloadFile(_fileId: string) {
+    throw new EngineError('NOT_IMPLEMENTED', 'mock engine');
   }
 
   // ---------- jobs control ----------

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { usePlayer } from './player';
 
-export type Tab = 'voices' | 'tts' | 'sts' | 'settings' | 'licenses';
+export type Tab = 'voices' | 'tts' | 'sts' | 'edit' | 'settings' | 'licenses';
 
 export interface Toast {
   id: number;

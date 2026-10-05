@@ -24,6 +24,9 @@ function useBusy() {
   } else if (cur?.kind === 'sts') {
     busyText = t('shell.busy.sts');
     queueText = t('shell.queue.sts');
+  } else if (cur?.kind === 'edit' || cur?.kind === 'mix') {
+    busyText = t('shell.busy.edit');
+    queueText = t('shell.queue.edit', { name: cur.label });
   } else if (cur?.kind === 'train') {
     busyText = t('shell.busy.train');
     queueText = t('shell.queue.train', { name: cur.label });
@@ -75,6 +78,7 @@ export function Sidebar() {
     ['voices', t('nav.voices'), ICONS.voices],
     ['tts', t('nav.tts'), ICONS.tts],
     ['sts', t('nav.sts'), ICONS.sts],
+    ['edit', t('nav.edit'), ICONS.edit],
   ];
   const extra: [Tab, string, string][] = [
     ['settings', t('nav.settings'), ICONS.settings],

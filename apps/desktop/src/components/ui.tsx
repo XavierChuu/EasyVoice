@@ -21,6 +21,7 @@ export const ICONS = {
   voices: 'M12 3v12M8 7v5a4 4 0 0 0 8 0V7M5 11a7 7 0 0 0 14 0M12 18v3',
   tts: 'M4 6h16M4 11h16M4 16h10',
   sts: 'M4 8h14l-4-4M20 16H6l4 4',
+  edit: 'M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12',
   settings: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1',
   licenses: 'M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7',
   export: 'M12 15V3M7 8l5-5 5 5M4 14v6h16v-6',

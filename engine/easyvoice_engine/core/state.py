@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .. import __version__
+from ..services.edit.store import EditStore
 from ..services.models import ModelCatalog
 from ..services.voices import VoiceStore
 from .device import pick_device
@@ -73,6 +74,7 @@ class EngineState:
         self.queue = JobQueue(self.device)
         self.catalog = ModelCatalog(self.paths.models)
         self.voices = VoiceStore(self.paths.voices, on_change=self.publish_voices)
+        self.edit = EditStore(self.paths.root / "projects")
         self.queue.subscribe(lambda job: self.hub.publish({"type": "job", "job": job.model_dump(by_alias=True)}))
         from ..services.registry import register_default_models
 

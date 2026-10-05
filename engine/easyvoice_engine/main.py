@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from . import __version__
-from .api import files, jobs, sts, system, train, tts, voices, ws
+from .api import edit, files, jobs, sts, system, train, tts, voices, ws
 from .core.errors import EngineError, from_exception
 from .core.state import EngineState
 
@@ -55,7 +55,7 @@ def create_app(state: EngineState) -> FastAPI:
         err = from_exception(exc)
         return JSONResponse(err.to_dict(), status_code=err.status)
 
-    for r in (system.router, voices.router, train.router, tts.router, sts.router, jobs.router, files.router, ws.router):
+    for r in (system.router, voices.router, train.router, tts.router, sts.router, edit.router, jobs.router, files.router, ws.router):
         app.include_router(r)
     return app
 

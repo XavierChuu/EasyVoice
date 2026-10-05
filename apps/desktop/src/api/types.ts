@@ -19,6 +19,38 @@ export type AudioDevice = S['AudioDevice'];
 export type Variant = S['VariantInfo'];
 export type TtsPart = S['TtsPart'];
 export type VoiceUpdate = S['VoiceUpdate'];
+export type EditProject = S['EditProject'];
+export type EditProjectSummary = S['EditProjectSummary'];
+export type EditAsset = S['EditAsset'];
+export type EditWord = S['EditWord'];
+export type SpeakerTurn = S['SpeakerTurn'];
+export type EditClip = S['EditClip-Output'];
+export type EditTrack = S['EditTrack-Output'];
+export type EditSpeaker = S['EditSpeaker'];
+export type EditTimeline = Pick<EditProject, 'name' | 'tracks' | 'clips' | 'speakers' | 'ripple'>;
+export type EditSegment = S['Segment'];
+export type EditOp =
+  | S['TranscribeOp'] | S['DiarizeOp'] | S['SeparateOp'] | S['FilterOp'] | S['ConvertOp'] | S['RetextOp'] | S['SpeakOp']
+  | S['SilencesOp'] | S['DuckOp'] | S['RenderOp'];
+export type EditFilter = S['FilterOp']['filter'];
+/** Kết quả (job.result) của từng thao tác Edit Audio — engine trả dạng dữ liệu tự do nên khai báo ở đây. */
+export interface EditOpResult {
+  assets?: string[];
+  replaceOffset?: number;
+  replaceDuration?: number;
+  pairs?: Record<string, [string, string]>;
+  speakers?: number;
+  base?: number;
+  embedder?: string;
+  words?: number;
+  ranges?: [number, number][];
+  tracks?: Record<string, string>;
+  file?: string;
+  srt?: string;
+  lufs?: number | null;
+  peakDb?: number | null;
+  durationSec?: number;
+}
 export type Gender = NonNullable<Profile['gender']>;
 /** Thẻ phân loại giọng (giới tính, mã quốc gia ISO, vùng miền). */
 export type VoiceTags = Pick<Profile, 'gender' | 'country' | 'region'>;

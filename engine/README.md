@@ -36,6 +36,20 @@ chỉ lắng nghe trên `127.0.0.1`, mọi request phải kèm token.
 Huấn luyện cần GPU (NVIDIA hoặc Apple Silicon) — CPU bị từ chối (`GPU_REQUIRED`) theo bảng phần cứng của spec.
 Cần các model: ContentVec, RMVPE, RVC pretrained v2 40k; thêm Demucs nếu bật tách nhạc nền.
 
+## Edit Audio — đã có
+
+| Phần | File |
+|---|---|
+| Dự án: timeline (track, clip, người nói) do app giữ và tự lưu; asset WAV mono 48 kHz không bao giờ bị sửa (mọi xử lý tạo asset mới → hoàn tác được) | `services/edit/store.py`, `api/edit.py` |
+| Trộn timeline (gain, fade, M/S), bộ lọc (khử ồn, lọc tần thấp, EQ preset, nén, chuẩn đỉnh, chuẩn loudness), đo loudness BS.1770, limiter, tìm khoảng lặng, ducking — chỉ numpy/scipy, chạy CPU | `services/edit/dsp.py` |
+| Chép lời theo từng từ (Whisper), tách nhạc nền (Demucs), đổi giọng một đoạn (RVC), đọc bằng giọng đã lưu (F5) | `services/edit/ops.py` |
+| Sửa lời bằng văn bản: speech editing của F5-TTS (che vùng chọn trong mel, sinh lại theo giọng xung quanh), ghép crossfade + khớp âm lượng | `ops.run_retext`, `F5Backend.edit` |
+| Nhận diện người nói: VAD năng lượng → vector giọng WavLM-SV (hoặc thống kê log-mel nếu chưa tải model) → gom cụm, tự đoán số người | `services/edit/diarize.py` |
+| Xuất WAV/MP3/FLAC (chuẩn loudness tùy chọn) + phụ đề .srt có tên người nói | `ops.run_render` |
+
+Thao tác AI là job `edit` (xếp hàng GPU); lọc / trộn / xuất là job `mix` chạy CPU ngay cả khi GPU đang train.
+Model tùy chọn mới: `wavlm-base-plus-sv` (nhận diện người nói chính xác hơn).
+
 Chưa có (trả lỗi `NOT_IMPLEMENTED`, UI báo rõ): real-time (Phase 4), nhập/xuất `.evoice` (Phase 5).
 
 ## Cài đặt (dev)
