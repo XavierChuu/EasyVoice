@@ -203,6 +203,23 @@ export function trimClip(t: EditTimeline, id: string, edge: 'start' | 'end', at:
   return updateClip(t, id, { duration: r4(e - c.start), fadeOut: Math.min(c.fadeOut, e - c.start) });
 }
 
+/** Nhân bản clip ngay sau chính nó; chỗ đó đã có clip khác thì đặt sang track mới. */
+export function duplicateClip(t: EditTimeline, id: string): EditTimeline {
+  const c = t.clips.find((x) => x.id === id);
+  if (!c) return t;
+  const at = clipEnd(c);
+  const busy = t.clips.some((x) => x.trackId === c.trackId && x.start < at + c.duration - EPS && clipEnd(x) > at + EPS);
+  let out = t;
+  let trackId = c.trackId;
+  if (busy) {
+    const src = t.tracks.find((x) => x.id === c.trackId);
+    const tr = makeTrack(t, { name: `${src?.name ?? 'Audio'} (2)`, kind: src?.kind ?? 'audio', color: src?.color });
+    out = { ...t, tracks: [...t.tracks, tr] };
+    trackId = tr.id;
+  }
+  return { ...out, clips: [...out.clips, { ...c, id: newId('c'), trackId, start: r4(at) }] };
+}
+
 export function deleteClip(t: EditTimeline, id: string): EditTimeline {
   return { ...t, clips: t.clips.filter((c) => c.id !== id) };
 }

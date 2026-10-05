@@ -1,7 +1,7 @@
 // Timeline nhiều track: thước thời gian, đầu track (tên, M/S, âm lượng), làn clip vẽ bằng canvas từ peaks.
 // Thao tác: kéo thanh tiêu đề clip để di chuyển (kể cả sang track khác), kéo mép để cắt bớt, kéo trên thân để chọn
 // vùng, bấm để đặt đầu phát. Ctrl/⌘ + cuộn để zoom quanh con trỏ. Thả file vào để nhập.
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type PointerEvent as RPointerEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type MouseEvent as RMouseEvent, type PointerEvent as RPointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { EditClip, EditTimeline, EditTrack } from '../../api/types';
@@ -9,6 +9,7 @@ import { filesToRefs } from '../../components/RefClipInput';
 import { PEAK_RATE, editAudio } from '../../lib/editPlayer';
 import { clipEnd, formatTime, moveClip, speakerColor, timelineEnd, trimClip, updateTrack } from '../../lib/editTimeline';
 import { useEdit } from '../../stores/edit';
+import type { MenuRequest } from './ContextMenu';
 
 export const HEADER_W = 196;
 const RULER_H = 24;
@@ -34,7 +35,7 @@ function fmtTick(sec: number, step: number) {
   return m ? `${m}:${String(s).padStart(2, '0')}` : `${s}s`;
 }
 
-export function Timeline() {
+export function Timeline({ onMenu }: { onMenu?: (req: MenuRequest) => void }) {
   const { t } = useTranslation();
   const timeline = useEdit((s) => s.timeline)!;
   const assets = useEdit((s) => s.assets);
@@ -152,6 +153,22 @@ export function Timeline() {
     setDrag({ kind: 'range', trackId: tr.id, t0: at, x0: e.clientX, moved: false });
   };
 
+  /** Chuột phải: trong vùng chọn → lệnh của vùng chọn; trên clip → chọn clip + lệnh của clip; chỗ trống → lệnh của track. */
+  const onLaneMenu = (e: RMouseEvent<HTMLDivElement>, tr: EditTrack) => {
+    e.preventDefault();
+    if (!onMenu || dragRef.current) return;
+    const at = timeAt(e.clientX);
+    const sel = ed().selection;
+    const inSelection = !!sel && sel.trackId === tr.id && at >= sel.start && at <= sel.end;
+    const c = inSelection ? undefined : hit(tr, at);
+    ed().selectTrack(tr.id);
+    if (!inSelection) {
+      ed().setSelection(null);
+      ed().selectClip(c?.id ?? null);
+    }
+    onMenu({ x: e.clientX, y: e.clientY, trackId: tr.id, time: at, clipId: c?.id ?? null, inSelection });
+  };
+
   const onMove = (e: RPointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
     if (!d) return hover(e);
@@ -239,7 +256,7 @@ export function Timeline() {
             onDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); setDrag({ kind: 'seek' }); ed().seek(timeAt(e.clientX)); }} />
           {shown.tracks.map((tr) => (
             <div key={tr.id} className="border-b border-line relative" style={{ height: TRACK_H, cursor: drag?.kind === 'move' ? 'grabbing' : cursor }}
-              onPointerDown={(e) => onLaneDown(e, tr)}>
+              onPointerDown={(e) => onLaneDown(e, tr)} onContextMenu={(e) => onLaneMenu(e, tr)}>
               <Lane track={tr} timeline={shown} view={view} pps={pps} selectedClip={clipId} audioVersion={audioVersion}
                 selection={selection?.trackId === tr.id ? selection : null} highlighted={tr.id === trackId} />
             </div>

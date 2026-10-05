@@ -701,7 +701,7 @@
       "off": "TẮT"
     },
     "rippleHint": "Khi xóa / chèn: dời mọi track cho khớp nhau, chỉ dời track đang sửa, hoặc không dời (để lại khoảng trống / ghi đè).",
-    "shortcuts": "SPACE phát/dừng · S tách tại đầu phát · DEL xóa vùng chọn/clip · CTRL+Z hoàn tác · CTRL+SHIFT+Z làm lại · CTRL+CUỘN zoom · kéo thanh trên clip để di chuyển, kéo mép để cắt bớt, kéo thân để chọn vùng",
+    "shortcuts": "SPACE phát/dừng · S tách tại đầu phát · DEL xóa vùng chọn/clip · CTRL+Z hoàn tác · CTRL+SHIFT+Z làm lại · CTRL+CUỘN zoom · kéo thanh trên clip để di chuyển, kéo mép để cắt bớt, kéo thân để chọn vùng · chuột phải để mở lệnh nhanh",
     "running": "ĐANG CHẠY",
     "inspectorEmpty": "Chọn một track, clip, hoặc kéo trên timeline / lời thoại để chọn một vùng.",
     "sel": {
@@ -871,6 +871,24 @@
       },
       "hint": "Trộn mọi track đang bật (theo M/S, âm lượng, fade). Chuẩn loudness có giới hạn đỉnh −1 dBFS."
     },
-    "importing": "Đang nhập audio…"
+    "importing": "Đang nhập audio…",
+    "menu": {
+      "aria": "Lệnh nhanh",
+      "split": "Tách clip tại hai mép",
+      "silence": "Tắt tiếng vùng này",
+      "silenceHint": "không dời",
+      "playClip": "Nghe clip",
+      "splitHere": "Tách tại {{at}}",
+      "duplicate": "Nhân bản",
+      "volume": "ÂM LƯỢNG · {{db}} dB",
+      "fadeOn": "Fade vào/ra nhanh",
+      "fadeOff": "Bỏ fade",
+      "noSpeaker": "Bỏ gán người nói",
+      "seekHere": "Đặt đầu phát tại đây",
+      "playHere": "Nghe từ đây",
+      "importHere": "Nhập file vào đây…",
+      "recordHere": "Thu âm tại đây…",
+      "speakHere": "Đọc bằng giọng tại đây…"
+    }
   }
 }

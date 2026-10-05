@@ -11,6 +11,7 @@ import { formatDuration } from '../../lib/text';
 import { useEdit } from '../../stores/edit';
 import { Recorder } from '../voices/Recorder';
 import { ConvertDialog, DuckDialog, ExportDialog, FilterDialog, ReplaceDialog, RetextDialog, SilencesDialog, SpeakDialog } from './dialogs';
+import { ContextMenu, type MenuRequest } from './ContextMenu';
 import { Inspector, type DialogKind } from './Inspector';
 import { Timeline } from './Timeline';
 import { TranscriptPanel } from './TranscriptPanel';
@@ -90,6 +91,8 @@ function Editor() {
   const saveState = useEdit((s) => s.saveState);
   const ed = useEdit.getState;
   const [dialog, setDialog] = useState<DialogKind | null>(null);
+  const [menu, setMenu] = useState<MenuRequest | null>(null);
+  const [recordAt, setRecordAt] = useState<{ trackId?: string; at: number } | null>(null);
   const [recording, setRecording] = useState(false);
   const [name, setName] = useState(timeline.name);
   useEffect(() => setName(timeline.name), [timeline.name]);
@@ -98,7 +101,7 @@ function Editor() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement;
-      if (dialog || recording || el.closest('input, textarea, select, [role=dialog]')) return;
+      if (dialog || recording || menu || el.closest('input, textarea, select, [role=dialog]')) return;
       const s = ed();
       const mod = e.ctrlKey || e.metaKey;
       if (e.code === 'Space') s.toggle();
@@ -124,11 +127,11 @@ function Editor() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [dialog, recording]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dialog, recording, menu]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const importPick = async () => {
+  const importPick = async (trackId?: string, at?: number) => {
     const files = await platform.pickFiles({ title: t('edit.import'), multiple: true, filters: [MEDIA_FILTER] });
-    if (files.length) await ed().importFiles(files, 'import', { trackId: undefined, at: undefined });
+    if (files.length) await ed().importFiles(files, 'import', { trackId, at });
   };
   const saveLabel = { saved: t('edit.save.saved'), saving: t('edit.save.saving'), dirty: t('edit.save.dirty'), error: t('edit.save.error') }[saveState];
   const end = timelineEnd(timeline);
@@ -177,17 +180,17 @@ function Editor() {
         </div>
         <div className="flex gap-2 ml-auto flex-wrap">
           <Btn variant="ghost" onClick={() => void importPick()}>+ {t('edit.import')}</Btn>
-          <Btn variant="ghost" onClick={() => setRecording(true)}>● {t('edit.record')}</Btn>
+          <Btn variant="ghost" onClick={() => { setRecordAt(null); setRecording(true); }}>● {t('edit.record')}</Btn>
           <Btn variant="ghost" onClick={() => ed().commit((x) => ({ ...x, tracks: [...x.tracks, makeTrack(x)] }))}>+ {t('edit.addTrack')}</Btn>
           <Btn variant="ghost" onClick={() => setDialog('speak')}>{t('edit.sel.speak')}</Btn>
         </div>
       </div>
 
-      <Timeline />
+      <Timeline onMenu={setMenu} />
       <div className="font-mono text-[10px] text-mute -mt-3">{t('edit.shortcuts')}</div>
 
       <div className="flex flex-wrap gap-4 items-start">
-        <div className="flex-[2_1_440px] min-w-0"><TranscriptPanel openDialog={setDialog} /></div>
+        <div className="flex-[2_1_440px] min-w-0"><TranscriptPanel openDialog={setDialog} onMenu={setMenu} /></div>
         <div className="flex-[1_1_300px] min-w-0"><Inspector openDialog={setDialog} /></div>
       </div>
 
@@ -200,7 +203,15 @@ function Editor() {
       {dialog === 'duck' && <DuckDialog onClose={() => setDialog(null)} />}
       {dialog === 'export' && <ExportDialog onClose={() => setDialog(null)} />}
       {recording && <Recorder maxSec={3600} minSec={0.3} onClose={() => setRecording(false)}
-        onDone={(ref) => { setRecording(false); void ed().importFiles([ref], 'record', { trackId: ed().trackId ?? undefined, at: ed().playhead }); }} />}
+        onDone={(ref) => {
+          setRecording(false);
+          void ed().importFiles([ref], 'record', recordAt ?? { trackId: ed().trackId ?? undefined, at: ed().playhead });
+        }} />}
+      {menu && (
+        <ContextMenu req={menu} onClose={() => setMenu(null)} openDialog={setDialog}
+          onImport={(trackId, at) => void importPick(trackId, at)}
+          onRecord={(trackId, at) => { setRecordAt({ trackId, at }); setRecording(true); }} />
+      )}
     </div>
   );
 }

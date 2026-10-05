@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { Btn } from '../../components/ui';
 import { deleteRange, deleteRanges, fillerRanges, isFiller, speakerColor, timelineWords, type TimelineWord } from '../../lib/editTimeline';
 import { useEdit } from '../../stores/edit';
+import type { MenuRequest } from './ContextMenu';
 import type { DialogKind } from './Inspector';
 
-export function TranscriptPanel({ openDialog }: { openDialog: (d: DialogKind) => void }) {
+export function TranscriptPanel({ openDialog, onMenu }: { openDialog: (d: DialogKind) => void; onMenu?: (req: MenuRequest) => void }) {
   const { t } = useTranslation();
   const timeline = useEdit((s) => s.timeline)!;
   const assets = useEdit((s) => s.assets);
@@ -85,6 +86,12 @@ export function TranscriptPanel({ openDialog }: { openDialog: (d: DialogKind) =>
         </div>
       )}
       <div className="px-4 py-3 max-h-[320px] overflow-auto flex flex-col gap-3 leading-[1.9]"
+        onContextMenu={(e) => {
+          // Chuột phải trên chữ đã chọn → cùng menu với vùng chọn trên timeline
+          if (!selection || !onMenu || !words.some(inSel)) return;
+          e.preventDefault();
+          onMenu({ x: e.clientX, y: e.clientY, trackId: selection.trackId, time: selection.start, clipId: null, inSelection: true });
+        }}
         onMouseUp={() => { dragging.current = false; }} onMouseLeave={() => { dragging.current = false; }}>
         {paragraphs.map((p) => {
           const sp = p[0].speaker !== null ? names.get(p[0].speaker) : undefined;

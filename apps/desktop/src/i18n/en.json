@@ -704,7 +704,7 @@
       "off": "OFF"
     },
     "rippleHint": "When deleting / inserting: shift every track to stay in sync, only the edited track, or nothing (leave a gap / overwrite).",
-    "shortcuts": "SPACE play/pause · S split at playhead · DEL delete selection/clip · CTRL+Z undo · CTRL+SHIFT+Z redo · CTRL+WHEEL zoom · drag a clip's top bar to move, edges to trim, body to select",
+    "shortcuts": "SPACE play/pause · S split at playhead · DEL delete selection/clip · CTRL+Z undo · CTRL+SHIFT+Z redo · CTRL+WHEEL zoom · drag a clip's top bar to move, edges to trim, body to select · right-click for quick actions",
     "running": "RUNNING",
     "inspectorEmpty": "Pick a track or clip, or drag on the timeline / transcript to select a range.",
     "sel": {
@@ -877,6 +877,24 @@
       },
       "hint": "Mixes every audible track (M/S, volume, fades). Loudness targets use a −1 dBFS peak ceiling."
     },
-    "importing": "Importing audio…"
+    "importing": "Importing audio…",
+    "menu": {
+      "aria": "Quick actions",
+      "split": "Split clip at both edges",
+      "silence": "Silence this range",
+      "silenceHint": "no shift",
+      "playClip": "Play clip",
+      "splitHere": "Split at {{at}}",
+      "duplicate": "Duplicate",
+      "volume": "VOLUME · {{db}} dB",
+      "fadeOn": "Quick fade in/out",
+      "fadeOff": "Remove fades",
+      "noSpeaker": "Clear speaker",
+      "seekHere": "Move playhead here",
+      "playHere": "Play from here",
+      "importHere": "Import file here…",
+      "recordHere": "Record here…",
+      "speakHere": "Read with a voice here…"
+    }
   }
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { EditAsset, EditTimeline } from '../api/types';
 import {
-  applySeparation, deleteRange, deleteRanges, fillerRanges, makeClip, replaceRange, replaceSegments, segmentsInRange, splitAt,
+  applySeparation, deleteRange, duplicateClip, deleteRanges, fillerRanges, makeClip, replaceRange, replaceSegments, segmentsInRange, splitAt,
   splitBySpeakers, timelineEnd, timelineWords, trimClip,
 } from './editTimeline';
 
@@ -94,5 +94,14 @@ describe('editTimeline', () => {
     const words = timelineWords(t, assets, 'v');
     expect(words.map((w) => [w.text, w.start])).toEqual([['Xin', 1], ['ờ,', 1.4], ['chào', 3]]);
     expect(fillerRanges(words)).toEqual([[1.37, 1.63]]);
+  });
+
+  it('duplicates a clip right after itself, or onto a new track when that spot is taken', () => {
+    const t = { ...tl(), clips: [{ ...makeClip({ trackId: 'v', assetId: 'a', start: 0, duration: 2 }), id: 'c1' }] };
+    const d = duplicateClip(t, 'c1');
+    expect(spans(d, 'v')).toEqual([[0, 0, 2], [2, 0, 2]]);
+    const busy = duplicateClip(d, 'c1');
+    expect(busy.tracks.length).toBe(3);
+    expect(spans(busy, busy.tracks[2].id)).toEqual([[2, 0, 2]]);
   });
 });
