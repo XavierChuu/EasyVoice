@@ -151,6 +151,7 @@ export type EngineErrorCode =
   | 'MODEL_MISSING'
   | 'NOT_IMPLEMENTED'
   | 'GPU_REQUIRED'
+  | 'DOWNLOAD_FAILED'
   | 'NOT_FOUND'
   | 'BAD_REQUEST'
   | 'UNAUTHORIZED'

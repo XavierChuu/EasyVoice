@@ -87,3 +87,77 @@ def test_engine_error_codes():
     e = EngineError("GPU_OOM")
     assert e.status == 507 and e.to_dict()["message"].startswith("Hết bộ nhớ GPU")
     assert EngineError("WHATEVER").code == "UNKNOWN"
+
+
+def test_download_job_continues_past_failed_model_and_reports_reason(tmp_path, http_server):
+    """Model lỗi (404) không chặn model khác; job báo lỗi rõ ràng thay vì đứng ở 0% mãi."""
+    import json
+
+    from conftest import TOKEN, wait_job
+    from fastapi.testclient import TestClient
+
+    from easyvoice_engine.core.state import EngineState
+    from easyvoice_engine.main import create_app
+
+    url, payload = http_server
+    manifest = tmp_path / "m.json"
+    manifest.write_text(json.dumps({"models": [
+        {"id": "bad", "name": "Bad", "role": "x", "group": "tts", "license": "MIT",
+         "files": [{"path": "bad/x.bin", "url": url.replace("model.bin", "missing.bin"), "size_mb": 1}]},
+        {"id": "good", "name": "Good", "role": "x", "group": "tts", "license": "MIT",
+         "files": [{"path": "good/model.bin", "url": url, "size_mb": 3}]},
+    ]}))
+    import os
+
+    os.environ["EASYVOICE_MANIFEST"] = str(manifest)
+    try:
+        st = EngineState.create(TOKEN, tmp_path / "data")
+        c = TestClient(create_app(st))
+        c.headers["Authorization"] = f"Bearer {TOKEN}"
+        job = wait_job(c, c.post("/models/download", json={"ids": ["bad", "good"]}).json()["jobId"])
+        assert job["status"] == "failed" and job["error"] == "DOWNLOAD_FAILED"
+        assert "Bad" in job["errorDetail"] and "404" in job["errorDetail"]
+        assert (st.paths.models / "good" / "model.bin").read_bytes() == payload
+        assert job["result"]["totalMb"] == 4.0
+        st.queue.shutdown()
+    finally:
+        del os.environ["EASYVOICE_MANIFEST"]
+
+
+class FlakyHandler(RangeHandler):
+    """Lần đầu gửi một nửa file rồi cắt kết nối (giả lập rớt mạng giữa chừng); các lần sau trả đúng (có Range)."""
+
+    cuts = 0
+
+    def do_GET(self):
+        if self.headers.get("Range") or FlakyHandler.cuts >= 1:
+            return super().do_GET()
+        FlakyHandler.cuts += 1
+        data = open(self.translate_path(self.path), "rb").read()
+        self.send_response(200)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data[: len(data) // 2])
+        self.wfile.flush()
+        self.connection.shutdown(2)
+
+
+def test_download_retries_and_resumes_after_connection_drop(tmp_path):
+    from easyvoice_engine.services.models import download_with_retry
+
+    payload = np.random.default_rng(1).bytes(2_000_000)
+    (tmp_path / "srv").mkdir()
+    (tmp_path / "srv" / "f.bin").write_bytes(payload)
+    FlakyHandler.cuts = 0
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), partial(FlakyHandler, directory=str(tmp_path / "srv")))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        dest = tmp_path / "out" / "f.bin"
+        seen, logs = [], []
+        download_with_retry(f"http://127.0.0.1:{srv.server_address[1]}/f.bin", dest, seen.append, None, logs.append,
+                            sleep=lambda s: None)
+        assert dest.read_bytes() == payload
+        assert any("thử lại" in x for x in logs)
+        assert seen[-1] == len(payload) and max(seen) == len(payload)  # tiến độ tuyệt đối, không cộng trùng khi tải tiếp
+    finally:
+        srv.shutdown()

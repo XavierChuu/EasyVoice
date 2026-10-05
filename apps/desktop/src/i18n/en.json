@@ -94,7 +94,8 @@
     "NOT_FOUND": "Not found ({{detail}}).",
     "BAD_REQUEST": "Invalid request: {{detail}}",
     "UNAUTHORIZED": "The app could not authenticate with the engine. Restart EasyVoice.",
-    "GPU_REQUIRED": "Voice training needs an NVIDIA GPU or Apple Silicon. This computer can only use Quick voices."
+    "GPU_REQUIRED": "Voice training needs an NVIDIA GPU or Apple Silicon. This computer can only use Quick voices.",
+    "DOWNLOAD_FAILED": "Some models could not be downloaded."
   },
   "voices": {
     "code": "01 / VOICE PROFILES",
@@ -586,7 +587,12 @@
     "downloading": "DOWNLOADING…",
     "done": "ALL SET",
     "resumeNote": "If your connection drops, the download continues where it left off.",
-    "start": "START USING EASYVOICE"
+    "start": "START USING EASYVOICE",
+    "retry": "RETRY",
+    "waiting": "WAITING…",
+    "failed": "Model download failed",
+    "cancelled": "Download stopped",
+    "failedHint": "Finished models are kept; partial files resume when you press Retry. Details are in the engine log (%APPDATA%\\EasyVoice\\logs\\engine.log)."
   },
   "emotion": {
     "happy": "Happy",

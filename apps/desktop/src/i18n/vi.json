@@ -93,7 +93,8 @@
     "NOT_FOUND": "Không tìm thấy ({{detail}}).",
     "BAD_REQUEST": "Yêu cầu không hợp lệ: {{detail}}",
     "UNAUTHORIZED": "App không xác thực được với engine. Hãy mở lại EasyVoice.",
-    "GPU_REQUIRED": "Huấn luyện giọng cần GPU NVIDIA hoặc Apple Silicon. Máy này chỉ dùng được giọng Nhanh."
+    "GPU_REQUIRED": "Huấn luyện giọng cần GPU NVIDIA hoặc Apple Silicon. Máy này chỉ dùng được giọng Nhanh.",
+    "DOWNLOAD_FAILED": "Không tải được một số model."
   },
   "voices": {
     "code": "01 / HỒ SƠ GIỌNG",
@@ -584,7 +585,12 @@
     "downloading": "ĐANG TẢI…",
     "done": "ĐÃ XONG",
     "resumeNote": "Nếu rớt mạng, lần sau sẽ tải tiếp từ chỗ dừng.",
-    "start": "BẮT ĐẦU DÙNG EASYVOICE"
+    "start": "BẮT ĐẦU DÙNG EASYVOICE",
+    "retry": "THỬ LẠI",
+    "waiting": "ĐANG CHỜ…",
+    "failed": "Tải model bị lỗi",
+    "cancelled": "Đã dừng tải",
+    "failedHint": "Model nào tải xong vẫn được giữ; phần đang tải dở sẽ tải tiếp khi bấm Thử lại. Chi tiết trong file log engine (%APPDATA%\\EasyVoice\\logs\\engine.log)."
   },
   "emotion": {
     "happy": "Vui vẻ",

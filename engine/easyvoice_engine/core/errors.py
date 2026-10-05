@@ -16,6 +16,7 @@ MESSAGES: dict[str, tuple[str, str]] = {
     "NOT_IMPLEMENTED": ("Tính năng này chưa có trong phiên bản engine hiện tại.", "This feature is not available in this engine version yet."),
     "UNAUTHORIZED": ("Thiếu hoặc sai token.", "Missing or wrong token."),
     "GPU_REQUIRED": ("Huấn luyện giọng cần GPU NVIDIA hoặc Apple Silicon.", "Voice training needs an NVIDIA GPU or Apple Silicon."),
+    "DOWNLOAD_FAILED": ("Không tải được một số model.", "Some models could not be downloaded."),
     "CANCELLED": ("Đã hủy.", "Cancelled."),
     "UNKNOWN": ("Đã có lỗi xảy ra. Chi tiết đã được ghi vào file log.", "Something went wrong. Details were written to the log."),
 }
@@ -23,7 +24,7 @@ MESSAGES: dict[str, tuple[str, str]] = {
 STATUS: dict[str, int] = {
     "BAD_FILE": 400, "BAD_REQUEST": 400, "UNSAFE_MODEL": 400, "NO_STS_VOICE": 400, "UNAUTHORIZED": 401,
     "NOT_FOUND": 404, "GPU_BUSY_REALTIME": 409, "GPU_BUSY_JOB": 409, "MODEL_MISSING": 424,
-    "NOT_IMPLEMENTED": 501, "GPU_OOM": 507, "GPU_REQUIRED": 409,
+    "NOT_IMPLEMENTED": 501, "DOWNLOAD_FAILED": 502, "GPU_OOM": 507, "GPU_REQUIRED": 409,
 }
 
 
