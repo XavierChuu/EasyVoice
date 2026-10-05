@@ -4,18 +4,21 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
+import re
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from ..core.errors import EngineError
 from ..core.job_queue import ApiModel, JobContext
 
 CHUNK = 1 << 20
+log = logging.getLogger(__name__)
 
 
 class ManifestFile(BaseModel):
@@ -23,6 +26,15 @@ class ManifestFile(BaseModel):
     url: str
     sha256: str | None = None
     size_mb: float | None = None
+
+    @field_validator("sha256")
+    @classmethod
+    def _valid_sha(cls, v: str | None) -> str | None:
+        # sha256 viết sai (thiếu/thừa ký tự) thì không bao giờ khớp → mọi lần tải đều bị xóa. Coi như chưa có hash.
+        if v is not None and not re.fullmatch(r"[0-9a-f]{64}", v.lower()):
+            log.warning("sha256 không hợp lệ trong manifest, bỏ qua kiểm tra: %s", v)
+            return None
+        return v.lower() if v else v
 
 
 class ManifestModel(BaseModel):
@@ -248,7 +260,8 @@ def run_download(ctx: JobContext, catalog: ModelCatalog, ids: list[str]) -> None
                     digest = sha256_of(dest)
                     if digest != f.sha256:
                         dest.unlink(missing_ok=True)
-                        raise EngineError("BAD_FILE", f"sai sha256 cho {f.path}")
+                        raise EngineError("BAD_FILE", f"sai sha256 cho {f.path}: tải về {digest[:12]}…, manifest {f.sha256[:12]}… "
+                                                      "(file có thể đã được cập nhật trên máy chủ hoặc tải bị lỗi)")
                 else:
                     ctx.log(f"sha256 {f.path} = {sha256_of(dest)} (chưa có trong manifest)")
         except Exception as exc:  # noqa: BLE001 — hủy (Cancelled) không phải Exception thường nên vẫn dừng job

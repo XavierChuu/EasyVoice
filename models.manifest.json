@@ -42,7 +42,7 @@
         {
           "path": "f5tts-vi-vivoice/vocab.txt",
           "url": "https://huggingface.co/hynt/F5-TTS-Vietnamese-ViVoice/resolve/main/config.json",
-          "sha256": "031ab4b5cab593dfba597551159b7d6594f2cb6acf2fabf5897d56c3e695d2e",
+          "sha256": null,
           "size_mb": 0.01
         },
         {

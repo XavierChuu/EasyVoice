@@ -161,3 +161,16 @@ def test_download_retries_and_resumes_after_connection_drop(tmp_path):
         assert seen[-1] == len(payload) and max(seen) == len(payload)  # tiến độ tuyệt đối, không cộng trùng khi tải tiếp
     finally:
         srv.shutdown()
+
+
+def test_manifest_hashes_are_well_formed():
+    """sha256 sai định dạng làm model không bao giờ tải được (file bị xóa sau mỗi lần tải)."""
+    import json
+    import re
+
+    from easyvoice_engine.services.models import ManifestFile, manifest_path
+
+    for m in json.loads(manifest_path().read_text(encoding="utf-8"))["models"]:
+        for f in m["files"]:
+            assert f["sha256"] is None or re.fullmatch(r"[0-9a-f]{64}", f["sha256"]), f["path"]
+    assert ManifestFile(path="x", url="u", sha256="abc").sha256 is None
