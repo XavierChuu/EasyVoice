@@ -31,6 +31,8 @@ interface Bridge {
   restartEngine(): Promise<void>;
   appPaths(): Promise<{ downloads: string; userData: string }>;
   onEngineStatus(cb: (info: EngineInfo) => void): () => void;
+  enableHotkeys?(on: boolean): Promise<{ global: boolean; error?: string }>;
+  onHotkey?(cb: (ev: { digit: string; down: boolean }) => void): () => void;
 }
 
 declare global {
@@ -100,6 +102,9 @@ export const platform = {
   restartEngine: () => bridge()?.restartEngine() ?? Promise.resolve(),
   appPaths: async () => (await bridge()?.appPaths()) ?? { downloads: '~/Downloads', userData: '~/.easyvoice' },
   onEngineStatus: (cb: (info: EngineInfo) => void) => bridge()?.onEngineStatus(cb) ?? (() => {}),
+  /** Bật/tắt bắt phím 1-9 toàn cục (Electron). Trình duyệt / lỗi hook → { global: false }. */
+  enableHotkeys: async (on: boolean) => (await bridge()?.enableHotkeys?.(on)) ?? { global: false },
+  onHotkey: (cb: (ev: { digit: string; down: boolean }) => void) => bridge()?.onHotkey?.(cb) ?? (() => {}),
 };
 
 export const AUDIO_FILTER: FileFilter = { name: 'Audio', extensions: ['wav', 'mp3', 'm4a', 'flac', 'ogg'] };

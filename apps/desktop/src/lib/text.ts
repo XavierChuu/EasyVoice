@@ -32,3 +32,11 @@ export function formatSize(bytes: number): string {
   if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
   return `${Math.max(1, Math.round(bytes / 1e3))} KB`;
 }
+
+// Chữ cái chỉ tiếng Việt mới có (đ, ơ, ư, ă + các dấu thanh trên nguyên âm có mũ/móc) — đủ để nhận ra văn bản tiếng Việt.
+const VI_CHARS = /[đơưăạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i;
+
+export const looksVietnamese = (text: string) => VI_CHARS.test(text);
+
+/** Chuỗi để so khớp tìm kiếm: bỏ dấu, đ → d, chữ thường ("Giận Dữ" khớp "gian du"). */
+export const fold = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').toLowerCase();

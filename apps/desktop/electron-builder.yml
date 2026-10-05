@@ -6,6 +6,9 @@ files:
   - dist/**
   - dist-electron/**
   - package.json
+# Module native (hook bàn phím toàn cục cho phím tắt live) không chạy được từ trong asar.
+asarUnpack:
+  - node_modules/uiohook-napi/**
 win:
   target: nsis
 mac:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from pathlib import Path
 
@@ -14,6 +15,16 @@ from .f5_wrapper import TtsBackend
 from .text_normalize import normalize
 
 
+# Chữ cái chỉ tiếng Việt mới có — đủ để nhận ra văn bản tiếng Việt (giọng mẫu tiếng Anh vẫn có thể đọc tiếng Việt).
+_VI_CHARS = re.compile("[đơưăạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]", re.IGNORECASE)
+
+
+def text_language(text: str, voice_lang: str) -> str:
+    if _VI_CHARS.search(text):
+        return "vi"
+    return voice_lang if voice_lang in ("vi", "en") else "en"
+
+
 def plan_sentences(text: str) -> list[str]:
     out: list[str] = []
     for s in split_sentences(text):
@@ -21,24 +32,45 @@ def plan_sentences(text: str) -> list[str]:
     return out
 
 
+VoiceKey = tuple[str, str | None]  # (profile_id, variant_id)
+
+
+def plan_parts(parts: list[tuple[str, VoiceKey]]) -> list[tuple[str, VoiceKey]]:
+    """Tách từng đoạn (đã gắn giọng) thành câu; câu bị đoạn chọn giọng cắt ngang thành nhiều câu riêng."""
+    out: list[tuple[str, VoiceKey]] = []
+    for text, key in parts:
+        out += [(s, key) for s in plan_sentences(text)]
+    return out
+
+
+class VoiceRef:
+    def __init__(self, ref_audio: Path, ref_text: str, cache_dir: Path, language: str) -> None:
+        self.ref_audio, self.ref_text, self.cache_dir, self.language = ref_audio, ref_text, cache_dir, language
+
+
 class TtsRender:
     """Trạng thái render của một job (giữ lại để render lại một câu riêng lẻ)."""
 
-    def __init__(self, out_dir: Path, lang: str, ref_audio: Path, ref_text: str, speed: float, seed: int,
-                 pause_ms: int, user_dict: list[tuple[str, str]]) -> None:
+    def __init__(self, out_dir: Path, lang: str, refs: dict[VoiceKey, VoiceRef], default: VoiceKey, speed: float,
+                 seed: int, pause_ms: int, user_dict: list[tuple[str, str]]) -> None:
         self.out_dir = out_dir
-        self.lang, self.ref_audio, self.ref_text = lang, ref_audio, ref_text
+        self.lang, self.refs, self.default = lang, refs, default
         self.speed, self.seed, self.pause_ms, self.user_dict = speed, seed, pause_ms, user_dict
         self.sr = 24000
         self.attempts: dict[int, int] = {}
+        self.model_id = ""
 
     def sentence_path(self, i: int) -> Path:
         return self.out_dir / f"s{i:03d}.wav"
 
+    def ref_for(self, s: TtsSentence) -> VoiceRef:
+        return self.refs[(s.profile_id, s.variant_id) if s.profile_id else self.default]
+
     def render_one(self, backend: TtsBackend, s: TtsSentence) -> None:
         attempt = self.attempts.get(s.index, 0)
         text = normalize(s.text, self.lang, self.user_dict)
-        wav = backend.synthesize(text, self.ref_audio, self.ref_text, self.speed, self.seed + 7919 * attempt + s.index)
+        ref = self.ref_for(s)
+        wav = backend.synthesize(text, ref.ref_audio, ref.ref_text, self.speed, self.seed + 7919 * attempt + s.index)
         self.sr = backend.sample_rate
         audio_io.save(self.sentence_path(s.index), audio_io.peak_normalize(wav), self.sr)
         s.duration_sec = len(wav) / self.sr

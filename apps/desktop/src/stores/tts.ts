@@ -1,8 +1,14 @@
 import { create } from 'zustand';
 
+import type { Segment } from '../lib/segments';
+
 interface TtsState {
   text: string;
   profileId: string;
+  /** Biến thể của giọng chính; null = giọng chuẩn. */
+  variantId: string | null;
+  /** Đoạn gán giọng riêng (bôi đen → chuột phải). */
+  segments: Segment[];
   mode: 'direct' | 'chain';
   speed: number;
   seed: number;
@@ -13,6 +19,8 @@ interface TtsState {
 export const useTts = create<TtsState>((set) => ({
   text: '',
   profileId: 'p1',
+  variantId: null,
+  segments: [],
   mode: 'direct',
   speed: 1,
   seed: 1234,

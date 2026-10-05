@@ -8,7 +8,7 @@ import {
   EngineError,
   type AudioDevice, type DatasetFile, type DictEntry, type EngineErrorCode, type EngineEvent, type ExportOptions,
   type FileRef, type ImportInspection, type Job, type PlaySource, type Profile, type RefAnalysis, type StsRequest,
-  type SystemInfo, type TtsRequest, type VoiceLang,
+  type SystemInfo, type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
 } from './types';
 
 const notYet = (phase: number) => Promise.reject(new EngineError('NOT_IMPLEMENTED', `Phase ${phase}`));
@@ -130,15 +130,25 @@ export class HttpEngine implements EngineClient {
   transcribe = async (file: FileRef, lang: VoiceLang) =>
     (await this.req<{ text: string }>('POST', '/voices/transcribe', this.form({ language: lang }, [['file', file]]))).text;
 
-  createQuickVoice = (input: { name: string; language: VoiceLang; file: FileRef; transcript: string; consent: true }) =>
-    this.req<Profile>('POST', '/voices', this.form(
-      { name: input.name, language: input.language, transcript: input.transcript, consent: true }, [['file', input.file]],
+  createQuickVoice = (input: { name: string; language: VoiceLang; file: FileRef; transcript: string; consent: true; tags?: VoiceTags }) => {
+    const tags = Object.fromEntries(Object.entries(input.tags ?? {}).filter(([, v]) => v)) as Record<string, string>;
+    return this.req<Profile>('POST', '/voices', this.form(
+      { name: input.name, language: input.language, transcript: input.transcript, consent: true, ...tags }, [['file', input.file]],
     ));
+  };
 
   startTraining = () => notYet(3) as Promise<Profile>;
-  renameVoice = async (id: string, name: string) => { await this.req('PATCH', `/voices/${id}`, { name }); };
+  updateVoice = async (id: string, patch: VoiceUpdate) => { await this.req('PATCH', `/voices/${id}`, patch); };
   deleteVoice = async (id: string) => { await this.req('DELETE', `/voices/${id}`); };
-  previewVoice = async (id: string): Promise<PlaySource> => ({ durationSec: 8, url: this.mediaUrl(`/voices/${id}/preview`) });
+  previewVoice = async (id: string, variantId?: string): Promise<PlaySource> =>
+    ({ durationSec: 8, url: this.mediaUrl(`/voices/${id}/preview`, { variant: variantId }) });
+
+  addVariant = (voiceId: string, input: { name: string; emotion: string | null; file: FileRef; transcript: string }) =>
+    this.req<Profile>('POST', `/voices/${voiceId}/variants`, this.form(
+      { name: input.name, transcript: input.transcript, ...(input.emotion ? { emotion: input.emotion } : {}) }, [['file', input.file]],
+    ));
+
+  deleteVariant = async (voiceId: string, variantId: string) => { await this.req('DELETE', `/voices/${voiceId}/variants/${variantId}`); };
 
   inspectImport = (files: FileRef[]) => this.req<ImportInspection>('POST', '/voices/import/inspect', this.form({}, files.map((f) => ['files', f])));
   importVoice = (token: string, name: string) => this.req<Profile>('POST', '/voices/import', { token, name });
@@ -150,7 +160,7 @@ export class HttpEngine implements EngineClient {
   normalizePreview = (text: string, lang: VoiceLang, dict: DictEntry[]) => normalizePreview(text, lang, dict);
 
   startTts = async (req: TtsRequest) => (await this.req<{ jobId: string }>('POST', '/tts', {
-    profileId: req.profileId, text: req.text, mode: req.mode, speed: req.speed, seed: req.seed, pauseMs: req.pauseMs,
+    profileId: req.profileId, variantId: req.variantId ?? null, parts: req.parts ?? [], text: req.text, mode: req.mode, speed: req.speed, seed: req.seed, pauseMs: req.pauseMs,
     userDict: req.dict.map((d) => [d.from, d.to]),
   })).jobId;
 

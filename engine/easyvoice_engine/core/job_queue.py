@@ -35,6 +35,8 @@ class TtsSentence(ApiModel):
     status: Literal["queued", "rendering", "done", "redo"] = "queued"
     progress: float = 0.0
     duration_sec: float | None = None
+    profile_id: str | None = None  # giọng của câu (đoạn chọn giọng riêng); None = giọng của job
+    variant_id: str | None = None
 
 
 class Job(ApiModel):

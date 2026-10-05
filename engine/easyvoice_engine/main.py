@@ -72,6 +72,11 @@ def free_port() -> int:
 
 
 def main() -> None:
+    # Windows + stdout bị pipe (Electron): Python mặc định cp1252 → thư viện in tiếng Việt (F5-TTS print câu đang
+    # render) sẽ ném UnicodeEncodeError làm hỏng cả job. Ép UTF-8, ký tự lạ thì thay thế thay vì lỗi.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description="EasyVoice engine")
     ap.add_argument("--port", type=int, default=0, help="0 = tự chọn port trống")
     ap.add_argument("--data-dir", help="thư mục dữ liệu (mặc định theo OS, hoặc EASYVOICE_DATA_DIR)")

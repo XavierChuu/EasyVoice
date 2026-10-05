@@ -5,7 +5,7 @@ import type { EngineInfo } from '../lib/platform';
 import { HttpEngine } from './httpEngine';
 import { MockEngine } from './mockEngine';
 import type {
-  AudioDevice, DatasetFile, DictEntry, EngineEvent, ExportOptions, FileRef, ImportInspection, PlaySource, Profile,
+  AudioDevice, DatasetFile, DictEntry, EngineEvent, ExportOptions, FileRef, ImportInspection, PlaySource, Profile, VoiceTags, VoiceUpdate,
   RealtimeConfig, RefAnalysis, StsRequest, SystemInfo, TrainPreset, TtsRequest, VoiceLang,
 } from './types';
 
@@ -20,14 +20,18 @@ export interface EngineClient {
   analyzeRef(file: FileRef): Promise<RefAnalysis>;
   analyzeDataset(files: FileRef[]): Promise<DatasetFile[]>;
   transcribe(file: FileRef, lang: VoiceLang): Promise<string>;
-  createQuickVoice(input: { name: string; language: VoiceLang; file: FileRef; transcript: string; consent: true }): Promise<Profile>;
+  createQuickVoice(input: { name: string; language: VoiceLang; file: FileRef; transcript: string; consent: true; tags?: VoiceTags }): Promise<Profile>;
   startTraining(input: {
     name: string; language: VoiceLang; files: FileRef[]; separate: boolean; preset: TrainPreset; consent: true;
   }): Promise<Profile>;
-  renameVoice(id: string, name: string): Promise<void>;
+  /** Đổi tên và/hoặc thẻ; chỉ trường có trong patch được đổi (null = xóa thẻ). */
+  updateVoice(id: string, patch: VoiceUpdate): Promise<void>;
   deleteVoice(id: string): Promise<void>;
-  /** Đoạn nghe thử của giọng (preview.wav / ref.wav). */
-  previewVoice(id: string): Promise<PlaySource>;
+  /** Đoạn nghe thử của giọng (preview.wav / ref.wav) hoặc của một biến thể. */
+  previewVoice(id: string, variantId?: string): Promise<PlaySource>;
+  /** Biến thể cảm xúc của cùng người đọc: một đoạn ref + lời thoại riêng. */
+  addVariant(voiceId: string, input: { name: string; emotion: string | null; file: FileRef; transcript: string }): Promise<Profile>;
+  deleteVariant(voiceId: string, variantId: string): Promise<void>;
 
   inspectImport(files: FileRef[]): Promise<ImportInspection>;
   importVoice(token: string, name: string): Promise<Profile>;
@@ -51,7 +55,8 @@ export interface EngineClient {
 
   audioDevices(): Promise<{ inputs: AudioDevice[]; outputs: AudioDevice[] }>;
   startRealtime(cfg: RealtimeConfig): Promise<void>;
-  updateRealtime(patch: Partial<Pick<RealtimeConfig, 'pitch' | 'gateDb'>>): Promise<void>;
+  /** profileId: đổi giọng đích khi đang live (giữ phím tắt 1-9). */
+  updateRealtime(patch: Partial<Pick<RealtimeConfig, 'pitch' | 'gateDb' | 'profileId'>>): Promise<void>;
   stopRealtime(): Promise<void>;
 }
 

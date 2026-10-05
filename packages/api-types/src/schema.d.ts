@@ -155,8 +155,8 @@ export interface paths {
         delete: operations["delete_voices__voice_id__delete"];
         options?: never;
         head?: never;
-        /** Rename */
-        patch: operations["rename_voices__voice_id__patch"];
+        /** Update */
+        patch: operations["update_voices__voice_id__patch"];
         trace?: never;
     };
     "/voices/{voice_id}/preview": {
@@ -171,6 +171,40 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/voices/{voice_id}/variants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Variant */
+        post: operations["add_variant_voices__voice_id__variants_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/voices/{voice_id}/variants/{variant_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Variant */
+        delete: operations["delete_variant_voices__voice_id__variants__variant_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -472,6 +506,17 @@ export interface components {
             /** Outputs */
             outputs: components["schemas"]["AudioDevice"][];
         };
+        /** Body_add_variant_voices__voice_id__variants_post */
+        Body_add_variant_voices__voice_id__variants_post: {
+            /** Name */
+            name: string;
+            /** Transcript */
+            transcript: string;
+            /** Emotion */
+            emotion?: string | null;
+            /** File */
+            file: string;
+        };
         /** Body_analyze_voices_analyze_post */
         Body_analyze_voices_analyze_post: {
             /** File */
@@ -493,6 +538,12 @@ export interface components {
             consent: boolean;
             /** File */
             file: string;
+            /** Gender */
+            gender?: string | null;
+            /** Country */
+            country?: string | null;
+            /** Region */
+            region?: string | null;
         };
         /** Body_inspect_import_voices_import_inspect_post */
         Body_inspect_import_voices_import_inspect_post: {
@@ -688,6 +739,8 @@ export interface components {
             installed: boolean;
             /** Required */
             required: boolean;
+            /** Languages */
+            languages: string[] | null;
         };
         /**
          * Profile
@@ -722,6 +775,17 @@ export interface components {
             hasRef: boolean;
             /** Samplerate */
             sampleRate: number | null;
+            /**
+             * Variants
+             * @default []
+             */
+            variants: components["schemas"]["VariantInfo"][];
+            /** Gender */
+            gender: ("male" | "female" | "other") | null;
+            /** Country */
+            country: string | null;
+            /** Region */
+            region: string | null;
         };
         /** RedoRequest */
         RedoRequest: {
@@ -751,11 +815,6 @@ export interface components {
             /** Ok */
             ok: boolean;
         };
-        /** RenameRequest */
-        RenameRequest: {
-            /** Name */
-            name: string;
-        };
         /** SystemInfo */
         SystemInfo: {
             /** Appversion */
@@ -784,12 +843,31 @@ export interface components {
             /** Text */
             text: string;
         };
+        /**
+         * TtsPart
+         * @description Một đoạn văn bản đọc bằng giọng/biến thể riêng (người dùng bôi đen rồi chọn giọng).
+         */
+        TtsPart: {
+            /** Text */
+            text: string;
+            /** Profileid */
+            profileId: string;
+            /** Variantid */
+            variantId?: string | null;
+        };
         /** TtsRequest */
         TtsRequest: {
             /** Profileid */
             profileId: string;
             /** Text */
             text: string;
+            /** Variantid */
+            variantId?: string | null;
+            /**
+             * Parts
+             * @default []
+             */
+            parts: components["schemas"]["TtsPart"][];
             /**
              * Mode
              * @default direct
@@ -839,6 +917,10 @@ export interface components {
             progress: number;
             /** Durationsec */
             durationSec: number | null;
+            /** Profileid */
+            profileId: string | null;
+            /** Variantid */
+            variantId: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -852,6 +934,31 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VariantInfo */
+        VariantInfo: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Emotion */
+            emotion: string | null;
+            /** Createdat */
+            createdAt: string;
+        };
+        /**
+         * VoiceUpdate
+         * @description Chỉ trường nào gửi lên mới được đổi; gửi null cho thẻ = xóa thẻ.
+         */
+        VoiceUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Gender */
+            gender?: ("male" | "female" | "other") | null;
+            /** Country */
+            country?: string | null;
+            /** Region */
+            region?: string | null;
         };
     };
     responses: never;
@@ -1123,7 +1230,7 @@ export interface operations {
             };
         };
     };
-    rename_voices__voice_id__patch: {
+    update_voices__voice_id__patch: {
         parameters: {
             query?: never;
             header?: never;
@@ -1134,7 +1241,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RenameRequest"];
+                "application/json": components["schemas"]["VoiceUpdate"];
             };
         };
         responses: {
@@ -1160,7 +1267,9 @@ export interface operations {
     };
     preview_voices__voice_id__preview_get: {
         parameters: {
-            query?: never;
+            query?: {
+                variant?: string | null;
+            };
             header?: never;
             path: {
                 voice_id: string;
@@ -1175,6 +1284,73 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_variant_voices__voice_id__variants_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                voice_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_add_variant_voices__voice_id__variants_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Profile"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_variant_voices__voice_id__variants__variant_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                voice_id: string;
+                variant_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Profile"];
+                };
             };
             /** @description Validation Error */
             422: {

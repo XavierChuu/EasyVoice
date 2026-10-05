@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import os
+from pathlib import Path
 
 import numpy as np
 import soundfile as sf
@@ -127,3 +128,49 @@ def test_import_rvc_and_convert_offline(client, dummy_rvc_assets, tmp_path):
     assert np.isfinite(out).all()
     assert client.get(f"/sts/{job['id']}/audio?which=a").status_code == 200
     assert any("Tách nhạc nền chưa có" in line for line in job["log"])
+
+
+def test_variants_and_multi_voice_tts(client, state, wav_file):
+    a = create_voice(client, wav_file)
+    with wav_file.open("rb") as f:
+        r = client.post(f"/voices/{a['id']}/variants", data={"name": "Vui vẻ", "emotion": "happy", "transcript": "Tuyệt quá!"},
+                        files={"file": ("happy.wav", f, "audio/wav")})
+    assert r.status_code == 200, r.text
+    happy = r.json()["variants"][0]
+    assert happy["name"] == "Vui vẻ" and happy["emotion"] == "happy"
+    with wav_file.open("rb") as f:  # trùng tên → lỗi rõ ràng
+        dup = client.post(f"/voices/{a['id']}/variants", data={"name": "vui vẻ", "transcript": "x"},
+                          files={"file": ("x.wav", f, "audio/wav")})
+    assert dup.status_code == 400
+    assert client.get(f"/voices/{a['id']}/preview?variant={happy['id']}").status_code == 200
+    b = create_voice(client, wav_file)
+
+    parts = [{"text": "Hello there. ", "profileId": a["id"]},
+             {"text": "I am so happy! ", "profileId": a["id"], "variantId": happy["id"]},
+             {"text": "And I am B.", "profileId": b["id"]}]
+    job_id = client.post("/tts", json={"profileId": a["id"], "text": "".join(p["text"] for p in parts),
+                                       "parts": parts}).json()["jobId"]
+    job = wait_job(client, job_id)
+    assert job["status"] == "done", job
+    s = job["sentences"]
+    assert [x["profileId"] for x in s] == [None, a["id"], b["id"]] and s[1]["variantId"] == happy["id"]
+    refs = [Path(c[2]).relative_to(state.paths.voices).parts for c in state.extras["fake_tts"].calls]
+    assert refs[0] == (a["id"], "ref.wav") and refs[1][:3] == (a["id"], "variants", happy["id"]) and refs[2][0] == b["id"]
+
+    # giọng/biến thể không tồn tại → từ chối ngay, không tạo job
+    bad = client.post("/tts", json={"profileId": a["id"], "text": "x", "variantId": "nope"})
+    assert bad.status_code == 404
+    assert client.delete(f"/voices/{a['id']}/variants/{happy['id']}").json()["variants"] == []
+
+
+def test_voice_tags(client, wav_file):
+    with wav_file.open("rb") as f:
+        v = client.post("/voices", data={"name": "Lan", "language": "vi", "transcript": "Xin chào.", "consent": "true",
+                                         "gender": "female", "country": "vn", "region": "south"},
+                        files={"file": ("ref.wav", f, "audio/wav")}).json()
+    assert (v["gender"], v["country"], v["region"]) == ("female", "VN", "south")
+    # chỉ đổi trường được gửi; null = xóa thẻ
+    u = client.patch(f"/voices/{v['id']}", json={"region": None}).json()
+    assert u["name"] == "Lan" and u["gender"] == "female" and u["country"] == "VN" and u["region"] is None
+    assert client.patch(f"/voices/{v['id']}", json={"country": "Vietnam"}).status_code == 400
+    assert client.patch(f"/voices/{v['id']}", json={"gender": "robot"}).status_code == 422

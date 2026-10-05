@@ -13,9 +13,10 @@ button:disabled { opacity: .35; cursor: not-allowed; }
 input[type=range] { accent-color: #ff5b14; width: 100%; }
 input[type=checkbox] { accent-color: #ff5b14; width: 16px; height: 16px; border-radius: 0; flex-shrink: 0; }
 textarea:focus, input:focus, select:focus, button:focus-visible { outline: 1px solid #ff5b14; outline-offset: 2px; }
+/* Ô nằm trong khung tự đổi viền khi focus (ô tìm kiếm): không vẽ thêm viền cam. */
+input.no-ring:focus, textarea.no-ring:focus { outline: none; }
 ::selection { background: #ff5b14; color: #0a0a0a; }
 .stripes { background: repeating-linear-gradient(45deg, #0a0a0a 0 10px, #0e0e0e 10px 20px); }
-.wave-grid { background: repeating-linear-gradient(90deg, transparent 0 59px, #161616 59px 60px); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #2b2b2b; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }

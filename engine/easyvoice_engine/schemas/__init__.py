@@ -6,7 +6,7 @@ from typing import Literal
 
 from ..core.job_queue import ApiModel, Job, TtsSentence  # noqa: F401
 from ..services.models import ModelInfo  # noqa: F401
-from ..services.voices import Profile, RefAnalysis  # noqa: F401
+from ..services.voices import Profile, RefAnalysis, VariantInfo  # noqa: F401
 
 
 class Health(ApiModel):
@@ -35,17 +35,33 @@ class DownloadRequest(ApiModel):
     ids: list[str]
 
 
-class RenameRequest(ApiModel):
-    name: str
+class VoiceUpdate(ApiModel):
+    """Chỉ trường nào gửi lên mới được đổi; gửi null cho thẻ = xóa thẻ."""
+
+    name: str | None = None
+    gender: Literal["male", "female", "other"] | None = None
+    country: str | None = None
+    region: str | None = None
 
 
 class Transcript(ApiModel):
     text: str
 
 
+class TtsPart(ApiModel):
+    """Một đoạn văn bản đọc bằng giọng/biến thể riêng (người dùng bôi đen rồi chọn giọng)."""
+
+    text: str
+    profile_id: str
+    variant_id: str | None = None
+
+
 class TtsRequest(ApiModel):
     profile_id: str
     text: str
+    variant_id: str | None = None  # None = giọng chuẩn
+    # Bỏ trống = cả văn bản đọc bằng profile_id/variant_id. Có thì text = các part nối lại (UI tách sẵn).
+    parts: list[TtsPart] = []
     mode: Literal["direct", "chain"] = "direct"
     speed: float = 1.0
     seed: int = 1234

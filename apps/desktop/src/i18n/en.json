@@ -99,23 +99,40 @@
     "new": "NEW VOICE",
     "today": "TODAY",
     "menu": "Voice options",
-    "rename": "Rename",
+    "rename": "Edit name & tags",
     "viewTraining": "Training details",
     "delete": "Delete",
     "read": "Read",
     "convert": "Convert",
     "export": "Export voice",
     "importedBy": "imported · by {{author}}",
-    "renameTitle": "RENAME_VOICE",
+    "renameTitle": "EDIT_VOICE",
     "deleteTitle": "DELETE_VOICE",
     "deleteBody": "Delete “{{name}}”? Its model and reference audio are removed from this computer. This cannot be undone.",
     "deleteBodyTraining": "“{{name}}” is still training. Deleting stops training and removes everything, including checkpoints. This cannot be undone.",
     "deleted": "Deleted “{{name}}”.",
     "emptyCaption": "NO VOICES YET",
     "empty": "Create your first voice from a short clip, or import one someone shared with you.",
-    "noPreview": "No preview clip for this voice yet."
+    "noPreview": "No preview clip for this voice yet.",
+    "search": "Search voices",
+    "searchPlaceholder": "Search by name, variant, gender, country, region…",
+    "noMatch": "No voice matches “{{query}}”.",
+    "filter": "FILTER",
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "name": "Name A–Z"
+    },
+    "showing": "{{shown}}/{{total}} voices",
+    "noTags": "No voice has this tag yet.",
+    "capability": "Capability",
+    "hasVariants": "Has variants",
+    "clearFilters": "CLEAR SEARCH & FILTERS",
+    "noMatchFilter": "No voice matches the filters."
   },
   "wizard": {
+    "noPreview": "No waveform preview.",
     "aria": "Create new voice",
     "name": "VOICE NAME",
     "namePlaceholder": "e.g. Podcast narrator",
@@ -345,6 +362,18 @@
     "background": "Training runs in the background. You can close this and keep using the app."
   },
   "tts": {
+    "failedAt": "FAILED AT",
+    "failedTitle": "Could not read the text",
+    "retry": "RETRY",
+    "langUnsupported": {
+      "title": "No installed model can read {{lang}}",
+      "body": "The installed TTS models ({{models}}) do not support this language: the text will still be read but pronunciation and tones will be wrong.",
+      "download": "Download “{{name}}” via Settings → Run first-time setup again."
+    },
+    "langMismatch": {
+      "title": "Text and reference voice use different languages",
+      "body": "The text is {{text}}, the reference voice is {{voice}}. The result may carry the accent of the reference voice."
+    },
     "code": "02 / TEXT-TO-SPEECH",
     "title": "Text to Speech",
     "desc": "Paste your text, pick a voice, hit Read. Long text is split into sentences.",
@@ -385,7 +414,23 @@
     "redo": "REDO",
     "playSentence": "Play sentence",
     "exported": "Saved {{fmt}}.",
-    "mockNote": "MOCK · system voice for testing playback — not F5-TTS yet"
+    "mockNote": "MOCK · system voice for testing playback — not F5-TTS yet",
+    "segments": {
+      "title": "VOICE-ASSIGNED PASSAGES",
+      "clearAll": "CLEAR ALL"
+    },
+    "picker": {
+      "aria": "Pick a voice for the selected text",
+      "title": "READ THIS WITH",
+      "search": "Search voices or variants…",
+      "none": "No voice matches.",
+      "clear": "Remove voice (use the main voice)",
+      "hint": "Select a passage and right-click to read it with another voice / variant.",
+      "rightClick": "Right-click to change voice / variant"
+    },
+    "defaultVoice": "Default voice",
+    "voiceSearch": "Search voices…",
+    "defaultVoiceHint": "Reads all the text except passages you selected and assigned another voice."
   },
   "dict": {
     "title": "PRONUNCIATION_DICTIONARY",
@@ -396,6 +441,7 @@
     "add": "ADD WORD"
   },
   "sts": {
+    "noPreview": "No waveform preview (this format is decoded by the engine).",
     "code": "03 / SPEECH-TO-SPEECH",
     "title": "Voice Changer",
     "desc": "Convert a voice from a file or your mic into one of your trained voices.",
@@ -448,7 +494,16 @@
       "underrunCount_other": "{{count}} dropouts",
       "start": "START"
     },
-    "mockNote": "MOCK · pitch shift only for testing playback — not RVC yet"
+    "mockNote": "MOCK · pitch shift only for testing playback — not RVC yet",
+    "hk": {
+      "title": "VOICE HOTKEYS · HOLD 1–9 WHILE SPEAKING",
+      "now": "NOW USING",
+      "slot": "Voice for key {{key}}",
+      "none": "— not set —",
+      "hint": "Assign voices before going live. While live, hold a number key as you speak to switch to that voice; release to return to the default (target voice on the left). Top-row and numpad keys both work.",
+      "global": "Global hotkeys: works while you are in Discord / OBS / a game (the number still types into that app as usual).",
+      "window": "Hotkeys only work while the EasyVoice window is focused."
+    }
   },
   "guide": {
     "title": "VIRTUAL_AUDIO_SETUP",
@@ -527,5 +582,71 @@
     "done": "ALL SET",
     "resumeNote": "If your connection drops, the download continues where it left off.",
     "start": "START USING EASYVOICE"
+  },
+  "emotion": {
+    "happy": "Happy",
+    "angry": "Angry",
+    "fearful": "Fearful",
+    "anxious": "Anxious",
+    "menacing": "Menacing",
+    "sad": "Sad",
+    "calm": "Calm",
+    "whisper": "Whisper"
+  },
+  "variants": {
+    "section": "VARIANTS",
+    "standard": "Standard",
+    "short": "Variant",
+    "add": "Create variant",
+    "variant": "VARIANT",
+    "aria": "Create a variant of {{name}}",
+    "intro": "A variant is the same voice “{{name}}” read with a different emotion. Record or pick a 5–12 second clip of the same person speaking with that emotion: the voice copies the clip's delivery too.",
+    "sectionHint": "Optional: add clips of the same speaker with other emotions (happy, angry, fearful…). The standard voice stays the default.",
+    "emotion": "Emotion",
+    "emotionHint": "Pick a suggestion or type your own name below (e.g. “Ghost story”).",
+    "name": "Variant name",
+    "namePlaceholder": "e.g. Happy",
+    "clipCaption": "EMOTION CLIP · 5–12 SECONDS",
+    "clipDrop": "Drop a clip of the same speaker using this emotion",
+    "same": "This is the same speaker as “{{name}}” and I have the right to use this voice.",
+    "create": "CREATE VARIANT",
+    "created": "Created variant “{{name}}” for {{voice}}.",
+    "hint": {
+      "name": "pick an emotion or name the variant",
+      "same": "confirm it is the same speaker",
+      "incomplete": "finish or remove unfinished variants"
+    },
+    "someFailed": "The voice was created but some variants failed: {{list}}",
+    "deleteTitle": "DELETE_VARIANT",
+    "deleteBody": "Delete variant “{{name}}” of {{voice}}? Its clip is removed from this computer.",
+    "deleted": "Deleted variant “{{name}}”.",
+    "label": "Variant"
+  },
+  "tags": {
+    "gender": "Gender",
+    "country": "Country",
+    "region": "Region / accent",
+    "regionPlaceholder": "e.g. Texas, Liverpool…"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "region": {
+    "north": "Northern",
+    "central": "Central",
+    "south": "Southern",
+    "general": "General American",
+    "southern": "Southern US",
+    "newyork": "New York",
+    "midwest": "Midwest",
+    "california": "California",
+    "rp": "Received Pronunciation",
+    "london": "London",
+    "northern": "Northern English",
+    "scottish": "Scottish",
+    "welsh": "Welsh",
+    "irish": "Northern Irish"
   }
 }

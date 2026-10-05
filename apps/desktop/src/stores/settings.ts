@@ -17,6 +17,8 @@ export interface SettingsState {
   pauseMs: number;
   dict: DictEntry[];
   author: string;
+  /** Phím tắt live: '1'..'9' → id giọng (giữ phím khi nói để đổi sang giọng đó). */
+  rtHotkeys: Record<string, string>;
   set: (patch: Partial<Omit<SettingsState, 'set'>>) => void;
 }
 
@@ -32,6 +34,7 @@ export const useSettings = create<SettingsState>()(
       pauseMs: 250,
       dict: [],
       author: '',
+      rtHotkeys: {},
       set: (patch) => set(patch),
     }),
     { name: 'ev.settings' },

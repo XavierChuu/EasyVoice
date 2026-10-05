@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, session, shell, systemPreferences 
 import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
+import { setupHotkeys } from './hotkeys';
 import { Sidecar, type EngineInfo } from './sidecar';
 
 let win: BrowserWindow | null = null;
@@ -10,6 +11,7 @@ let engineInfo: EngineInfo = { status: 'mock', restarts: 0 };
 // Chỉ đọc lại được những file người dùng vừa chọn qua hộp thoại (không cho renderer đọc file tùy ý).
 const picked = new Set<string>();
 const MAX_READ = 100e6;
+const stopHotkeys = setupHotkeys(() => win?.webContents);
 
 function broadcast(info: EngineInfo) {
   engineInfo = info;
@@ -108,7 +110,10 @@ void app.whenReady().then(async () => {
   });
 });
 
-app.on('before-quit', () => sidecar?.stop());
+app.on('before-quit', () => {
+  stopHotkeys();
+  sidecar?.stop();
+});
 app.on('window-all-closed', () => {
   sidecar?.stop();
   if (process.platform !== 'darwin') app.quit();

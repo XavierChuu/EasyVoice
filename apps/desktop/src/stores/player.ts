@@ -10,7 +10,9 @@ interface PlayerState {
   key: string | null;
   position: number; // 0..1
   error: string | null;
-  play: (key: string, src: PlaySource) => void;
+  play: (key: string, src: PlaySource, startAt?: number) => void;
+  /** Tua tới vị trí 0..1 của nguồn đang phát (chỉ với audio url). */
+  seek: (fraction: number) => void;
   stop: () => void;
 }
 
@@ -30,12 +32,16 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   key: null,
   position: 0,
   error: null,
-  play: (key, src) => {
+  play: (key, src, startAt) => {
     get().stop();
     const my = ++token;
     set({ key, position: 0, error: null });
     if (src.url) {
       audio = new Audio(src.url);
+      if (startAt) {
+        const a = audio;
+        a.onloadedmetadata = () => { if (Number.isFinite(a.duration)) a.currentTime = startAt * a.duration; };
+      }
       audio.ontimeupdate = () => audio && set({ position: audio.currentTime / (audio.duration || src.durationSec || 1) });
       audio.onended = () => my === token && get().stop();
       audio.onerror = () => my === token && set({ key: null, error: 'decode' });
@@ -69,6 +75,12 @@ export const usePlayer = create<PlayerState>((set, get) => ({
       if (p >= 1) get().stop();
       else set({ position: p });
     }, 50);
+  },
+  seek: (fraction) => {
+    if (!audio || !Number.isFinite(audio.duration)) return;
+    const f = Math.max(0, Math.min(1, fraction));
+    audio.currentTime = f * audio.duration;
+    set({ position: f });
   },
   stop: () => {
     token++;

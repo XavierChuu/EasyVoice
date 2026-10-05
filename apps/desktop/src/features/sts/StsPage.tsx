@@ -1,17 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { engine } from '../../api/engine';
-import type { AudioDevice, FileRef } from '../../api/types';
-import { Alert, Bars, Box, Btn, Check, DropZone, Label, OptionList, PageHead, Range, Segmented, Segs } from '../../components/ui';
+import type { AudioDevice, FileRef, Profile } from '../../api/types';
+import { Alert, Box, Btn, Check, DropZone, Label, OptionList, PageHead, Range, Segmented, Segs } from '../../components/ui';
 import { errorText } from '../../lib/errors';
 import { MEDIA_FILTER, platform } from '../../lib/platform';
 import { formatDuration, pad2 } from '../../lib/text';
 import { canSts, useEngine } from '../../stores/engine';
 import { usePlayer } from '../../stores/player';
+import { useSettings } from '../../stores/settings';
 import { RT_PRESETS, useSts, type RtPreset } from '../../stores/sts';
 import { useUi } from '../../stores/ui';
+import { Waveform } from '../../components/Waveform';
+import { HotkeyPanel } from './HotkeyPanel';
+import { useLiveHotkeys } from './useLiveHotkeys';
 import { VirtualDeviceGuide } from './VirtualDeviceGuide';
+
+/** URL audio kết quả (B) để vẽ waveform, chỉ lấy khi job xong. */
+function useStsOutputUrl(jobId: string | undefined, done: boolean) {
+  const [src, setSrc] = useState<string | Blob | null>(null);
+  useEffect(() => {
+    if (!jobId || !done) return void setSrc(null);
+    let live = true;
+    engine().stsAudio(jobId, 'b').then((a) => live && setSrc(a.url ?? null)).catch(() => live && setSrc(null));
+    return () => { live = false; };
+  }, [jobId, done]);
+  return src;
+}
 
 export function StsPage() {
   const { t } = useTranslation();
@@ -55,7 +71,8 @@ export function StsPage() {
             )}
           </div>
         </Box>
-        {s.mode === 'offline' ? <OfflinePanel targetId={target?.id} targetName={target?.name ?? ''} /> : <RealtimePanel targetId={target?.id} />}
+        {s.mode === 'offline' ? <OfflinePanel targetId={target?.id} targetName={target?.name ?? ''} />
+          : <RealtimePanel targetId={target?.id} targetName={target?.name ?? ''} voices={stsVoices.filter((v) => !v.trainJobId)} />}
       </div>
     </div>
   );
@@ -105,6 +122,12 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
     if (ab === which) return player.stop();
     player.play(`sts:${which}`, await engine().stsAudio(job.id, which));
   };
+  const outSrc = useStsOutputUrl(job?.id, done);
+  const seekAb = async (which: 'a' | 'b', f: number) => {
+    if (!job) return;
+    if (ab === which) return player.seek(f);
+    player.play(`sts:${which}`, await engine().stsAudio(job.id, which), f);
+  };
   const abBtn = (which: 'a' | 'b') => (
     <button type="button" onClick={() => void playAb(which)} aria-label={`${t('common.play')} ${which.toUpperCase()}`}
       className="bg-transparent border-0 p-0 text-mute hover:text-fg cursor-pointer font-mono text-[11px]">
@@ -128,7 +151,11 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
             </div>
             <div className="flex flex-col gap-1.5">
               <span className="flex gap-2 items-center"><Label>A · {t('sts.source')}</Label>{job && abBtn('a')}</span>
-              <div className="border border-line"><Bars seed={0.4} color="#6A6A6A" playhead={ab === 'a' ? player.position : undefined} /></div>
+              <div className="border border-line">
+                <Waveform source={s.file.file} height={88} color="#8F8F8F" label={`A · ${t('sts.source')}`}
+                  position={ab === 'a' ? player.position : undefined} placeholder={t('sts.noPreview')}
+                  onSeek={job ? (f) => void seekAb('a', f) : undefined} />
+              </div>
             </div>
             <Check id="stssep" checked={s.separate} onChange={(separate) => s.set({ separate })}>{t('sts.separate')}</Check>
             <button type="button" onClick={() => setAdvanced(!advanced)} aria-expanded={advanced}
@@ -167,7 +194,11 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
                   <span className="font-mono text-[11px] tracking-label text-acc">B · {t('sts.output')} → {targetName.toUpperCase()}</span>
                   {abBtn('b')}
                 </span>
-                <div className="border border-line"><Bars seed={2.1} playhead={ab === 'b' ? player.position : undefined} /></div>
+                <div className="border border-line">
+                  <Waveform source={outSrc} height={88} label={`B · ${t('sts.output')}`}
+                    position={ab === 'b' ? player.position : undefined}
+                    onSeek={(f) => void seekAb('b', f)} />
+                </div>
                 {engine().mode === 'mock' && <span className="font-mono text-[10px] text-mute">{t('sts.mockNote')}</span>}
               </div>
             )}
@@ -193,7 +224,7 @@ function OfflinePanel({ targetId, targetName }: { targetId?: string; targetName:
   );
 }
 
-function RealtimePanel({ targetId }: { targetId?: string }) {
+function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; targetName: string; voices: Profile[] }) {
   const { t } = useTranslation();
   const s = useSts();
   const rt = useEngine((x) => x.rt);
@@ -202,6 +233,16 @@ function RealtimePanel({ targetId }: { targetId?: string }) {
   const [guide, setGuide] = useState(false);
   const [advanced, setAdvanced] = useState(false);
   const [starting, setStarting] = useState(false);
+  const { rtHotkeys, set: setSettings } = useSettings();
+
+  // Phím tắt: chỉ tính phím gán cho giọng còn tồn tại; giữ phím → đổi giọng đích, nhả → về giọng mặc định.
+  const assigned = useMemo(() => new Set(Object.keys(rtHotkeys).filter((d) => voices.some((v) => v.id === rtHotkeys[d]))), [rtHotkeys, voices]);
+  const hk = useLiveHotkeys(rt.running, assigned);
+  useEffect(() => {
+    if (!rt.running || !targetId) return;
+    const profileId = hk.active ? rtHotkeys[hk.active] : targetId;
+    engine().updateRealtime({ profileId }).catch((err) => setNotice(errorText(t, err)));
+  }, [hk.active, rt.running]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = async () => {
     const d = await engine().audioDevices();
@@ -310,6 +351,14 @@ function RealtimePanel({ targetId }: { targetId?: string }) {
           </button>
         </div>
       </div>
+      <HotkeyPanel voices={voices} hotkeys={rtHotkeys} active={hk.active} mode={hk.mode} error={hk.error} running={rt.running}
+        defaultName={targetName}
+        onChange={(d, id) => {
+          const next = { ...rtHotkeys };
+          if (id) next[d] = id;
+          else delete next[d];
+          setSettings({ rtHotkeys: next });
+        }} />
       {guide && <VirtualDeviceGuide onClose={() => setGuide(false)} />}
     </div>
   );

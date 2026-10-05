@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { engine } from '../../api/engine';
 import type { Job, Profile } from '../../api/types';
 import { Icon, ICONS } from '../../components/ui';
+import { variantLabel } from './VariantEditor';
 import { pad2 } from '../../lib/text';
+import { tagLabels } from '../../lib/voiceTags';
 import { canSts, canTts } from '../../stores/engine';
 import { usePlayer } from '../../stores/player';
+import { useSettings } from '../../stores/settings';
 
 export function createdLabel(iso: string, today: string): string {
   const d = new Date(iso);
@@ -25,11 +28,14 @@ interface Props {
   onRename: () => void;
   onDelete: () => void;
   onTraining: () => void;
+  onAddVariant: () => void;
+  onDeleteVariant: (variantId: string, name: string) => void;
 }
 
-export function VoiceCard({ profile: p, code, job, onRead, onConvert, onExport, onRename, onDelete, onTraining }: Props) {
+export function VoiceCard({ profile: p, code, job, onRead, onConvert, onExport, onRename, onDelete, onTraining, onAddVariant, onDeleteVariant }: Props) {
   const { t } = useTranslation();
   const player = usePlayer();
+  const uiLang = useSettings((s) => s.lang);
   const [menu, setMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const playing = player.key === `voice:${p.id}`;
@@ -46,6 +52,11 @@ export function VoiceCard({ profile: p, code, job, onRead, onConvert, onExport, 
     if (playing) return player.stop();
     player.play(`voice:${p.id}`, await engine().previewVoice(p.id));
   };
+  const toggleVariant = async (vid: string) => {
+    const key = `voice:${p.id}:${vid}`;
+    if (player.key === key) return player.stop();
+    player.play(key, await engine().previewVoice(p.id, vid));
+  };
 
   let stageLine: { left: string; right: string } | null = null;
   if (job && training) {
@@ -57,6 +68,8 @@ export function VoiceCard({ profile: p, code, job, onRead, onConvert, onExport, 
 
   const sub = [t(`lang.${p.language}`), p.imported && p.author ? t('voices.importedBy', { author: p.author }) : null]
     .filter(Boolean).join(' · ');
+  const tg = tagLabels(t, p, uiLang);
+  const tags = [tg.gender, tg.country, tg.region].filter(Boolean);
   const badge = (on: boolean, label: string) => on
     ? <span className="px-2 py-0.5 bg-fg text-bg font-bold">{label}</span>
     : <span className="px-[7px] py-px border border-line3 text-mute">{label} —</span>;
@@ -75,6 +88,7 @@ export function VoiceCard({ profile: p, code, job, onRead, onConvert, onExport, 
           {menu && (
             <div role="menu" className="absolute right-0 top-8 z-20 bg-bg border border-fg min-w-[180px] flex flex-col font-sans text-[13px] tracking-normal">
               <MenuItem onClick={() => { setMenu(false); onRename(); }}>{t('voices.rename')}</MenuItem>
+              {canTts(p) && !training && <MenuItem onClick={() => { setMenu(false); onAddVariant(); }}>{t('variants.add')}</MenuItem>}
               {job && <MenuItem onClick={() => { setMenu(false); onTraining(); }}>{t('voices.viewTraining')}</MenuItem>}
               <MenuItem onClick={() => { setMenu(false); onDelete(); }} danger>{t('voices.delete')}</MenuItem>
             </div>
@@ -86,10 +100,42 @@ export function VoiceCard({ profile: p, code, job, onRead, onConvert, onExport, 
           <div className="font-bold text-[18px] leading-[1.2] break-words">{p.name}</div>
           <div className="text-[12px] text-mute">{sub}</div>
         </div>
+        {tags.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap text-[12px]">
+            {tags.map((x) => <span key={x} className="px-2 py-0.5 bg-line2 text-soft">{x}</span>)}
+          </div>
+        )}
         <div className="flex gap-1.5 flex-wrap font-mono text-[11px]">
           {badge(canTts(p), 'TTS')}
           {badge(canSts(p), 'STS')}
         </div>
+        {canTts(p) && (
+          <div className="flex flex-col gap-1.5">
+            <span className="font-mono text-[10px] tracking-label text-mute">{t('variants.section')}</span>
+            <div className="flex gap-1.5 flex-wrap font-mono text-[11px]">
+              <span className="px-2 py-1 border border-fg">{t('variants.standard')}</span>
+              {p.variants.map((v) => {
+                const on = player.key === `voice:${p.id}:${v.id}`;
+                return (
+                  <span key={v.id} className={`group inline-flex items-stretch border ${on ? 'border-acc bg-acc text-bg' : 'border-line3'}`}>
+                    <button type="button" onClick={() => void toggleVariant(v.id)} aria-label={`${t('common.play')} ${variantLabel(t, v)}`}
+                      className="bg-transparent border-0 text-inherit px-2 py-1 cursor-pointer font-mono text-[11px] hover:text-acc">
+                      {on ? '■' : '▶'} {variantLabel(t, v)}
+                    </button>
+                    <button type="button" onClick={() => onDeleteVariant(v.id, variantLabel(t, v))} aria-label={`${t('voices.delete')} ${variantLabel(t, v)}`}
+                      className="bg-transparent border-0 border-l border-line3 text-mute px-1.5 cursor-pointer hover:text-acc opacity-60 group-hover:opacity-100">×</button>
+                  </span>
+                );
+              })}
+              {!training && (
+                <button type="button" onClick={onAddVariant}
+                  className="bg-transparent border border-dashed border-line3 text-acc px-2 py-1 cursor-pointer font-mono text-[11px] hover:border-acc">
+                  + {t('variants.short')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         {stageLine && job && (
           <button type="button" onClick={onTraining} className="flex flex-col gap-1.5 font-mono text-[11px] bg-transparent border-0 p-0 text-fg text-left cursor-pointer">
             <div className="flex justify-between w-full"><span className="text-acc">{stageLine.left}</span><span>{stageLine.right}</span></div>

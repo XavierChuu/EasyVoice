@@ -234,26 +234,6 @@ export function Segmented<T extends string>({ options, value, onChange, mono, di
 }
 
 // ---------- Visuals ----------
-export function waveHeights(seed: number, n: number, max = 42): number[] {
-  return Array.from({ length: n }, (_, i) => 4 + Math.round(Math.abs(Math.sin(i * 0.7 + seed) * Math.cos(i * 0.23 + seed * 2)) * max));
-}
-
-export function Bars({ seed, n = 72, height = 52, color = '#F2F2F2', progress, playhead, className }: {
-  seed: number; n?: number; height?: number; color?: string; progress?: number; playhead?: number; className?: string;
-}) {
-  const hs = waveHeights(seed, n, Math.min(42, height - 10));
-  return (
-    <div className={cx('flex items-center gap-[2px] px-3', className)} style={{ height }}>
-      {hs.map((h, i) => {
-        let c = color;
-        if (progress !== undefined) c = i / n < progress ? '#FF5B14' : '#3D3D3D';
-        if (playhead !== undefined && i / n < playhead) c = '#FF5B14';
-        return <div key={i} className="flex-1" style={{ height: h, background: c }} />;
-      })}
-    </div>
-  );
-}
-
 export function Segs({ level, n = 40, h = 14 }: { level: number; n?: number; h?: number }) {
   const lit = Math.round((Math.max(0, Math.min(100, level)) / 100) * n);
   return (

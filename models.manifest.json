@@ -4,8 +4,17 @@
   "models": [
     {
       "id": "f5tts-v1-base", "name": "F5-TTS v1 Base (EN/ZH)", "role": "Text to Speech", "group": "tts",
-      "license": "CC-BY-NC-4.0", "commercial": false, "required": true, "arch": "F5TTS_v1_Base",
+      "license": "CC-BY-NC-4.0", "commercial": false, "required": true, "arch": "F5TTS_v1_Base", "languages": ["en", "zh"],
       "files": [{ "path": "f5tts-v1-base/model_1250000.safetensors", "url": "https://huggingface.co/SWivid/F5-TTS/resolve/main/F5TTS_v1_Base/model_1250000.safetensors", "sha256": null, "size_mb": 1350 }]
+    },
+    {
+      "_comment": "hynt/F5-TTS-Vietnamese-ViVoice: fine-tune F5TTS_Base trên 1000 h tiếng Việt (ViVoice, VLSP 2021-2023), văn bản chữ thường. config.json của repo thực chất là vocab. model_last.pt kèm optimizer → engine tự chuyển sang .ema.safetensors khi nạp lần đầu.",
+      "id": "f5tts-vi-vivoice", "name": "F5-TTS Vietnamese ViVoice (VI)", "role": "Text to Speech", "group": "tts",
+      "license": "CC-BY-NC-SA-4.0", "commercial": false, "required": false, "arch": "F5TTS_Base", "languages": ["vi"], "lowercase": true,
+      "files": [
+        { "path": "f5tts-vi-vivoice/vocab.txt", "url": "https://huggingface.co/hynt/F5-TTS-Vietnamese-ViVoice/resolve/main/config.json", "sha256": "031ab4b5cab593dfba597551159b7d6594f2cb6acf2fabf5897d56c3e695d2e", "size_mb": 0.01 },
+        { "path": "f5tts-vi-vivoice/model_last.pt", "url": "https://huggingface.co/hynt/F5-TTS-Vietnamese-ViVoice/resolve/main/model_last.pt", "sha256": "5ae8293dd09868d5758cd1edc6b74f53bd0200652d907bd43724a69c7b82ea1f", "size_mb": 5394 }
+      ]
     },
     {
       "id": "vocos-mel-24khz", "name": "Vocos mel 24 kHz", "role": "Vocoder", "group": "tts",

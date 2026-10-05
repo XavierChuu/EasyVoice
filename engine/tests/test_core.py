@@ -27,6 +27,7 @@ def test_model_manager_load_unload_20_times_no_leak():
 
     mm.register("tts", loader, "tts")
     mm.register("rvc", loader, "rvc")
+    gc.collect()  # tensor còn sót của test trước được giải phóng giữa chừng sẽ làm lệch mức nền
     base = torch.cuda.memory_allocated() if device.startswith("cuda") else 0
     for i in range(20):
         mm.get("tts" if i % 2 == 0 else "rvc")  # đổi tác vụ → model nhóm kia bị gỡ
@@ -36,7 +37,7 @@ def test_model_manager_load_unload_20_times_no_leak():
     assert mm.loaded() == []
     assert all(r() is None for r in refs)  # mọi model đã được giải phóng
     if device.startswith("cuda"):
-        assert torch.cuda.memory_allocated() == base
+        assert torch.cuda.memory_allocated() <= base
 
 
 def test_model_manager_keeps_same_group_and_shared():

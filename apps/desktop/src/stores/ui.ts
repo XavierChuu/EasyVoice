@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { usePlayer } from './player';
+
 export type Tab = 'voices' | 'tts' | 'sts' | 'settings' | 'licenses';
 
 export interface Toast {
@@ -24,7 +26,11 @@ export const useUi = create<UiState>((set, get) => ({
   tab: 'voices',
   notice: '',
   toasts: [],
-  setTab: (tab) => set({ tab, notice: '' }),
+  setTab: (tab) => {
+    // Rời trang thì dừng audio đang nghe thử (giọng mẫu, câu TTS, A/B…), không để phát tiếp ở nền.
+    if (tab !== get().tab) usePlayer.getState().stop();
+    set({ tab, notice: '' });
+  },
   setNotice: (notice) => set({ notice }),
   toast: (text, path) => {
     const id = ++toastId;

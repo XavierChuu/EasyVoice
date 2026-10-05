@@ -17,6 +17,24 @@ RMVPE_KEY = "rvc:rmvpe"
 ASR_KEY = "asr:whisper"
 
 
+def tts_key(state: "EngineState", model_id: str) -> str:
+    """Model TTS mặc định (settings.tts_model) dùng khóa "tts"; model khác "tts:<id>" (cùng nhóm, gỡ theo LRU)."""
+    return TTS_KEY if model_id == state.settings.tts_model else f"{TTS_KEY}:{model_id}"
+
+
+def pick_tts_model(state: "EngineState", lang: str) -> str:
+    """Model mặc định nếu đọc được ngôn ngữ này; không thì model TTS đã cài có khai báo ngôn ngữ đó."""
+    cat = state.catalog
+    default = state.settings.tts_model
+    m = cat.models.get(default)
+    if m is None or not m.languages or lang in m.languages:
+        return default
+    for other in cat.models.values():
+        if other.languages and lang in other.languages and cat.installed(other.id):
+            return other.id
+    return default
+
+
 def rvc_voice_key(voice_id: str) -> str:
     return f"rvc:voice:{voice_id}"
 
@@ -24,14 +42,19 @@ def rvc_voice_key(voice_id: str) -> str:
 def register_default_models(state: "EngineState") -> None:
     cat = state.catalog
 
-    def load_tts(device: str):
-        from .tts.f5_wrapper import F5Backend
+    def load_tts_model(model_id: str, device: str):
+        from .tts.f5_wrapper import F5Backend, ema_safetensors
 
-        m = cat.require(state.settings.tts_model)
+        m = cat.require(model_id)
         voc = cat.require("vocos-mel-24khz")
         vocab = next((state.paths.models / f.path for f in m.files if f.path.endswith("vocab.txt")), None)
         ckpt = next(state.paths.models / f.path for f in m.files if not f.path.endswith("vocab.txt"))
-        return F5Backend(device, ckpt, vocab, m.arch or "F5TTS_v1_Base", cat.dir(voc.id))
+        if ckpt.suffix == ".pt":
+            ckpt = ema_safetensors(ckpt)
+        return F5Backend(device, ckpt, vocab, m.arch or "F5TTS_v1_Base", cat.dir(voc.id), lowercase=m.lowercase)
+
+    def load_tts(device: str):
+        return load_tts_model(state.settings.tts_model, device)
 
     def load_contentvec(device: str):
         from .rvc.infer import ContentEncoder
@@ -52,6 +75,9 @@ def register_default_models(state: "EngineState") -> None:
         return Whisper(cat.dir("whisper-small"), device)
 
     state.models.register(TTS_KEY, load_tts, "tts")
+    for m in cat.models.values():
+        if m.languages and m.id != state.settings.tts_model:
+            state.models.register(f"{TTS_KEY}:{m.id}", lambda device, mid=m.id: load_tts_model(mid, device), "tts")
     state.models.register(CONTENTVEC_KEY, load_contentvec, "rvc")
     state.models.register(RMVPE_KEY, load_rmvpe, "rvc")
     state.models.register(ASR_KEY, load_asr, "asr")

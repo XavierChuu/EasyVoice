@@ -32,6 +32,8 @@ class ManifestModel(BaseModel):
     commercial: bool | None = None
     required: bool = False
     arch: str | None = None
+    languages: list[str] | None = None  # model TTS: ngôn ngữ đọc được (app cảnh báo khi văn bản ngoài danh sách)
+    lowercase: bool = False  # model TTS train trên văn bản chữ thường
     files: list[ManifestFile]
 
 
@@ -45,6 +47,7 @@ class ModelInfo(ApiModel):
     commercial: bool | None
     installed: bool
     required: bool
+    languages: list[str] | None = None
 
 
 def manifest_path() -> Path:
@@ -82,7 +85,7 @@ class ModelCatalog:
 
     def info(self) -> list[ModelInfo]:
         return [ModelInfo(id=m.id, name=m.name, role=m.role, group=m.group, license=m.license, commercial=m.commercial,
-                          required=m.required, installed=self.installed(m.id),
+                          required=m.required, installed=self.installed(m.id), languages=m.languages,
                           size_mb=sum(f.size_mb or 0 for f in m.files)) for m in self.models.values()]
 
 

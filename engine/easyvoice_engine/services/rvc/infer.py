@@ -127,7 +127,10 @@ def convert(model: RvcModel, encoder: ContentEncoder, f0x: F0Extractor, index: I
             pad = p_len - feats.shape[1]
             feats = torch.cat([feats, feats[:, -1:].expand(-1, pad, -1)], dim=1)
             feats0 = torch.cat([feats0, feats0[:, -1:].expand(-1, pad, -1)], dim=1)
-        feats, feats0 = feats[:, :p_len], feats0[:, :p_len]
+        # Encoder/index có thể trả float32 trong khi synthesizer chạy half trên GPU (như RVC gốc: feats theo dtype
+        # của net, pitchf giữ float32).
+        dtype = next(model.net.parameters()).dtype
+        feats, feats0 = feats[:, :p_len].to(dtype), feats0[:, :p_len].to(dtype)
         pitch = pitchf = None
         if model.f0 == 1:
             f0 = f0x(x.float())[:p_len]

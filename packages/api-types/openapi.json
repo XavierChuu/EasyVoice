@@ -286,8 +286,8 @@
         "tags": [
           "voices"
         ],
-        "summary": "Rename",
-        "operationId": "rename_voices__voice_id__patch",
+        "summary": "Update",
+        "operationId": "update_voices__voice_id__patch",
         "parameters": [
           {
             "name": "voice_id",
@@ -304,7 +304,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RenameRequest"
+                "$ref": "#/components/schemas/VoiceUpdate"
               }
             }
           }
@@ -382,11 +382,130 @@
               "type": "string",
               "title": "Voice Id"
             }
+          },
+          {
+            "name": "variant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Variant"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/{voice_id}/variants": {
+      "post": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Add Variant",
+        "operationId": "add_variant_voices__voice_id__variants_post",
+        "parameters": [
+          {
+            "name": "voice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Voice Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_add_variant_voices__voice_id__variants_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voices/{voice_id}/variants/{variant_id}": {
+      "delete": {
+        "tags": [
+          "voices"
+        ],
+        "summary": "Delete Variant",
+        "operationId": "delete_variant_voices__voice_id__variants__variant_id__delete",
+        "parameters": [
+          {
+            "name": "voice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Voice Id"
+            }
+          },
+          {
+            "name": "variant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Variant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -1120,6 +1239,41 @@
         ],
         "title": "AudioDevices"
       },
+      "Body_add_variant_voices__voice_id__variants_post": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "transcript": {
+            "type": "string",
+            "title": "Transcript"
+          },
+          "emotion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emotion"
+          },
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "transcript",
+          "file"
+        ],
+        "title": "Body_add_variant_voices__voice_id__variants_post"
+      },
       "Body_analyze_voices_analyze_post": {
         "properties": {
           "file": {
@@ -1161,6 +1315,39 @@
             "type": "string",
             "contentMediaType": "application/octet-stream",
             "title": "File"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
           }
         },
         "type": "object",
@@ -1688,6 +1875,20 @@
           "required": {
             "type": "boolean",
             "title": "Required"
+          },
+          "languages": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Languages"
           }
         },
         "type": "object",
@@ -1700,7 +1901,8 @@
           "license",
           "commercial",
           "installed",
-          "required"
+          "required",
+          "languages"
         ],
         "title": "ModelInfo"
       },
@@ -1788,6 +1990,52 @@
               }
             ],
             "title": "Samplerate"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/VariantInfo"
+            },
+            "type": "array",
+            "title": "Variants",
+            "default": []
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "male",
+                  "female",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
           }
         },
         "type": "object",
@@ -1802,7 +2050,11 @@
           "author",
           "license",
           "hasRef",
-          "sampleRate"
+          "sampleRate",
+          "variants",
+          "gender",
+          "country",
+          "region"
         ],
         "title": "Profile",
         "description": "Dạng gửi cho UI."
@@ -1890,19 +2142,6 @@
         ],
         "title": "RefCheck"
       },
-      "RenameRequest": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "RenameRequest"
-      },
       "SystemInfo": {
         "properties": {
           "appVersion": {
@@ -1980,6 +2219,36 @@
         ],
         "title": "Transcript"
       },
+      "TtsPart": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "profileId": {
+            "type": "string",
+            "title": "Profileid"
+          },
+          "variantId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variantid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "profileId"
+        ],
+        "title": "TtsPart",
+        "description": "Một đoạn văn bản đọc bằng giọng/biến thể riêng (người dùng bôi đen rồi chọn giọng)."
+      },
       "TtsRequest": {
         "properties": {
           "profileId": {
@@ -1989,6 +2258,25 @@
           "text": {
             "type": "string",
             "title": "Text"
+          },
+          "variantId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variantid"
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/TtsPart"
+            },
+            "type": "array",
+            "title": "Parts",
+            "default": []
           },
           "mode": {
             "type": "string",
@@ -2076,6 +2364,28 @@
               }
             ],
             "title": "Durationsec"
+          },
+          "profileId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profileid"
+          },
+          "variantId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variantid"
           }
         },
         "type": "object",
@@ -2084,7 +2394,9 @@
           "text",
           "status",
           "progress",
-          "durationSec"
+          "durationSec",
+          "profileId",
+          "variantId"
         ],
         "title": "TtsSentence"
       },
@@ -2127,6 +2439,97 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VariantInfo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "emotion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emotion"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "emotion",
+          "createdAt"
+        ],
+        "title": "VariantInfo"
+      },
+      "VoiceUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "male",
+                  "female",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          }
+        },
+        "type": "object",
+        "title": "VoiceUpdate",
+        "description": "Chỉ trường nào gửi lên mới được đổi; gửi null cho thẻ = xóa thẻ."
       }
     }
   }

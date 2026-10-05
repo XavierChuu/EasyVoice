@@ -10,8 +10,9 @@ from ..core.job_queue import TtsSentence
 from ..core.state import EngineState
 from ..schemas import JobRef, RedoRequest, TtsRequest
 from ..services import audio_io
-from ..services.registry import TTS_KEY
-from ..services.tts.pipeline import TtsRender, plan_sentences, run_tts
+from ..services.registry import ASR_KEY, pick_tts_model, tts_key
+from ..services.tts.pipeline import TtsRender, VoiceRef, plan_parts, run_tts, text_language
+from ..services.tts.ref_prep import prepare_ref
 from .deps import get_state
 
 router = APIRouter(tags=["tts"])
@@ -25,30 +26,45 @@ def _render(state: EngineState, job_id: str) -> TtsRender:
 
 
 def _runner(state: EngineState, render: TtsRender):
-    return lambda ctx: run_tts(ctx, render, lambda: state.models.get(TTS_KEY), state.register_file)
+    return lambda ctx: run_tts(ctx, render, lambda: state.models.get(tts_key(state, render.model_id)), state.register_file)
 
 
 @router.post("/tts", response_model=JobRef)
 def start_tts(req: TtsRequest, state: EngineState = Depends(get_state)) -> JobRef:
     if req.mode == "chain":
         raise EngineError("NOT_IMPLEMENTED", "chế độ Qua RVC có ở Phase 3")
-    profile = state.voices.get(req.profile_id)
-    if "tts" not in profile.capabilities or not profile.ref_audio:
-        raise EngineError("BAD_REQUEST", "giọng này chưa dùng được cho Đọc văn bản")
-    sentences = plan_sentences(req.text)
-    if not sentences:
+    default = (req.profile_id, req.variant_id or None)
+    parts = [(p.text, (p.profile_id, p.variant_id or None)) for p in req.parts] or [(req.text, default)]
+    planned = plan_parts(parts)
+    if not planned:
         raise EngineError("BAD_REQUEST", "văn bản trống")
-    d = state.voices.dir(profile.id)
+    # Kiểm tra mọi giọng/biến thể được dùng TRƯỚC khi nhận job (lỗi báo ngay cho UI, không phải giữa chừng).
+    refs: dict = {}
+    for key in {default, *(k for _, k in planned)}:
+        p, ref, text, cache = state.voices.tts_ref(*key)
+        refs[key] = VoiceRef(ref, text, cache, p.language)
+    profile = state.voices.get(req.profile_id)
+    # Chuẩn hóa + chọn model theo ngôn ngữ của VĂN BẢN (giọng mẫu tiếng Anh vẫn đọc được văn bản tiếng Việt).
+    lang = text_language(req.text or " ".join(t for t, _ in parts), profile.language)
     # Tạo render TRƯỚC khi submit: worker có thể chạy job ngay lập tức.
-    render = TtsRender(state.paths.jobs, profile.language, d / profile.ref_audio, profile.ref_text or "",
-                       req.speed, req.seed, max(0, min(2000, req.pause_ms)), [tuple(x) for x in req.user_dict])
+    render = TtsRender(state.paths.jobs, lang, refs, default, req.speed, req.seed, max(0, min(2000, req.pause_ms)),
+                       [tuple(x) for x in req.user_dict])
+    render.model_id = pick_tts_model(state, lang)
 
     def run(ctx):
         render.out_dir = state.job_dir(ctx.job)
+        ctx.log(f"Model TTS: {render.model_id} · văn bản {lang} · {len(refs)} giọng")
+        for r in refs.values():
+            try:
+                r.ref_audio, r.ref_text = prepare_ref(r.cache_dir, r.ref_audio, r.ref_text, r.language,
+                                                      lambda path, lang: state.models.get(ASR_KEY).words(path, lang))
+            except EngineError as exc:  # thiếu Whisper: để F5-TTS tự cắt (chất lượng kém hơn với ref dài)
+                ctx.log(f"Không chuẩn bị được ref: {exc}")
         _runner(state, render)(ctx)
 
-    job = state.queue.submit("tts", profile.name, run, profile_id=profile.id,
-                             sentences=[TtsSentence(index=i, text=s) for i, s in enumerate(sentences)])
+    sentences = [TtsSentence(index=i, text=s, profile_id=None if k == default else k[0],
+                             variant_id=None if k == default else k[1]) for i, (s, k) in enumerate(planned)]
+    job = state.queue.submit("tts", profile.name, run, profile_id=profile.id, sentences=sentences)
     state.extras[f"tts:{job.id}"] = render
     return JobRef(job_id=job.id)
 

@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { FileRef } from '../../api/types';
-import { Alert, Bars, Btn, Label, Modal, Segs } from '../../components/ui';
+import { Alert, Btn, Label, Modal, Segs } from '../../components/ui';
+import { Waveform } from '../../components/Waveform';
 import { isElectron, osName, platform } from '../../lib/platform';
 import { usePlayer } from '../../stores/player';
 
@@ -158,7 +159,8 @@ export function Recorder({ onDone, onClose }: { onDone: (ref: FileRef) => void; 
               [{playing ? `■ ${t('common.stop')}` : `▶ ${t('recorder.listen')}`}]
             </Btn>
           </div>
-          <Bars seed={1.7} n={60} height={48} playhead={playing ? player.position : undefined} />
+          <Waveform source={result?.blob} height={88} label={t('recorder.take')} position={playing ? player.position : undefined}
+            onSeek={result ? (f) => (playing ? player.seek(f) : player.play('recorder', { durationSec: elapsed, url: result.url }, f)) : undefined} />
         </div>
       )}
       {state === 'recording' && elapsed > 1.5 && level < 5 && <Alert tone="line" title={t('recorder.silent')}>{t('recorder.silentBody')}</Alert>}

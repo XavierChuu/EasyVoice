@@ -21,7 +21,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-tts = ["f5-tts==1.1.22"]
+# datasets: f5-tts import nó; không chặn dưới thì resolver lùi về 1.1.1 (hỏng với pyarrow mới) để lấy fsspec mới nhất.
+tts = ["f5-tts==1.1.22", "datasets>=3"]
 asr = ["faster-whisper>=1.0"]
 realtime = ["sounddevice"]
 dev = ["pytest", "httpx"]

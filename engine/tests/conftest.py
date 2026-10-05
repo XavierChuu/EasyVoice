@@ -21,11 +21,11 @@ class FakeTts:
     sample_rate = 24000
 
     def __init__(self) -> None:
-        self.calls: list[tuple[str, int]] = []
+        self.calls: list[tuple[str, int, str]] = []
 
     def synthesize(self, text, ref_audio, ref_text, speed, seed):
         assert Path(ref_audio).exists() and ref_text
-        self.calls.append((text, seed))
+        self.calls.append((text, seed, str(ref_audio)))
         n = int(self.sample_rate * max(0.3, len(text) * 0.03) / speed)
         t = np.arange(n) / self.sample_rate
         return (0.3 * np.sin(2 * np.pi * (180 + seed % 50) * t)).astype(np.float32)

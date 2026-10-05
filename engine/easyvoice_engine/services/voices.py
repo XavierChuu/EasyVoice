@@ -20,6 +20,36 @@ from . import audio_io
 REF_SR = 24000  # F5-TTS làm việc ở 24 kHz
 Lang = Literal["vi", "en", "unknown"]
 License = Literal["personal", "commercial", "noredist", "unknown"]
+Gender = Literal["male", "female", "other"]
+
+
+def clean_tags(gender: str | None, country: str | None, region: str | None) -> dict:
+    """Thẻ phân loại giọng: giới tính, quốc gia (mã ISO 3166 hai chữ, vd. VN), vùng miền (khóa gợi ý hoặc tự gõ)."""
+    if gender not in (None, "", "male", "female", "other"):
+        raise EngineError("BAD_REQUEST", f"giới tính không hợp lệ: {gender}")
+    c = (country or "").strip().upper() or None
+    if c is not None and (len(c) != 2 or not c.isalpha()):
+        raise EngineError("BAD_REQUEST", f"mã quốc gia không hợp lệ: {country}")
+    return {"gender": gender or None, "country": c, "region": (region or "").strip()[:40] or None}
+
+
+class VoiceVariant(ApiModel):
+    """Biến thể của cùng một người đọc (vui vẻ, giận dữ...): một đoạn ref riêng thể hiện cảm xúc đó.
+    F5-TTS sao chép cả ngữ điệu/cảm xúc của đoạn ref, nên mỗi biến thể chỉ cần ref + lời thoại riêng."""
+
+    id: str
+    name: str
+    emotion: str | None = None  # khóa cảm xúc gợi ý (happy, angry...) hoặc None nếu người dùng tự đặt tên
+    created_at: str
+    ref_audio: str  # đường dẫn tương đối trong thư mục giọng: variants/<id>/ref.wav
+    ref_text: str
+
+
+class VariantInfo(ApiModel):
+    id: str
+    name: str
+    emotion: str | None
+    created_at: str
 
 
 class VoiceProfile(ApiModel):
@@ -44,6 +74,10 @@ class VoiceProfile(ApiModel):
     license: License = "personal"
     imported: bool = False
     train_job_id: str | None = None
+    variants: list[VoiceVariant] = []
+    gender: Gender | None = None
+    country: str | None = None
+    region: str | None = None
 
 
 class Profile(ApiModel):
@@ -60,6 +94,10 @@ class Profile(ApiModel):
     license: License
     has_ref: bool
     sample_rate: int | None
+    variants: list[VariantInfo] = []
+    gender: Gender | None = None
+    country: str | None = None
+    region: str | None = None
 
 
 class RefCheck(ApiModel):
@@ -152,7 +190,10 @@ class VoiceStore:
     def to_api(p: VoiceProfile) -> Profile:
         return Profile(id=p.id, name=p.name, language=p.language, created_at=p.created_at, capabilities=p.capabilities,
                        train_job_id=p.train_job_id, imported=p.imported, author=p.author, license=p.license,
-                       has_ref=bool(p.ref_audio), sample_rate=p.rvc_sample_rate)
+                       has_ref=bool(p.ref_audio), sample_rate=p.rvc_sample_rate,
+                       variants=[VariantInfo(id=v.id, name=v.name, emotion=v.emotion, created_at=v.created_at)
+                                 for v in p.variants],
+                       gender=p.gender, country=p.country, region=p.region)
 
     def _new(self, name: str, language: Lang, **fields) -> VoiceProfile:
         name = name.strip()
@@ -161,7 +202,8 @@ class VoiceStore:
         return VoiceProfile(id=uuid.uuid4().hex[:12], name=name[:80], language=language,
                             created_at=datetime.now(timezone.utc).isoformat(timespec="seconds"), **fields)
 
-    def create_quick(self, name: str, language: Lang, transcript: str, upload: Path, consent: bool) -> VoiceProfile:
+    def create_quick(self, name: str, language: Lang, transcript: str, upload: Path, consent: bool,
+                     tags: dict | None = None) -> VoiceProfile:
         if not consent:
             raise EngineError("BAD_REQUEST", "cần xác nhận quyền sử dụng giọng")
         if not transcript.strip():
@@ -171,7 +213,7 @@ class VoiceStore:
             raise EngineError("BAD_FILE", "audio quá ngắn")
         clean, _ = clean_reference(audio, sr)
         p = self._new(name, language, capabilities=["tts"], ref_audio="ref.wav", ref_text=transcript.strip(),
-                      consent_confirmed=True)
+                      consent_confirmed=True, **(tags or {}))
         d = self.dir(p.id)
         d.mkdir(parents=True)
         audio_io.save(d / "ref.wav", clean, sr)
@@ -194,12 +236,16 @@ class VoiceStore:
         self.on_change()
         return p
 
-    def rename(self, voice_id: str, name: str) -> VoiceProfile:
+    def update(self, voice_id: str, name: str | None = None, tags: dict | None = None) -> VoiceProfile:
+        """Đổi tên và/hoặc thẻ phân loại. tags chỉ chứa các khóa người dùng gửi (gửi null = xóa thẻ)."""
         with self._lock:
             p = self.get(voice_id)
-            if not name.strip():
-                raise EngineError("BAD_REQUEST", "tên giọng trống")
-            p.name = name.strip()[:80]
+            if name is not None:
+                if not name.strip():
+                    raise EngineError("BAD_REQUEST", "tên giọng trống")
+                p.name = name.strip()[:80]
+            for k, v in (tags or {}).items():
+                setattr(p, k, v)
             self._write(p)
         self.on_change()
         return p
@@ -209,7 +255,70 @@ class VoiceStore:
         shutil.rmtree(self.dir(voice_id), ignore_errors=True)
         self.on_change()
 
-    def preview_path(self, voice_id: str) -> Path:
+    # ---------- biến thể ----------
+    def add_variant(self, voice_id: str, name: str, emotion: str | None, transcript: str, upload: Path) -> VoiceProfile:
+        name = name.strip()
+        if not name:
+            raise EngineError("BAD_REQUEST", "tên biến thể trống")
+        if not transcript.strip():
+            raise EngineError("BAD_REQUEST", "thiếu lời thoại")
+        audio, sr = audio_io.load(upload, REF_SR)
+        if len(audio) < sr:
+            raise EngineError("BAD_FILE", "audio quá ngắn")
+        clean, _ = clean_reference(audio, sr)
+        with self._lock:
+            p = self.get(voice_id)
+            if "tts" not in p.capabilities:
+                raise EngineError("BAD_REQUEST", "biến thể chỉ dùng cho giọng Đọc văn bản (có đoạn ref)")
+            if any(v.name.casefold() == name.casefold() for v in p.variants):
+                raise EngineError("BAD_REQUEST", f"đã có biến thể “{name}”")
+            vid = uuid.uuid4().hex[:8]
+            rel = f"variants/{vid}"
+            d = self.dir(voice_id) / rel
+            d.mkdir(parents=True)
+            audio_io.save(d / "ref.wav", clean, sr)
+            (d / "ref.txt").write_text(transcript.strip(), encoding="utf-8")
+            p.variants.append(VoiceVariant(id=vid, name=name[:40], emotion=emotion or None, ref_audio=f"{rel}/ref.wav",
+                                           ref_text=transcript.strip(),
+                                           created_at=datetime.now(timezone.utc).isoformat(timespec="seconds")))
+            self._write(p)
+        self.on_change()
+        return p
+
+    def delete_variant(self, voice_id: str, variant_id: str) -> VoiceProfile:
+        with self._lock:
+            p = self.get(voice_id)
+            v = self.variant(p, variant_id)
+            p.variants = [x for x in p.variants if x.id != v.id]
+            self._write(p)
+            shutil.rmtree(self.dir(voice_id) / "variants" / v.id, ignore_errors=True)
+        self.on_change()
+        return p
+
+    @staticmethod
+    def variant(p: VoiceProfile, variant_id: str) -> VoiceVariant:
+        v = next((x for x in p.variants if x.id == variant_id), None)
+        if v is None:
+            raise EngineError("NOT_FOUND", f"biến thể {variant_id}")
+        return v
+
+    def tts_ref(self, voice_id: str, variant_id: str | None) -> tuple[VoiceProfile, Path, str, Path]:
+        """(profile, ref.wav, lời thoại, thư mục cache ref đã cắt) của giọng chuẩn hoặc một biến thể."""
+        p = self.get(voice_id)
+        if "tts" not in p.capabilities or not p.ref_audio:
+            raise EngineError("BAD_REQUEST", f"giọng “{p.name}” chưa dùng được cho Đọc văn bản")
+        d = self.dir(voice_id)
+        if not variant_id:
+            return p, d / p.ref_audio, p.ref_text or "", d
+        v = self.variant(p, variant_id)
+        ref = d / v.ref_audio
+        return p, ref, v.ref_text, ref.parent
+
+    def preview_path(self, voice_id: str, variant_id: str | None = None) -> Path:
+        if variant_id:
+            p = self.get(voice_id)
+            return self.dir(voice_id) / self.variant(p, variant_id).ref_audio
+
         p = self.get(voice_id)
         d = self.dir(voice_id)
         for name in ("preview.wav", p.ref_audio or ""):

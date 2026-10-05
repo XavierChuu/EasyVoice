@@ -9,10 +9,10 @@ from fastapi.responses import FileResponse
 
 from ..core.errors import EngineError
 from ..core.state import EngineState, ImportStaging
-from ..schemas import ImportCheck, ImportInspection, ImportRequest, Profile, RefAnalysis, RenameRequest, Transcript
+from ..schemas import ImportCheck, ImportInspection, ImportRequest, Profile, RefAnalysis, Transcript, VoiceUpdate
 from ..services.registry import ASR_KEY
 from ..services.rvc.import_pth import convert_pth
-from ..services.voices import analyze_reference
+from ..services.voices import analyze_reference, clean_tags
 from .deps import get_state, save_upload
 
 router = APIRouter(tags=["voices"])
@@ -44,18 +44,22 @@ def transcribe(file: UploadFile = File(...), language: str = Form("vi"), state: 
 @router.post("/voices", response_model=Profile)
 def create_quick(
     name: str = Form(...), language: Literal["vi", "en"] = Form("vi"), transcript: str = Form(...),
-    consent: bool = Form(...), file: UploadFile = File(...), state: EngineState = Depends(get_state),
+    consent: bool = Form(...), file: UploadFile = File(...), gender: str | None = Form(None),
+    country: str | None = Form(None), region: str | None = Form(None), state: EngineState = Depends(get_state),
 ) -> Profile:
+    tags = clean_tags(gender, country, region)
     path = save_upload(state, file)
     try:
-        return state.voices.to_api(state.voices.create_quick(name, language, transcript, path, consent))
+        return state.voices.to_api(state.voices.create_quick(name, language, transcript, path, consent, tags))
     finally:
         path.unlink(missing_ok=True)
 
 
 @router.patch("/voices/{voice_id}", response_model=Profile)
-def rename(voice_id: str, req: RenameRequest, state: EngineState = Depends(get_state)) -> Profile:
-    return state.voices.to_api(state.voices.rename(voice_id, req.name))
+def update(voice_id: str, req: VoiceUpdate, state: EngineState = Depends(get_state)) -> Profile:
+    sent = req.model_fields_set
+    tags = {k: v for k, v in clean_tags(req.gender, req.country, req.region).items() if k in sent}
+    return state.voices.to_api(state.voices.update(voice_id, req.name if "name" in sent else None, tags))
 
 
 @router.delete("/voices/{voice_id}", status_code=204)
@@ -65,8 +69,25 @@ def delete(voice_id: str, state: EngineState = Depends(get_state)) -> None:
 
 
 @router.get("/voices/{voice_id}/preview", response_class=FileResponse)
-def preview(voice_id: str, state: EngineState = Depends(get_state)) -> FileResponse:
-    return FileResponse(state.voices.preview_path(voice_id))
+def preview(voice_id: str, variant: str | None = None, state: EngineState = Depends(get_state)) -> FileResponse:
+    return FileResponse(state.voices.preview_path(voice_id, variant))
+
+
+@router.post("/voices/{voice_id}/variants", response_model=Profile)
+def add_variant(
+    voice_id: str, name: str = Form(...), transcript: str = Form(...), emotion: str | None = Form(None),
+    file: UploadFile = File(...), state: EngineState = Depends(get_state),
+) -> Profile:
+    path = save_upload(state, file)
+    try:
+        return state.voices.to_api(state.voices.add_variant(voice_id, name, emotion, transcript, path))
+    finally:
+        path.unlink(missing_ok=True)
+
+
+@router.delete("/voices/{voice_id}/variants/{variant_id}", response_model=Profile)
+def delete_variant(voice_id: str, variant_id: str, state: EngineState = Depends(get_state)) -> Profile:
+    return state.voices.to_api(state.voices.delete_variant(voice_id, variant_id))
 
 
 @router.post("/voices/import/inspect", response_model=ImportInspection)

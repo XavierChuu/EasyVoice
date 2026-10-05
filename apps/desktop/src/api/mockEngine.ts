@@ -13,7 +13,7 @@ import {
   type AudioDevice, type DatasetFile, type DictEntry, type EngineEvent, type ExportOptions, type FileRef,
   type ImportInspection, type Job, type ModelInfo, type PlaySource, type Profile, type RealtimeConfig, type RealtimeStats,
   type RefAnalysis, type StsRequest, type StsStage, type SystemInfo, type TrainPreset, type TrainStage,
-  type TtsRequest, type VoiceLang,
+  type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
 } from './types';
 
 const TICK_MS = 120;
@@ -26,7 +26,8 @@ const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toStri
 const daysAgo = (d: number) => new Date(Date.now() - d * 86400_000).toISOString();
 
 const mkProfile = (p: Partial<Profile> & Pick<Profile, 'id' | 'name' | 'language' | 'createdAt' | 'capabilities'>): Profile => ({
-  trainJobId: null, imported: false, author: null, license: 'personal', hasRef: true, sampleRate: null, ...p,
+  trainJobId: null, imported: false, author: null, license: 'personal', hasRef: true, sampleRate: null, variants: [],
+  gender: null, country: null, region: null, ...p,
 });
 
 const ok = (key: string, value: string, bad = false) => ({ key, value, bad });
@@ -36,13 +37,13 @@ export function trainStage(p: number): TrainStage {
 }
 
 const MODEL_CATALOG: Omit<ModelInfo, 'installed'>[] = [
-  { id: 'f5-vi', name: 'F5-TTS Vietnamese', role: 'Text to Speech', group: 'tts', sizeMb: 1350, license: 'CC-BY-NC-4.0', commercial: false, required: true },
-  { id: 'vocos', name: 'Vocos mel 24 kHz', role: 'Vocoder', group: 'tts', sizeMb: 52, license: 'MIT', commercial: true, required: true },
-  { id: 'whisper-small', name: 'Whisper small (faster-whisper)', role: 'Transcript', group: 'tts', sizeMb: 470, license: 'MIT', commercial: true, required: false },
-  { id: 'contentvec', name: 'ContentVec base', role: 'Voice Changer · encoder', group: 'sts', sizeMb: 360, license: 'MIT', commercial: true, required: true },
-  { id: 'rmvpe', name: 'RMVPE', role: 'Voice Changer · pitch', group: 'sts', sizeMb: 173, license: 'MIT', commercial: true, required: true },
-  { id: 'rvc-pretrained', name: 'RVC v2 pretrained 40k', role: 'Voice training', group: 'sts', sizeMb: 110, license: 'MIT', commercial: true, required: false },
-  { id: 'demucs', name: 'Demucs htdemucs', role: 'Music separation', group: 'common', sizeMb: 320, license: 'MIT', commercial: true, required: false },
+  { id: 'f5-vi', name: 'F5-TTS Vietnamese', role: 'Text to Speech', group: 'tts', sizeMb: 1350, license: 'CC-BY-NC-4.0', commercial: false, required: true, languages: ['vi', 'en'] },
+  { id: 'vocos', name: 'Vocos mel 24 kHz', role: 'Vocoder', group: 'tts', sizeMb: 52, license: 'MIT', commercial: true, required: true, languages: null },
+  { id: 'whisper-small', name: 'Whisper small (faster-whisper)', role: 'Transcript', group: 'tts', sizeMb: 470, license: 'MIT', commercial: true, required: false, languages: null },
+  { id: 'contentvec', name: 'ContentVec base', role: 'Voice Changer · encoder', group: 'sts', sizeMb: 360, license: 'MIT', commercial: true, required: true, languages: null },
+  { id: 'rmvpe', name: 'RMVPE', role: 'Voice Changer · pitch', group: 'sts', sizeMb: 173, license: 'MIT', commercial: true, required: true, languages: null },
+  { id: 'rvc-pretrained', name: 'RVC v2 pretrained 40k', role: 'Voice training', group: 'sts', sizeMb: 110, license: 'MIT', commercial: true, required: false, languages: null },
+  { id: 'demucs', name: 'Demucs htdemucs', role: 'Music separation', group: 'common', sizeMb: 320, license: 'MIT', commercial: true, required: false, languages: null },
 ];
 
 function loadInstalled(): Set<string> {
@@ -84,10 +85,17 @@ export class MockEngine implements EngineClient {
 
   constructor() {
     this.voices = [
-      mkProfile({ id: 'p1', name: 'My Voice', language: 'vi', createdAt: daysAgo(2), capabilities: ['tts', 'sts'], sampleRate: 40000 }),
-      mkProfile({ id: 'p2', name: 'Warm Newsreader', language: 'vi', createdAt: daysAgo(6), capabilities: ['tts'] }),
-      mkProfile({ id: 'p3', name: 'Narrator EN', language: 'en', createdAt: daysAgo(13), capabilities: ['tts', 'sts'], sampleRate: 40000 }),
-      mkProfile({ id: 'p4', name: 'Cartoon Character', language: 'vi', createdAt: daysAgo(0), capabilities: ['tts'] }),
+      mkProfile({
+        id: 'p1', name: 'My Voice', language: 'vi', createdAt: daysAgo(2), capabilities: ['tts', 'sts'], sampleRate: 40000,
+        gender: 'male', country: 'VN', region: 'north',
+        variants: [
+          { id: 'v1', name: 'Vui vẻ', emotion: 'happy', createdAt: daysAgo(1) },
+          { id: 'v2', name: 'Giận dữ', emotion: 'angry', createdAt: daysAgo(1) },
+        ],
+      }),
+      mkProfile({ id: 'p2', name: 'Warm Newsreader', language: 'vi', createdAt: daysAgo(6), capabilities: ['tts'], gender: 'female', country: 'VN', region: 'south' }),
+      mkProfile({ id: 'p3', name: 'Narrator EN', language: 'en', createdAt: daysAgo(13), capabilities: ['tts', 'sts'], sampleRate: 40000, gender: 'male', country: 'GB' }),
+      mkProfile({ id: 'p4', name: 'Cartoon Character', language: 'vi', createdAt: daysAgo(0), capabilities: ['tts'], gender: 'other', country: 'VN', region: 'central' }),
     ];
     const train = this.newJob('train', 'Cartoon Character', 'p4');
     train.progress = 0.62;
@@ -341,9 +349,12 @@ export class MockEngine implements EngineClient {
       : 'Hi everyone, today I will show you a really simple recipe.';
   }
 
-  async createQuickVoice(input: { name: string; language: VoiceLang; file: FileRef; transcript: string }) {
+  async createQuickVoice(input: { name: string; language: VoiceLang; file: FileRef; transcript: string; tags?: VoiceTags }) {
     await sleep(800);
-    const p = mkProfile({ id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(), capabilities: ['tts'] });
+    const p = mkProfile({
+      id: uid('p'), name: input.name, language: input.language, createdAt: new Date().toISOString(), capabilities: ['tts'],
+      ...input.tags, country: input.tags?.country?.toUpperCase() || null,
+    });
     this.refAudio.set(p.id, input.file);
     this.voices.unshift(p);
     this.emitVoices();
@@ -369,9 +380,14 @@ export class MockEngine implements EngineClient {
     return { ...p };
   }
 
-  async renameVoice(id: string, name: string) {
+  async updateVoice(id: string, patch: VoiceUpdate) {
     const v = this.voices.find((p) => p.id === id);
-    if (v) v.name = name;
+    if (v) {
+      if (patch.name) v.name = patch.name;
+      if ('gender' in patch) v.gender = patch.gender ?? null;
+      if ('country' in patch) v.country = patch.country?.toUpperCase() || null;
+      if ('region' in patch) v.region = patch.region || null;
+    }
     this.emitVoices();
   }
 
@@ -388,8 +404,29 @@ export class MockEngine implements EngineClient {
     this.emitVoices();
   }
 
-  async previewVoice(id: string): Promise<PlaySource> {
-    const ref = this.refAudio.get(id);
+  async addVariant(voiceId: string, input: { name: string; emotion: string | null; file: FileRef; transcript: string }) {
+    await sleep(500);
+    const v = this.voices.find((p) => p.id === voiceId);
+    if (!v) throw new EngineError('NOT_FOUND', voiceId);
+    if (!v.capabilities.includes('tts')) throw new EngineError('BAD_REQUEST', 'biến thể chỉ dùng cho giọng Đọc văn bản');
+    if (v.variants.some((x) => x.name.toLowerCase() === input.name.trim().toLowerCase())) {
+      throw new EngineError('BAD_REQUEST', `đã có biến thể “${input.name.trim()}”`);
+    }
+    const variant = { id: uid('v'), name: input.name.trim(), emotion: input.emotion, createdAt: new Date().toISOString() };
+    v.variants = [...v.variants, variant];
+    this.refAudio.set(`${voiceId}:${variant.id}`, input.file);
+    this.emitVoices();
+    return { ...v };
+  }
+
+  async deleteVariant(voiceId: string, variantId: string) {
+    const v = this.voices.find((p) => p.id === voiceId);
+    if (v) v.variants = v.variants.filter((x) => x.id !== variantId);
+    this.emitVoices();
+  }
+
+  async previewVoice(id: string, variantId?: string): Promise<PlaySource> {
+    const ref = this.refAudio.get(variantId ? `${id}:${variantId}` : id);
     if (ref?.file) return { durationSec: 8, url: URL.createObjectURL(ref.file) };
     return { durationSec: 4 }; // giọng mẫu dựng sẵn của mock: không có audio
   }
@@ -480,7 +517,18 @@ export class MockEngine implements EngineClient {
     this.assertGpuFree();
     const v = this.voices.find((p) => p.id === req.profileId);
     const job = this.newJob('tts', v?.name ?? 'TTS', req.profileId);
-    job.sentences = splitSentences(req.text).map((text, index) => ({ index, text, status: 'queued' as const, progress: 0, durationSec: null }));
+    const parts = req.parts?.length ? req.parts : [{ text: req.text, profileId: req.profileId, variantId: req.variantId ?? null }];
+    for (const p of parts) {
+      const pv = this.voices.find((x) => x.id === p.profileId);
+      if (!pv) throw new EngineError('NOT_FOUND', `voice ${p.profileId}`);
+      if (p.variantId && !pv.variants.some((x) => x.id === p.variantId)) throw new EngineError('NOT_FOUND', `biến thể ${p.variantId}`);
+    }
+    const isDefault = (p: (typeof parts)[number]) => p.profileId === req.profileId && (p.variantId ?? null) === (req.variantId ?? null);
+    job.sentences = parts.flatMap((p) => splitSentences(p.text).map((text) => ({ text, p })))
+      .map(({ text, p }, index) => ({
+        index, text, status: 'queued' as const, progress: 0, durationSec: null,
+        profileId: isDefault(p) ? null : p.profileId, variantId: isDefault(p) ? null : (p.variantId ?? null),
+      }));
     this.ttsReq.set(job.id, { lang: v?.language === 'en' ? 'en-US' : 'vi-VN', rate: req.speed });
     this.enqueue(job);
     return job.id;
@@ -617,7 +665,11 @@ export class MockEngine implements EngineClient {
     this.schedule();
   }
 
-  async updateRealtime(patch: Partial<Pick<RealtimeConfig, 'pitch' | 'gateDb'>>) {
+  async updateRealtime(patch: Partial<Pick<RealtimeConfig, 'pitch' | 'gateDb' | 'profileId'>>) {
+    if (patch.profileId) {
+      const v = this.voices.find((p) => p.id === patch.profileId);
+      if (!v || !v.capabilities.includes('sts') || v.trainJobId) throw new EngineError('NO_STS_VOICE');
+    }
     if (this.rt.cfg) this.rt.cfg = { ...this.rt.cfg, ...patch };
   }
 

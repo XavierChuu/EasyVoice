@@ -98,23 +98,40 @@
     "new": "GIỌNG MỚI",
     "today": "HÔM NAY",
     "menu": "Tùy chọn giọng",
-    "rename": "Đổi tên",
+    "rename": "Sửa tên & thẻ",
     "viewTraining": "Chi tiết huấn luyện",
     "delete": "Xóa",
     "read": "Đọc",
     "convert": "Đổi giọng",
     "export": "Xuất giọng",
     "importedBy": "đã nhập · của {{author}}",
-    "renameTitle": "ĐỔI_TÊN_GIỌNG",
+    "renameTitle": "SỬA_GIỌNG",
     "deleteTitle": "XÓA_GIỌNG",
     "deleteBody": "Xóa “{{name}}”? Model và audio mẫu sẽ bị xóa khỏi máy. Không thể hoàn tác.",
     "deleteBodyTraining": "“{{name}}” đang huấn luyện. Xóa sẽ dừng huấn luyện và xóa toàn bộ, kể cả checkpoint. Không thể hoàn tác.",
     "deleted": "Đã xóa “{{name}}”.",
     "emptyCaption": "CHƯA CÓ GIỌNG NÀO",
     "empty": "Tạo giọng đầu tiên từ một đoạn audio ngắn, hoặc nhập giọng người khác chia sẻ.",
-    "noPreview": "Giọng này chưa có đoạn nghe thử."
+    "noPreview": "Giọng này chưa có đoạn nghe thử.",
+    "search": "Tìm giọng",
+    "searchPlaceholder": "Tìm theo tên, biến thể, giới tính, quốc gia, vùng miền…",
+    "noMatch": "Không có giọng nào khớp “{{query}}”.",
+    "filter": "LỌC",
+    "sort": {
+      "label": "Sắp xếp",
+      "newest": "Mới nhất",
+      "oldest": "Cũ nhất",
+      "name": "Tên A–Z"
+    },
+    "showing": "{{shown}}/{{total}} giọng",
+    "noTags": "Chưa có giọng nào gắn thẻ này.",
+    "capability": "Khả năng",
+    "hasVariants": "Có biến thể",
+    "clearFilters": "XÓA TÌM & LỌC",
+    "noMatchFilter": "Không có giọng nào khớp bộ lọc."
   },
   "wizard": {
+    "noPreview": "Không xem trước được waveform.",
     "aria": "Tạo giọng mới",
     "name": "TÊN GIỌNG",
     "namePlaceholder": "vd. Giọng đọc podcast",
@@ -344,6 +361,18 @@
     "background": "Huấn luyện chạy nền. Bạn có thể đóng bảng này và tiếp tục dùng app."
   },
   "tts": {
+    "failedAt": "LỖI Ở",
+    "failedTitle": "Không đọc được văn bản",
+    "retry": "THỬ LẠI",
+    "langUnsupported": {
+      "title": "Chưa có model đọc được {{lang}}",
+      "body": "Model đọc đã cài ({{models}}) không hỗ trợ ngôn ngữ này: văn bản vẫn được đọc nhưng sai phát âm và thanh điệu.",
+      "download": "Tải “{{name}}” ở Cài đặt → Chạy lại thiết lập ban đầu."
+    },
+    "langMismatch": {
+      "title": "Văn bản và giọng mẫu khác ngôn ngữ",
+      "body": "Văn bản là {{text}}, giọng mẫu là {{voice}}. Giọng đọc có thể mang âm sắc của ngôn ngữ giọng mẫu."
+    },
     "code": "02 / ĐỌC VĂN BẢN",
     "title": "Đọc văn bản",
     "desc": "Dán văn bản, chọn giọng, bấm Đọc. Văn bản dài được tách thành từng câu.",
@@ -384,7 +413,23 @@
     "redo": "LÀM LẠI",
     "playSentence": "Nghe câu này",
     "exported": "Đã lưu {{fmt}}.",
-    "mockNote": "MOCK · đọc bằng giọng hệ thống để test phần nghe — chưa phải F5-TTS"
+    "mockNote": "MOCK · đọc bằng giọng hệ thống để test phần nghe — chưa phải F5-TTS",
+    "segments": {
+      "title": "ĐOẠN GÁN GIỌNG",
+      "clearAll": "BỎ HẾT"
+    },
+    "picker": {
+      "aria": "Chọn giọng cho đoạn đã bôi đen",
+      "title": "ĐỌC ĐOẠN NÀY BẰNG",
+      "search": "Tìm giọng hoặc biến thể…",
+      "none": "Không có giọng nào khớp.",
+      "clear": "Bỏ gán giọng (dùng giọng chính)",
+      "hint": "Bôi đen một đoạn rồi bấm chuột phải để đọc đoạn đó bằng giọng / biến thể khác.",
+      "rightClick": "Chuột phải để đổi giọng / biến thể"
+    },
+    "defaultVoice": "Giọng mặc định",
+    "voiceSearch": "Tìm giọng…",
+    "defaultVoiceHint": "Đọc toàn bộ văn bản, trừ các đoạn đã bôi đen và gán giọng riêng."
   },
   "dict": {
     "title": "TỪ_ĐIỂN_PHÁT_ÂM",
@@ -395,6 +440,7 @@
     "add": "THÊM TỪ"
   },
   "sts": {
+    "noPreview": "Không xem trước được waveform (định dạng này đọc ở engine).",
     "code": "03 / ĐỔI GIỌNG",
     "title": "Đổi giọng",
     "desc": "Đổi giọng từ file hoặc micro sang một trong các giọng đã huấn luyện.",
@@ -446,7 +492,16 @@
       "underrunCount_other": "{{count}} lần giật",
       "start": "BẮT ĐẦU"
     },
-    "mockNote": "MOCK · chỉ đổi cao độ để test phần nghe — chưa phải RVC"
+    "mockNote": "MOCK · chỉ đổi cao độ để test phần nghe — chưa phải RVC",
+    "hk": {
+      "title": "PHÍM TẮT GIỌNG · GIỮ 1–9 KHI NÓI",
+      "now": "ĐANG DÙNG",
+      "slot": "Giọng cho phím {{key}}",
+      "none": "— chưa gán —",
+      "hint": "Gán giọng trước khi live. Khi live: giữ phím số lúc nói để đổi sang giọng đó, nhả ra là về giọng mặc định (giọng đích bên trái). Hàng số và numpad đều được.",
+      "global": "Bắt phím toàn cục: dùng được cả khi đang ở Discord / OBS / game (phím số vẫn gõ vào ứng dụng đó như bình thường).",
+      "window": "Chỉ bắt được phím khi cửa sổ EasyVoice đang được chọn."
+    }
   },
   "guide": {
     "title": "CÀI_THIẾT_BỊ_ÂM_THANH_ẢO",
@@ -525,5 +580,71 @@
     "done": "ĐÃ XONG",
     "resumeNote": "Nếu rớt mạng, lần sau sẽ tải tiếp từ chỗ dừng.",
     "start": "BẮT ĐẦU DÙNG EASYVOICE"
+  },
+  "emotion": {
+    "happy": "Vui vẻ",
+    "angry": "Giận dữ",
+    "fearful": "Lo sợ",
+    "anxious": "Bồn chồn",
+    "menacing": "Nguy hiểm",
+    "sad": "Buồn",
+    "calm": "Điềm tĩnh",
+    "whisper": "Thì thầm"
+  },
+  "variants": {
+    "section": "BIẾN THỂ",
+    "standard": "Chuẩn",
+    "short": "Biến thể",
+    "add": "Tạo biến thể",
+    "variant": "BIẾN THỂ",
+    "aria": "Tạo biến thể cho {{name}}",
+    "intro": "Biến thể là cùng giọng “{{name}}” nhưng đọc với một cảm xúc khác. Thu hoặc chọn một đoạn 5–12 giây cùng người đó đọc đúng cảm xúc này: giọng đọc sẽ bắt chước cả ngữ điệu của đoạn mẫu.",
+    "sectionHint": "Tùy chọn: thêm các đoạn cùng người đọc với cảm xúc khác (vui vẻ, giận dữ, lo sợ…). Giọng chuẩn luôn là mặc định.",
+    "emotion": "Cảm xúc",
+    "emotionHint": "Chọn gợi ý hoặc tự đặt tên bên dưới (vd. “Kể chuyện ma”).",
+    "name": "Tên biến thể",
+    "namePlaceholder": "vd. Vui vẻ",
+    "clipCaption": "ĐOẠN MẪU CẢM XÚC · 5–12 GIÂY",
+    "clipDrop": "Thả đoạn audio cùng người đọc, đọc với cảm xúc này",
+    "same": "Đây là cùng người đọc với “{{name}}” và tôi có quyền dùng giọng này.",
+    "create": "TẠO BIẾN THỂ",
+    "created": "Đã tạo biến thể “{{name}}” cho {{voice}}.",
+    "hint": {
+      "name": "chọn cảm xúc hoặc đặt tên biến thể",
+      "same": "xác nhận cùng người đọc",
+      "incomplete": "hoàn tất hoặc bỏ các biến thể đang nhập dở"
+    },
+    "someFailed": "Đã tạo giọng nhưng một số biến thể lỗi: {{list}}",
+    "deleteTitle": "XÓA_BIẾN_THỂ",
+    "deleteBody": "Xóa biến thể “{{name}}” của {{voice}}? Đoạn mẫu của biến thể sẽ bị xóa khỏi máy.",
+    "deleted": "Đã xóa biến thể “{{name}}”.",
+    "label": "Biến thể"
+  },
+  "tags": {
+    "gender": "Giới tính",
+    "country": "Quốc gia",
+    "region": "Vùng miền / giọng địa phương",
+    "regionPlaceholder": "vd. Texas, Liverpool…"
+  },
+  "gender": {
+    "male": "Nam",
+    "female": "Nữ",
+    "other": "Khác"
+  },
+  "region": {
+    "north": "Miền Bắc",
+    "central": "Miền Trung",
+    "south": "Miền Nam",
+    "general": "Chuẩn Mỹ",
+    "southern": "Miền Nam nước Mỹ",
+    "newyork": "New York",
+    "midwest": "Trung Tây",
+    "california": "California",
+    "rp": "Chuẩn Anh (RP)",
+    "london": "London",
+    "northern": "Miền Bắc nước Anh",
+    "scottish": "Scotland",
+    "welsh": "Wales",
+    "irish": "Bắc Ireland"
   }
 }

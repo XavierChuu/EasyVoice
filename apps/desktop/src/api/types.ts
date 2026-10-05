@@ -16,6 +16,12 @@ export type ImportInspection = S['ImportInspection'];
 export type ModelInfo = S['ModelInfo'];
 export type SystemInfo = S['SystemInfo'];
 export type AudioDevice = S['AudioDevice'];
+export type Variant = S['VariantInfo'];
+export type TtsPart = S['TtsPart'];
+export type VoiceUpdate = S['VoiceUpdate'];
+export type Gender = NonNullable<Profile['gender']>;
+/** Thẻ phân loại giọng (giới tính, mã quốc gia ISO, vùng miền). */
+export type VoiceTags = Pick<Profile, 'gender' | 'country' | 'region'>;
 export type VoiceLang = Profile['language'];
 export type Capability = Profile['capabilities'][number];
 export type LicenseId = Profile['license'];
@@ -76,7 +82,11 @@ export interface ExportOptions {
 
 export interface TtsRequest {
   profileId: string;
+  /** Biến thể của giọng chính; bỏ trống = giọng chuẩn. */
+  variantId?: string | null;
   text: string;
+  /** Các đoạn gán giọng riêng (bôi đen → chuột phải). Bỏ trống = cả văn bản đọc bằng giọng chính. */
+  parts?: TtsPart[];
   mode: 'direct' | 'chain';
   speed: number;
   seed: number;

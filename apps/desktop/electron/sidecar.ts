@@ -64,7 +64,7 @@ export class Sidecar {
     this.set({ status: this.info.restarts ? 'restarting' : 'starting', port, token });
     const proc = spawn(this.python, ['-m', 'easyvoice_engine.main', '--port', String(port)], {
       cwd: this.engineDir,
-      env: { ...process.env, EASYVOICE_TOKEN: token, PYTHONUNBUFFERED: '1' }, // token qua env, không lộ trên argv
+      env: { ...process.env, EASYVOICE_TOKEN: token, PYTHONUNBUFFERED: '1', PYTHONIOENCODING: 'utf-8' }, // token qua env, không lộ trên argv
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
     });

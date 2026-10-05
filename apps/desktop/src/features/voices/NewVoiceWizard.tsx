@@ -2,58 +2,43 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { engine } from '../../api/engine';
-import type { DatasetFile, FileRef, RefAnalysis, TrainPreset, VoiceLang } from '../../api/types';
-import { Alert, Bars, Btn, Check, DropZone, Label, Panel, Segmented, TextInput, selCls } from '../../components/ui';
+import type { DatasetFile, FileRef, TrainPreset, VoiceLang, VoiceTags } from '../../api/types';
+import { filesToRefs, RefClipInput, type RefClip } from '../../components/RefClipInput';
+import { Alert, Btn, Check, DropZone, Label, Panel, Segmented, TextInput, selCls } from '../../components/ui';
 import { errorText } from '../../lib/errors';
-import { AUDIO_FILTER, MEDIA_FILTER, platform } from '../../lib/platform';
-import { formatDuration } from '../../lib/text';
+import { MEDIA_FILTER, platform } from '../../lib/platform';
+import { formatDuration, pad2 } from '../../lib/text';
+import { defaultCountry } from '../../lib/voiceTags';
 import { useSettings } from '../../stores/settings';
-import { usePlayer } from '../../stores/player';
 import { useUi } from '../../stores/ui';
-import { Recorder } from './Recorder';
+import { TagFields } from './TagFields';
+import { draftReady, newDraft, VariantEditor, type VariantDraft } from './VariantEditor';
 
 const MIN_MIN = 8; // spec 3.1: cảnh báo nếu dưới 8 phút
 const REC_MIN = 10;
-
-const toRefs = (files: File[]): FileRef[] => files.map((f) => ({ path: f.name, name: f.name, size: f.size, file: f }));
 
 export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const uiLang = useSettings((s) => s.lang);
   const toast = useUi((s) => s.toast);
   const setNotice = useUi((s) => s.setNotice);
-  const player = usePlayer();
   const [mode, setMode] = useState<'quick' | 'hq'>('quick');
   const [name, setName] = useState('');
   const [language, setLanguage] = useState<VoiceLang>(uiLang);
-  const [quick, setQuick] = useState<{ ref: FileRef; analysis: RefAnalysis | null } | null>(null);
+  const [quick, setQuick] = useState<RefClip | null>(null);
+  const [tags, setTags] = useState<VoiceTags>({ gender: null, country: defaultCountry(uiLang) || null, region: null });
   const [transcript, setTranscript] = useState('');
-  const [transcribing, setTranscribing] = useState(false);
-  const [transcribeError, setTranscribeError] = useState('');
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [dataset, setDataset] = useState<DatasetFile[]>([]);
   const [analyzing, setAnalyzing] = useState(false);
   const [separate, setSeparate] = useState(true);
   const [preset, setPreset] = useState<TrainPreset>('balanced');
   const [consent, setConsent] = useState(false);
-  const [recording, setRecording] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const isQuick = mode === 'quick';
   const totalSec = dataset.reduce((a, d) => a + d.durationSec, 0);
 
-  const setQuickFile = async (ref: FileRef) => {
-    setQuick({ ref, analysis: null });
-    try {
-      setQuick({ ref, analysis: await engine().analyzeRef(ref) });
-    } catch (err) {
-      setQuick(null);
-      setNotice(errorText(t, err));
-    }
-  };
-  const pickQuick = async () => {
-    const [ref] = await platform.pickFiles({ title: t('wizard.quick.choose'), filters: [AUDIO_FILTER] });
-    if (ref) await setQuickFile(ref);
-  };
   const addDataset = async (refs: FileRef[]) => {
     if (!refs.length) return;
     setAnalyzing(true);
@@ -62,18 +47,6 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
     setAnalyzing(false);
   };
   const pickDataset = async () => addDataset(await platform.pickFiles({ title: t('wizard.hq.choose'), multiple: true, filters: [MEDIA_FILTER] }));
-  const autoTranscript = async () => {
-    if (!quick) return;
-    setTranscribing(true);
-    setTranscribeError('');
-    try {
-      setTranscript(await engine().transcribe(quick.ref, language));
-    } catch (err) {
-      setTranscribeError(errorText(t, err));
-    } finally {
-      setTranscribing(false);
-    }
-  };
 
   let hint: string;
   if (!name.trim()) hint = t('wizard.hint.name');
@@ -81,20 +54,29 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
   else if (isQuick && !transcript.trim()) hint = t('wizard.hint.transcript');
   else if (!isQuick && !dataset.length) hint = t('wizard.hint.files');
   else if (!isQuick && totalSec < MIN_MIN * 60) hint = t('wizard.hint.tooShort', { min: MIN_MIN });
+  else if (variants.some((v) => !draftReady(v))) hint = t('variants.hint.incomplete');
   else if (!consent) hint = t('wizard.hint.consent');
   else hint = isQuick ? t('wizard.hint.ready') : t('wizard.hint.background');
-  const disabled = submitting || !(name.trim() && consent && (isQuick ? quick && transcript.trim() : dataset.length && totalSec >= MIN_MIN * 60));
+  const disabled = submitting || variants.some((v) => !draftReady(v))
+    || !(name.trim() && consent && (isQuick ? quick && transcript.trim() : dataset.length && totalSec >= MIN_MIN * 60));
 
   const submit = async () => {
     setSubmitting(true);
     try {
-      if (isQuick && quick) {
-        await engine().createQuickVoice({ name: name.trim(), language, file: quick.ref, transcript: transcript.trim(), consent: true });
-        toast(t('wizard.created', { name: name.trim() }));
-      } else {
-        await engine().startTraining({ name: name.trim(), language, files: dataset.map((d) => d.ref), separate, preset, consent: true });
-        toast(t('wizard.trainingStarted', { name: name.trim() }));
+      const profile = isQuick && quick
+        ? await engine().createQuickVoice({ name: name.trim(), language, file: quick.ref, transcript: transcript.trim(), consent: true, tags })
+        : await engine().startTraining({ name: name.trim(), language, files: dataset.map((d) => d.ref), separate, preset, consent: true });
+      // Biến thể tạo sau giọng chuẩn; một biến thể lỗi không làm mất giọng đã tạo.
+      const failed: string[] = [];
+      for (const v of variants) {
+        try {
+          await engine().addVariant(profile.id, { name: v.name.trim(), emotion: v.emotion, file: v.clip!.ref, transcript: v.transcript.trim() });
+        } catch (err) {
+          failed.push(`${v.name.trim()}: ${errorText(t, err)}`);
+        }
       }
+      toast(isQuick ? t('wizard.created', { name: name.trim() }) : t('wizard.trainingStarted', { name: name.trim() }));
+      if (failed.length) setNotice(t('variants.someFailed', { list: failed.join(' · ') }));
       onClose();
     } catch (err) {
       setNotice(errorText(t, err));
@@ -107,7 +89,6 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
     { id: 'quick' as const, code: 'A · ZERO-SHOT', title: t('wizard.quick.title'), desc: t('wizard.quick.desc'), meta: t('wizard.quick.meta') },
     { id: 'hq' as const, code: 'B · FINE-TUNE', title: t('wizard.hq.title'), desc: t('wizard.hq.desc'), meta: t('wizard.hq.meta') },
   ];
-  const a = quick?.analysis;
 
   return (
     <Panel title="NEW_PROFILE" label={t('wizard.aria')} onClose={onClose}>
@@ -128,59 +109,22 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
           <TextInput label={t('wizard.name')} value={name} onChange={setName} placeholder={t('wizard.namePlaceholder')} autoFocus />
           <div className="flex flex-col gap-1.5">
             <Label>{t('wizard.language')}</Label>
-            <Segmented options={[{ id: 'vi', label: t('lang.vi') }, { id: 'en', label: t('lang.en') }]} value={language === 'en' ? 'en' : 'vi'} onChange={setLanguage} />
+            <Segmented options={[{ id: 'vi', label: t('lang.vi') }, { id: 'en', label: t('lang.en') }]} value={language === 'en' ? 'en' : 'vi'}
+              onChange={(l) => {
+                setLanguage(l);
+                // Quốc gia đang là mặc định của ngôn ngữ cũ (chưa tự chọn) thì đổi theo ngôn ngữ mới.
+                if (!tags.country || tags.country === defaultCountry(language)) setTags({ ...tags, country: defaultCountry(l) || null, region: null });
+              }} />
           </div>
         </div>
+        <TagFields id="wizard" value={tags} onChange={setTags} />
 
         {isQuick ? (
-          <div className="flex flex-col gap-[18px]">
-            {!quick ? (
-              <DropZone caption={t('wizard.quick.caption')} text={t('wizard.quick.drop')} onFiles={(f) => f[0] && void setQuickFile(toRefs(f)[0])}>
-                <Btn variant="outline" onClick={() => void pickQuick()}>{t('wizard.quick.choose')}</Btn>
-                <Btn variant="ghost" onClick={() => setRecording(true)}>● {t('wizard.quick.record')}</Btn>
-              </DropZone>
-            ) : (
-              <div className="border border-line">
-                <div className="flex justify-between items-center flex-wrap gap-2 px-3 py-2 border-b border-line font-mono text-[12px]">
-                  <span>{quick.ref.name} {a && <span className="text-mute">· {a.durationSec.toFixed(2)}s · {Math.round(a.sampleRate / 1000)}kHz · {a.channels === 1 ? 'mono' : 'stereo'}</span>}</span>
-                  <span className="flex gap-3">
-                    {quick.ref.file && (
-                      <Btn variant="link" onClick={() => (player.key === 'wizard-ref' ? player.stop()
-                        : player.play('wizard-ref', { durationSec: a?.durationSec ?? 8, url: URL.createObjectURL(quick.ref.file!) }))}>
-                        [{player.key === 'wizard-ref' ? `■ ${t('common.stop')}` : `▶ ${t('recorder.listen')}`}]
-                      </Btn>
-                    )}
-                    <Btn variant="link" onClick={() => { player.stop(); setQuick(null); setTranscript(''); }}>[{t('common.replace')}]</Btn>
-                  </span>
-                </div>
-                <Bars seed={0.9} n={60} height={56} playhead={player.key === 'wizard-ref' ? player.position : undefined} />
-                <div className="flex flex-wrap gap-x-5 gap-y-2 px-3 py-2.5 border-t border-line font-mono text-[11px] text-mute">
-                  {!a && <span className="text-acc">{t('wizard.quick.analyzing')}</span>}
-                  {a?.checks.map((c) => (
-                    <span key={c.key}><span className={c.ok ? 'text-acc' : 'text-fg'}>{c.ok ? 'OK' : '!!'}</span> {t(`wizard.check.${c.key}`)}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {a?.warnings.map((w) => <Alert key={w} title={t(`wizard.warn.${w}.title`)}>{t(`wizard.warn.${w}.body`)}</Alert>)}
-            <div className="flex flex-col gap-1.5">
-              <span className="flex justify-between flex-wrap gap-2 items-center">
-                <Label htmlFor="transcript">{t('wizard.transcript')}</Label>
-                <button type="button" onClick={() => void autoTranscript()} disabled={!quick || transcribing}
-                  className="bg-transparent border border-line3 text-fg px-3 py-1.5 cursor-pointer font-mono text-[11px] min-h-[36px] hover:border-fg">
-                  {transcribing ? t('wizard.transcribing') : 'AUTO · WHISPER'}
-                </button>
-              </span>
-              <textarea id="transcript" value={transcript} onChange={(e) => setTranscript(e.target.value)} rows={2} placeholder={t('wizard.transcriptPlaceholder')}
-                className="bg-bg border border-line3 p-3 text-fg text-[15px] resize-y rounded-none placeholder:text-dim" />
-              <span className="text-[12px] text-mute">{t('wizard.transcriptHint')}</span>
-              {transcribeError && <span className="text-[12px] text-acc">{transcribeError}</span>}
-            </div>
-          </div>
+          <RefClipInput id="wizard" language={language} clip={quick} onClip={setQuick} transcript={transcript} onTranscript={setTranscript} />
         ) : (
           <div className="flex flex-col gap-[18px]">
             {!dataset.length ? (
-              <DropZone caption={t('wizard.hq.caption')} text={t('wizard.hq.drop')} onFiles={(f) => void addDataset(toRefs(f))}>
+              <DropZone caption={t('wizard.hq.caption')} text={t('wizard.hq.drop')} onFiles={(f) => void addDataset(filesToRefs(f))}>
                 <Btn variant="outline" onClick={() => void pickDataset()} disabled={analyzing}>{analyzing ? t('wizard.quick.analyzing') : t('wizard.hq.choose')}</Btn>
               </DropZone>
             ) : (
@@ -223,6 +167,24 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
+        <div className="border border-line flex flex-col">
+          <div className="flex justify-between items-center gap-3 flex-wrap px-3.5 py-2 border-b border-line">
+            <span className="font-mono text-[11px] tracking-[.08em] text-mute">{t('variants.section')} · {pad2(variants.length)}</span>
+            <Btn variant="link" onClick={() => setVariants([...variants, newDraft()])}>[+ {t('variants.add')}]</Btn>
+          </div>
+          {variants.length === 0 ? (
+            <p className="m-0 px-3.5 py-3 text-[13px] text-mute">{t('variants.sectionHint')}</p>
+          ) : variants.map((v, i) => (
+            <div key={v.key} className="p-3.5 border-b border-line2 last:border-b-0 flex flex-col gap-3">
+              <div className="flex justify-between items-center">
+                <span className="font-mono text-[11px] tracking-label text-acc">{t('variants.variant')} {pad2(i + 1)}</span>
+                <Btn variant="link" onClick={() => setVariants(variants.filter((x) => x.key !== v.key))}>[{t('common.remove')}]</Btn>
+              </div>
+              <VariantEditor draft={v} language={language} onChange={(d) => setVariants(variants.map((x) => (x.key === v.key ? d : x)))} />
+            </div>
+          ))}
+        </div>
+
         <Check id="consent" checked={consent} onChange={setConsent} boxed>{t('wizard.consent')}</Check>
 
         <div className="flex justify-end items-center gap-4 flex-wrap">
@@ -232,7 +194,6 @@ export function NewVoiceWizard({ onClose }: { onClose: () => void }) {
           </Btn>
         </div>
       </div>
-      {recording && <Recorder onClose={() => setRecording(false)} onDone={(ref) => { setRecording(false); void setQuickFile(ref); }} />}
     </Panel>
   );
 }
