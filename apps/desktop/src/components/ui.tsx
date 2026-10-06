@@ -259,12 +259,16 @@ export function Modal({ title, onClose, children, footer, width = 520 }: {
   title: string; onClose: () => void; children: ReactNode; footer?: ReactNode; width?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  // Chỉ đặt focus MỘT lần khi mở. Trước đây effect chạy lại mỗi khi trang cha vẽ lại (onClose là hàm mới mỗi lần,
+  // vd. trạng thái hệ thống cập nhật 3 s/lần) → con trỏ bị kéo về ô nhập đầu tiên giữa lúc đang gõ ô khác.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current();
     window.addEventListener('keydown', onKey);
-    ref.current?.querySelector<HTMLElement>('input,button:not([aria-label])')?.focus();
+    ref.current?.querySelector<HTMLElement>('input,textarea,button:not([aria-label])')?.focus();
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, []);
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div ref={ref} role="dialog" aria-modal="true" aria-label={title} className="bg-bg border border-fg flex flex-col max-h-[90vh] w-full" style={{ maxWidth: width }}>

@@ -48,7 +48,10 @@ export function ContextMenu({ req, onClose, openDialog, onImport, onRecord }: {
     setPos({ x: Math.max(4, Math.min(req.x, window.innerWidth - r.width - 4)), y: Math.max(4, Math.min(req.y, window.innerHeight - r.height - 4)) });
   }, [req.x, req.y]);
 
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
+    const onClose = () => closeRef.current();
     const close = (e: Event) => { if (!ref.current?.contains(e.target as Node)) onClose(); };
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('pointerdown', close, true);
@@ -62,7 +65,7 @@ export function ContextMenu({ req, onClose, openDialog, onImport, onRecord }: {
       window.removeEventListener('resize', onClose);
       window.removeEventListener('scroll', onClose, true);
     };
-  }, [onClose]);
+  }, []);
 
   /** Lệnh xử lý đoạn: dùng vùng chọn, hoặc cả clip nếu bấm vào clip. */
   const onRange = (d: DialogKind) => () => {
