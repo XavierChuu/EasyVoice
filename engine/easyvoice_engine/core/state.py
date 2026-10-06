@@ -56,6 +56,7 @@ class ImportStaging:
     index: Path | None
     meta: dict
     name: str
+    kind: str = "rvc"  # "rvc" (.pth đã chuyển) | "evoice" (dir/files = nội dung đã giải nén, meta = manifest)
 
 
 @dataclass

@@ -115,3 +115,32 @@ class ErrorBody(ApiModel):
     message: str
     message_en: str
     detail: str
+
+
+class ExportRequest(ApiModel):
+    include_model: bool = True
+    include_ref: bool = False
+    license: Literal["personal", "commercial", "noredist"] = "personal"
+    author: str = ""
+    dest_dir: str | None = None  # thư mục lưu (app gửi thư mục Tải về); bỏ trống / không hợp lệ → outputs/
+
+
+class ExportResult(ApiModel):
+    path: str
+    size_mb: float
+    file_id: str  # tải về qua GET /files/{id} (khi app chạy trong trình duyệt)
+
+
+class EngineSettings(ApiModel):
+    device: Literal["auto", "gpu", "cpu"]
+    models_dir: str  # "" = mặc định trong thư mục dữ liệu
+    voices_dir: str
+    active_models_dir: str  # thư mục engine đang dùng (đổi thư mục cần khởi động lại engine)
+    active_voices_dir: str
+    restart_required: bool
+
+
+class SettingsUpdate(ApiModel):
+    device: Literal["auto", "gpu", "cpu"] | None = None
+    models_dir: str | None = None
+    voices_dir: str | None = None

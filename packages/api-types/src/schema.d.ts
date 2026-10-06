@@ -89,6 +89,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/system/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Settings */
+        get: operations["get_settings_system_settings_get"];
+        /**
+         * Put Settings
+         * @description Lưu vào settings.json. Thiết bị áp dụng ngay (gỡ model để nạp lại đúng thiết bị); đổi thư mục model / giọng
+         *     có hiệu lực sau khi khởi động lại engine (restart_required).
+         */
+        put: operations["put_settings_system_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/voices": {
         parameters: {
             query?: never;
@@ -253,7 +275,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Export Voice */
+        /**
+         * Export Voice
+         * @description Xuất .evoice (spec 3.5). Lưu vào thư mục app gửi lên (thư mục Tải về), không hợp lệ thì vào outputs/.
+         */
         post: operations["export_voice_voices__voice_id__export_post"];
         delete?: never;
         options?: never;
@@ -1080,6 +1105,59 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** EngineSettings */
+        EngineSettings: {
+            /**
+             * Device
+             * @enum {string}
+             */
+            device: "auto" | "gpu" | "cpu";
+            /** Modelsdir */
+            modelsDir: string;
+            /** Voicesdir */
+            voicesDir: string;
+            /** Activemodelsdir */
+            activeModelsDir: string;
+            /** Activevoicesdir */
+            activeVoicesDir: string;
+            /** Restartrequired */
+            restartRequired: boolean;
+        };
+        /** ExportRequest */
+        ExportRequest: {
+            /**
+             * Includemodel
+             * @default true
+             */
+            includeModel: boolean;
+            /**
+             * Includeref
+             * @default false
+             */
+            includeRef: boolean;
+            /**
+             * License
+             * @default personal
+             * @enum {string}
+             */
+            license: "personal" | "commercial" | "noredist";
+            /**
+             * Author
+             * @default
+             */
+            author: string;
+            /** Destdir */
+            destDir?: string | null;
+        };
+        /** ExportResult */
+        ExportResult: {
+            /** Path */
+            path: string;
+            /** Sizemb */
+            sizeMb: number;
+            /** Fileid */
+            fileId: string;
+        };
         /** FilterOp */
         FilterOp: {
             /**
@@ -1414,6 +1492,15 @@ export interface components {
             /** Assetids */
             assetIds: string[];
         };
+        /** SettingsUpdate */
+        SettingsUpdate: {
+            /** Device */
+            device?: ("auto" | "gpu" | "cpu") | null;
+            /** Modelsdir */
+            modelsDir?: string | null;
+            /** Voicesdir */
+            voicesDir?: string | null;
+        };
         /** SilencesOp */
         SilencesOp: {
             /**
@@ -1747,6 +1834,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AudioDevices"];
+                };
+            };
+        };
+    };
+    get_settings_system_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngineSettings"];
+                };
+            };
+        };
+    };
+    put_settings_system_settings_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngineSettings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2107,7 +2247,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExportRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -2115,7 +2259,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ExportResult"];
                 };
             };
             /** @description Validation Error */

@@ -5,7 +5,7 @@ import type { EngineInfo } from '../lib/platform';
 import { HttpEngine } from './httpEngine';
 import { MockEngine } from './mockEngine';
 import type {
-  AudioDevice, DatasetFile, DictEntry, EditAsset, EditOp, EditProject, EditProjectSummary, EditTimeline, EngineEvent, ExportOptions,
+  AudioDevice, DatasetFile, DictEntry, EditAsset, EngineSettings, SettingsUpdate, EditOp, EditProject, EditProjectSummary, EditTimeline, EngineEvent, ExportOptions,
   FileRef, ImportInspection, PlaySource, Profile, VoiceTags, VoiceUpdate, RealtimeConfig, RefAnalysis, StsRequest, SystemInfo,
   TrainPreset, TtsRequest, VoiceLang,
 } from './types';
@@ -15,6 +15,9 @@ export interface EngineClient {
   subscribe(cb: (ev: EngineEvent) => void): () => void;
 
   system(): Promise<SystemInfo>;
+  /** Cài đặt engine (settings.json): thiết bị áp dụng ngay, thư mục model/giọng cần khởi động lại engine. */
+  getSettings(): Promise<EngineSettings>;
+  updateSettings(patch: Partial<SettingsUpdate>): Promise<EngineSettings>;
   downloadModels(ids: string[]): Promise<string>; // job id
 
   listVoices(): Promise<Profile[]>;

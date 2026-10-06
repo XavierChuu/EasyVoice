@@ -3,12 +3,12 @@
 
 import { decodeDuration, estimateDuration } from '../lib/audioMeta';
 import { normalizePreview } from '../lib/normalize';
-import { isElectron } from '../lib/platform';
+import { isElectron, platform } from '../lib/platform';
 import type { EngineClient } from './engine';
 import {
   EngineError,
   type AudioDevice, type DatasetFile, type DictEntry, type EditAsset, type EditOp, type EditProject, type EditProjectSummary,
-  type EditTimeline, type EngineErrorCode, type EngineEvent, type ExportOptions,
+  type EditTimeline, type EngineErrorCode, type EngineSettings, type SettingsUpdate, type EngineEvent, type ExportOptions,
   type FileRef, type ImportInspection, type Job, type PlaySource, type Profile, type RefAnalysis, type StsRequest,
   type SystemInfo, type TrainPreset, type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
 } from './types';
@@ -116,6 +116,8 @@ export class HttpEngine implements EngineClient {
 
   // ---------- system ----------
   system = () => this.req<SystemInfo>('GET', '/system/info');
+  getSettings = () => this.req<EngineSettings>('GET', '/system/settings');
+  updateSettings = (patch: Partial<SettingsUpdate>) => this.req<EngineSettings>('PUT', '/system/settings', patch);
   health = () => this.req<{ status: string; version: string }>('GET', '/system/health');
   downloadModels = async (ids: string[]) => (await this.req<{ jobId: string }>('POST', '/models/download', { ids })).jobId;
 
@@ -166,7 +168,17 @@ export class HttpEngine implements EngineClient {
 
   inspectImport = (files: FileRef[]) => this.req<ImportInspection>('POST', '/voices/import/inspect', this.form({}, files.map((f) => ['files', f])));
   importVoice = (token: string, name: string) => this.req<Profile>('POST', '/voices/import', { token, name });
-  exportVoice = (_id: string, _opts: ExportOptions) => notYet(5) as Promise<{ path: string; sizeMb: number }>;
+  /** Xuất .evoice vào thư mục Tải về của máy (engine chạy cùng máy nên ghi thẳng file, trả đường dẫn). */
+  exportVoice = async (id: string, opts: ExportOptions) => {
+    const { downloads } = await platform.appPaths();
+    const r = await this.req<{ path: string; sizeMb: number; fileId: string }>('POST', `/voices/${id}/export`, {
+      includeModel: opts.includeModel, includeRef: opts.includeRef, license: opts.license, author: opts.author,
+      destDir: isElectron() ? downloads : null,
+    });
+    // Trình duyệt (dev): không mở được thư mục trên máy → tải file về qua engine
+    if (!isElectron()) this.download(`/files/${r.fileId}`, { download: 'true' });
+    return { path: r.path, sizeMb: r.sizeMb };
+  };
   estimateExport = (_id: string, opts: { includeModel: boolean; includeRef: boolean }) =>
     (opts.includeModel ? 142.6 : 0) + (opts.includeRef ? 1.6 : 0) + 0.4;
 

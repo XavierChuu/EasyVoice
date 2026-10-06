@@ -1,7 +1,11 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Btn, Label, PageHead, Segmented } from '../../components/ui';
+import { engine } from '../../api/engine';
+import type { EngineSettings, SettingsUpdate } from '../../api/types';
+import { Alert, Btn, Label, PageHead, Segmented } from '../../components/ui';
+import { errorText } from '../../lib/errors';
+import { useUi } from '../../stores/ui';
 import { platform } from '../../lib/platform';
 import { useEngine } from '../../stores/engine';
 import { useSettings } from '../../stores/settings';
@@ -18,7 +22,7 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
   );
 }
 
-function FolderRow({ label, hint, value, onChange }: { label: string; hint: string; value: string; onChange: (v: string) => void }) {
+function FolderRow({ label, hint, value, active, onChange }: { label: string; hint: string; value: string; active?: string; onChange: (v: string) => void }) {
   const { t } = useTranslation();
   return (
     <Row label={label} hint={hint}>
@@ -27,6 +31,7 @@ function FolderRow({ label, hint, value, onChange }: { label: string; hint: stri
         <Btn variant="ghost" onClick={async () => { const p = await platform.pickFolder(label); if (p) onChange(p); }}>{t('settings.choose')}</Btn>
         {value && <Btn variant="link" onClick={() => onChange('')}>[{t('settings.reset')}]</Btn>}
       </div>
+      {active && <span className="font-mono text-[11px] text-mute break-all">{t('settings.inUse')}: {active}</span>}
     </Row>
   );
 }
@@ -36,6 +41,23 @@ export function SettingsPage() {
   const st = useSettings();
   const system = useEngine((s) => s.system);
   const info = useEngine((s) => s.info);
+  const setNotice = useUi((s) => s.setNotice);
+  // Thiết bị + thư mục là cài đặt của ENGINE (settings.json): đọc từ engine, ghi thẳng lên engine.
+  const [es, setEs] = useState<EngineSettings | null>(null);
+  useEffect(() => {
+    if (info.status === 'online' || info.status === 'mock') engine().getSettings().then(setEs).catch(() => setEs(null));
+  }, [info.status]);
+  const update = async (patch: Partial<SettingsUpdate>) => {
+    try {
+      const next = await engine().updateSettings(patch);
+      setEs(next);
+      st.set({ device: next.device, modelsDir: next.modelsDir, voicesDir: next.voicesDir });
+      setNotice('');
+    } catch (err) {
+      setNotice(errorText(t, err));
+    }
+  };
+  const device = es?.device ?? st.device;
   return (
     <div className="flex flex-col gap-7">
       <PageHead code={t('settings.code')} title={t('settings.title')} desc={t('settings.desc')} />
@@ -43,15 +65,24 @@ export function SettingsPage() {
         <Row label={t('settings.language')}>
           <Segmented value={st.lang} onChange={(lang) => st.set({ lang })} options={[{ id: 'vi', label: 'Tiếng Việt' }, { id: 'en', label: 'English' }]} />
         </Row>
-        <FolderRow label={t('settings.modelsDir')} hint={t('settings.modelsHint')} value={st.modelsDir} onChange={(modelsDir) => st.set({ modelsDir })} />
-        <FolderRow label={t('settings.voicesDir')} hint={t('settings.voicesHint')} value={st.voicesDir} onChange={(voicesDir) => st.set({ voicesDir })} />
+        <FolderRow label={t('settings.modelsDir')} hint={t('settings.modelsHint')} value={es?.modelsDir ?? st.modelsDir}
+          active={es?.activeModelsDir} onChange={(modelsDir) => void update({ modelsDir })} />
+        <FolderRow label={t('settings.voicesDir')} hint={t('settings.voicesHint')} value={es?.voicesDir ?? st.voicesDir}
+          active={es?.activeVoicesDir} onChange={(voicesDir) => void update({ voicesDir })} />
+        {es?.restartRequired && (
+          <div className="px-4 py-3 border-b border-line2">
+            <Alert title={t('settings.restartTitle')} action={
+              <Btn variant="ghost" disabled={info.status === 'mock'} onClick={() => void platform.restartEngine()}>{t('engineBanner.restart')}</Btn>
+            }>{t('settings.restartBody')}</Alert>
+          </div>
+        )}
         <Row label={t('settings.device')} hint={t('settings.deviceHint')}>
-          <Segmented value={st.device} onChange={(device) => st.set({ device })} options={[
+          <Segmented value={device} onChange={(d) => void update({ device: d })} options={[
             { id: 'auto', label: t('settings.deviceAuto') },
             { id: 'gpu', label: `GPU · ${system?.device ?? '—'}` },
             { id: 'cpu', label: t('settings.deviceCpu') },
           ]} />
-          {st.device === 'cpu' && <span className="text-[12px] text-acc">{t('settings.cpuWarn')}</span>}
+          {device === 'cpu' && <span className="text-[12px] text-acc">{t('settings.cpuWarn')}</span>}
         </Row>
         <Row label={t('settings.format')}>
           <Segmented value={st.ttsFormat} onChange={(ttsFormat) => st.set({ ttsFormat })} options={[{ id: 'wav', label: 'WAV 24 kHz' }, { id: 'mp3', label: 'MP3' }, { id: 'flac', label: 'FLAC' }]} />

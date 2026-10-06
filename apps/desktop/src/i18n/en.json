@@ -555,7 +555,10 @@
     "privacyHint": "Telemetry, if ever added, will be opt-in.",
     "privacyBody": "Nothing leaves your computer except model downloads.",
     "engine": "ENGINE",
-    "rerunSetup": "Re-run first-time setup"
+    "rerunSetup": "Re-run first-time setup",
+    "restartTitle": "Engine restart needed",
+    "restartBody": "The new folder is used after restarting the engine. Existing data is not moved automatically: copy models / voices over if you want to keep them.",
+    "inUse": "In use"
   },
   "licenses": {
     "code": "LICENSES",

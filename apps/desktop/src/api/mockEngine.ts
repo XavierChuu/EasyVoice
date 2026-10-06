@@ -11,7 +11,7 @@ import type { EngineClient } from './engine';
 import {
   EngineError,
   type AudioDevice, type DatasetFile, type DictEntry, type EditAsset, type EditOp, type EditProject, type EditProjectSummary,
-  type EditTimeline, type EngineEvent, type ExportOptions, type FileRef,
+  type EditTimeline, type EngineEvent, type EngineSettings, type SettingsUpdate, type ExportOptions, type FileRef,
   type ImportInspection, type Job, type ModelInfo, type PlaySource, type Profile, type RealtimeConfig, type RealtimeStats,
   type RefAnalysis, type StsRequest, type StsStage, type SystemInfo, type TrainPreset, type TrainStage,
   type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
@@ -305,6 +305,18 @@ export class MockEngine implements EngineClient {
       loadedModels: [],
       models: MODEL_CATALOG.map((m) => ({ ...m, installed: this.installed.has(m.id) })),
     };
+  }
+
+  private settings: EngineSettings = { device: 'auto', modelsDir: '', voicesDir: '', activeModelsDir: '~/EasyVoice/models',
+    activeVoicesDir: '~/EasyVoice/voices', restartRequired: false };
+
+  async getSettings() {
+    return { ...this.settings };
+  }
+
+  async updateSettings(patch: Partial<SettingsUpdate>) {
+    this.settings = { ...this.settings, ...Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== null && v !== undefined)) };
+    return { ...this.settings };
   }
 
   async downloadModels(ids: string[]) {

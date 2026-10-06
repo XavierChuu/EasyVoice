@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends
 
 from ..core import device as dev
 from ..core.state import EngineState
-from ..schemas import AudioDevice, AudioDevices, DownloadRequest, Health, JobRef, ModelInfo, SystemInfo
+from ..core.errors import EngineError
+from ..schemas import AudioDevice, AudioDevices, DownloadRequest, EngineSettings, Health, JobRef, ModelInfo, SettingsUpdate, SystemInfo
 from ..services.models import run_download
 from .deps import get_state
 
@@ -58,3 +59,53 @@ def audio_devices() -> AudioDevices:
         if d["max_output_channels"] > 0:
             outs.append(item)
     return AudioDevices(inputs=ins, outputs=outs)
+
+
+def _settings_view(state: EngineState) -> EngineSettings:
+    from pathlib import Path
+
+    st = state.settings
+    want_models = Path(st.models_dir) if st.models_dir else state.paths.root / "models"
+    want_voices = Path(st.voices_dir) if st.voices_dir else state.paths.root / "voices"
+    return EngineSettings(device=st.device, models_dir=st.models_dir, voices_dir=st.voices_dir,
+                          active_models_dir=str(state.paths.models), active_voices_dir=str(state.paths.voices),
+                          restart_required=want_models.resolve() != state.paths.models.resolve()
+                          or want_voices.resolve() != state.paths.voices.resolve())
+
+
+@router.get("/system/settings", response_model=EngineSettings)
+def get_settings(state: EngineState = Depends(get_state)) -> EngineSettings:
+    return _settings_view(state)
+
+
+@router.put("/system/settings", response_model=EngineSettings)
+def put_settings(req: SettingsUpdate, state: EngineState = Depends(get_state)) -> EngineSettings:
+    """Lưu vào settings.json. Thiết bị áp dụng ngay (gỡ model để nạp lại đúng thiết bị); đổi thư mục model / giọng
+    có hiệu lực sau khi khởi động lại engine (restart_required)."""
+    from pathlib import Path
+
+    st = state.settings
+    for field in ("models_dir", "voices_dir"):
+        value = getattr(req, field)
+        if value is None:
+            continue
+        value = value.strip()
+        if value:
+            path = Path(value)
+            if not path.is_absolute():
+                raise EngineError("BAD_REQUEST", f"cần đường dẫn đầy đủ: {value}")
+            try:
+                path.mkdir(parents=True, exist_ok=True)
+                probe = path / ".easyvoice_write_test"
+                probe.write_text("ok")
+                probe.unlink()
+            except OSError as exc:
+                raise EngineError("BAD_REQUEST", f"không ghi được vào thư mục {value}: {exc}") from exc
+        setattr(st, field, value)
+    if req.device is not None and req.device != st.device:
+        if state.queue.running() or state.queue.realtime:
+            raise EngineError("GPU_BUSY_JOB", "đổi thiết bị khi không có tác vụ nào đang chạy")
+        st.device = req.device
+        state.models.unload_all()
+    st.save(state.paths.settings_file)
+    return _settings_view(state)

@@ -9,7 +9,9 @@ from fastapi.responses import FileResponse
 
 from ..core.errors import EngineError
 from ..core.state import EngineState, ImportStaging
-from ..schemas import ImportCheck, ImportInspection, ImportRequest, Profile, RefAnalysis, Transcript, VoiceUpdate
+from ..schemas import (ExportRequest, ExportResult, ImportCheck, ImportInspection, ImportRequest, Profile, RefAnalysis,
+                       Transcript, VoiceUpdate)
+from ..services.evoice import export_voice as export_voice_file, import_evoice, inspect_evoice
 from ..services.registry import ASR_KEY
 from ..services.rvc.import_pth import convert_pth
 from ..services.voices import analyze_reference, clean_tags
@@ -105,9 +107,9 @@ def delete_variant(voice_id: str, variant_id: str, state: EngineState = Depends(
 
 @router.post("/voices/import/inspect", response_model=ImportInspection)
 def inspect_import(files: list[UploadFile] = File(...), state: EngineState = Depends(get_state)) -> ImportInspection:
-    names = [f.filename or "" for f in files]
-    if any(n.lower().endswith(".evoice") for n in names):
-        raise EngineError("NOT_IMPLEMENTED", "nhập .evoice có ở Phase 5")
+    evo = next((f for f in files if (f.filename or "").lower().endswith(".evoice")), None)
+    if evo is not None:
+        return _inspect_evoice(state, evo)
     pth = next((f for f in files if (f.filename or "").lower().endswith(".pth")), None)
     if pth is None:
         raise EngineError("BAD_FILE", "cần file .pth (và .index nếu có)")
@@ -146,20 +148,50 @@ def inspect_import(files: list[UploadFile] = File(...), state: EngineState = Dep
                 ImportCheck(key="index", value="faiss · OK" if index_path else "missing · lower similarity", bad=not index_path)])
 
 
+def _inspect_evoice(state: EngineState, upload: UploadFile) -> ImportInspection:
+    token = uuid.uuid4().hex[:12]
+    staging = state.paths.tmp / f"import_{token}"
+    path = save_upload(state, upload)
+    try:
+        ins = inspect_evoice(path, staging / "files")
+    finally:
+        path.unlink(missing_ok=True)
+    m = ins.manifest
+    if not ins.blocked:
+        state.imports[token] = ImportStaging(dir=staging, index=None, meta=m, name=str(m.get("name") or ""), kind="evoice")
+    caps = [c for c in m.get("capabilities") or [] if c in ("tts", "sts")]
+    return ImportInspection(
+        token=token, kind="evoice", file_label=upload.filename or "voice.evoice", blocked=ins.blocked,
+        checks=[ImportCheck(key=k, value=v, bad=bad) for k, v, bad in ins.checks],
+        suggested_name=str(m.get("name") or ""), author=str(m.get("author") or "unknown"),
+        language=m.get("language") if m.get("language") in ("vi", "en") else "unknown",
+        license=m.get("license") if m.get("license") in ("personal", "commercial", "noredist") else "unknown",
+        capabilities=caps if not ins.blocked else [], created_at=(str(m.get("created_at"))[:10] if m.get("created_at") else None),
+        sample_rate=int(m.get("sample_rate") or 0))
+
+
 @router.post("/voices/import", response_model=Profile)
 def do_import(req: ImportRequest, state: EngineState = Depends(get_state)) -> Profile:
     st = state.imports.pop(req.token, None)
     if st is None:
         raise EngineError("NOT_FOUND", "phiên nhập đã hết hạn, hãy chọn lại file")
     try:
+        if st.kind == "evoice":
+            return state.voices.to_api(import_evoice(state.voices, st.dir / "files", st.meta, req.name.strip()))
         return state.voices.to_api(state.voices.import_rvc(req.name or st.name, st.dir / "converted", st.index, st.meta))
     finally:
         shutil.rmtree(st.dir, ignore_errors=True)
 
 
-@router.post("/voices/{voice_id}/export")
-def export_voice(voice_id: str, state: EngineState = Depends(get_state)) -> None:
-    state.voices.get(voice_id)
-    raise EngineError("NOT_IMPLEMENTED", "xuất .evoice có ở Phase 5")
+@router.post("/voices/{voice_id}/export", response_model=ExportResult)
+def export_voice(voice_id: str, req: ExportRequest, state: EngineState = Depends(get_state)) -> ExportResult:
+    """Xuất .evoice (spec 3.5). Lưu vào thư mục app gửi lên (thư mục Tải về), không hợp lệ thì vào outputs/."""
+    from pathlib import Path
+
+    dest = Path(req.dest_dir) if req.dest_dir else None
+    if dest is None or not dest.is_dir():
+        dest = state.paths.outputs
+    out = export_voice_file(state.voices, voice_id, req.include_model, req.include_ref, req.license, req.author, dest)
+    return ExportResult(path=str(out), size_mb=round(out.stat().st_size / 1e6, 2), file_id=state.register_file(out, out.name))
 
 

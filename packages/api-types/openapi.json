@@ -135,6 +135,67 @@
         }
       }
     },
+    "/system/settings": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Get Settings",
+        "operationId": "get_settings_system_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Put Settings",
+        "description": "Lưu vào settings.json. Thiết bị áp dụng ngay (gỡ model để nạp lại đúng thiết bị); đổi thư mục model / giọng\ncó hiệu lực sau khi khởi động lại engine (restart_required).",
+        "operationId": "put_settings_system_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngineSettings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/voices": {
       "get": {
         "tags": [
@@ -608,6 +669,7 @@
           "voices"
         ],
         "summary": "Export Voice",
+        "description": "Xuất .evoice (spec 3.5). Lưu vào thư mục app gửi lên (thư mục Tải về), không hợp lệ thì vào outputs/.",
         "operationId": "export_voice_voices__voice_id__export_post",
         "parameters": [
           {
@@ -620,12 +682,24 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResult"
+                }
               }
             }
           },
@@ -2750,6 +2824,114 @@
         ],
         "title": "EditWord"
       },
+      "EngineSettings": {
+        "properties": {
+          "device": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "gpu",
+              "cpu"
+            ],
+            "title": "Device"
+          },
+          "modelsDir": {
+            "type": "string",
+            "title": "Modelsdir"
+          },
+          "voicesDir": {
+            "type": "string",
+            "title": "Voicesdir"
+          },
+          "activeModelsDir": {
+            "type": "string",
+            "title": "Activemodelsdir"
+          },
+          "activeVoicesDir": {
+            "type": "string",
+            "title": "Activevoicesdir"
+          },
+          "restartRequired": {
+            "type": "boolean",
+            "title": "Restartrequired"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device",
+          "modelsDir",
+          "voicesDir",
+          "activeModelsDir",
+          "activeVoicesDir",
+          "restartRequired"
+        ],
+        "title": "EngineSettings"
+      },
+      "ExportRequest": {
+        "properties": {
+          "includeModel": {
+            "type": "boolean",
+            "title": "Includemodel",
+            "default": true
+          },
+          "includeRef": {
+            "type": "boolean",
+            "title": "Includeref",
+            "default": false
+          },
+          "license": {
+            "type": "string",
+            "enum": [
+              "personal",
+              "commercial",
+              "noredist"
+            ],
+            "title": "License",
+            "default": "personal"
+          },
+          "author": {
+            "type": "string",
+            "title": "Author",
+            "default": ""
+          },
+          "destDir": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destdir"
+          }
+        },
+        "type": "object",
+        "title": "ExportRequest"
+      },
+      "ExportResult": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "sizeMb": {
+            "type": "number",
+            "title": "Sizemb"
+          },
+          "fileId": {
+            "type": "string",
+            "title": "Fileid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "sizeMb",
+          "fileId"
+        ],
+        "title": "ExportResult"
+      },
       "FilterOp": {
         "properties": {
           "op": {
@@ -3685,6 +3867,50 @@
           "assetIds"
         ],
         "title": "SeparateOp"
+      },
+      "SettingsUpdate": {
+        "properties": {
+          "device": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "gpu",
+                  "cpu"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          },
+          "modelsDir": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelsdir"
+          },
+          "voicesDir": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voicesdir"
+          }
+        },
+        "type": "object",
+        "title": "SettingsUpdate"
       },
       "SilencesOp": {
         "properties": {
