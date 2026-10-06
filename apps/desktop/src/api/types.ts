@@ -85,10 +85,17 @@ export type StsStage = 'demux' | 'separate' | 'prep' | 'convert' | 'remix' | 'jo
 
 
 
+export type Recording = S['Recording'];
+
 export interface RealtimeConfig {
   profileId: string;
   inputId: string;
+  /** '' = không phát ra thiết bị nào (chỉ ghi file). */
   outputId: string;
+  /** Ghi giọng đã đổi ra file ngay từ lúc bật. */
+  record?: boolean;
+  /** Giọng gán phím tắt: nạp sẵn để đổi tức thì. */
+  preloadProfileIds?: string[];
   preset: 'low' | 'balanced' | 'quality';
   blockMs: number;
   contextSec: number;
@@ -104,6 +111,10 @@ export interface RealtimeStats {
   latencyMs: number;
   underrun: boolean;
   underruns: number;
+  recording?: boolean;
+  recordSec?: number;
+  profileId?: string | null;
+  error?: string | null;
 }
 
 
@@ -154,6 +165,8 @@ export type EngineErrorCode =
   | 'NOT_IMPLEMENTED'
   | 'GPU_REQUIRED'
   | 'DOWNLOAD_FAILED'
+  | 'REALTIME_GPU'
+  | 'AUDIO_DEVICE'
   | 'NOT_FOUND'
   | 'BAD_REQUEST'
   | 'UNAUTHORIZED'

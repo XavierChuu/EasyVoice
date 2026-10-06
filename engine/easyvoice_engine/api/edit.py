@@ -35,6 +35,11 @@ class FromJob(ApiModel):
     job_id: str
 
 
+class FromFile(ApiModel):
+    file_id: str
+    name: str | None = None
+
+
 class Segment(ApiModel):
     """Một đoạn của asset (giây, theo thời gian trong asset)."""
 
@@ -209,6 +214,23 @@ def project_from_job(req: FromJob, state: EngineState = Depends(get_state)) -> E
     project = state.edit.create(job.label)
     asset = state.edit.add_asset(project.id, audio, sr, job.label, "job", words=words)
     track = EditTrack(id="t1", name="Audio 1", kind="voice" if job.kind == "tts" else "audio")
+    clip = EditClip(id="c1", track_id=track.id, asset_id=asset.id, start=0.0, offset=0.0, duration=asset.duration_sec)
+    return state.edit.save(project.id, EditTimeline(name=project.name, tracks=[track], clips=[clip]))
+
+
+@router.post("/edit/projects/from-file", response_model=EditProject)
+def project_from_file(req: FromFile, state: EngineState = Depends(get_state)) -> EditProject:
+    """Mở một file engine đã tạo (vd. bản ghi đổi giọng trực tiếp) thành dự án Edit Audio."""
+    from pathlib import Path
+
+    item = state.files.get(req.file_id)
+    if not item or not item[0].exists():
+        raise EngineError("NOT_FOUND", f"file {req.file_id}")
+    path, name = item
+    label = (req.name or Path(name).stem)[:80]
+    project = state.edit.create(label)
+    asset = state.edit.import_file(project.id, path, label, "record")
+    track = EditTrack(id="t1", name="Audio 1", kind="voice")
     clip = EditClip(id="c1", track_id=track.id, asset_id=asset.id, start=0.0, offset=0.0, duration=asset.duration_sec)
     return state.edit.save(project.id, EditTimeline(name=project.name, tracks=[track], clips=[clip]))
 

@@ -17,6 +17,9 @@ MESSAGES: dict[str, tuple[str, str]] = {
     "UNAUTHORIZED": ("Thiếu hoặc sai token.", "Missing or wrong token."),
     "GPU_REQUIRED": ("Huấn luyện giọng cần GPU NVIDIA hoặc Apple Silicon.", "Voice training needs an NVIDIA GPU or Apple Silicon."),
     "DOWNLOAD_FAILED": ("Không tải được một số model.", "Some models could not be downloaded."),
+    "REALTIME_GPU": ("Đổi giọng trực tiếp cần GPU NVIDIA hoặc Apple Silicon.", "Live voice changing needs an NVIDIA GPU or Apple Silicon."),
+    "AUDIO_DEVICE": ("Không mở được thiết bị âm thanh. Kiểm tra micro / loa đã cắm và không bị ứng dụng khác giữ.",
+                     "Could not open the audio device. Check that the mic / output is connected and not held by another app."),
     "CANCELLED": ("Đã hủy.", "Cancelled."),
     "UNKNOWN": ("Đã có lỗi xảy ra. Chi tiết đã được ghi vào file log.", "Something went wrong. Details were written to the log."),
 }
@@ -24,7 +27,7 @@ MESSAGES: dict[str, tuple[str, str]] = {
 STATUS: dict[str, int] = {
     "BAD_FILE": 400, "BAD_REQUEST": 400, "UNSAFE_MODEL": 400, "NO_STS_VOICE": 400, "UNAUTHORIZED": 401,
     "NOT_FOUND": 404, "GPU_BUSY_REALTIME": 409, "GPU_BUSY_JOB": 409, "MODEL_MISSING": 424,
-    "NOT_IMPLEMENTED": 501, "DOWNLOAD_FAILED": 502, "GPU_OOM": 507, "GPU_REQUIRED": 409,
+    "NOT_IMPLEMENTED": 501, "DOWNLOAD_FAILED": 502, "GPU_OOM": 507, "GPU_REQUIRED": 409, "REALTIME_GPU": 409, "AUDIO_DEVICE": 400,
 }
 
 

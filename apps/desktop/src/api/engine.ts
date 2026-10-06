@@ -6,7 +6,7 @@ import { HttpEngine } from './httpEngine';
 import { MockEngine } from './mockEngine';
 import type {
   AudioDevice, DatasetFile, DictEntry, EditAsset, EngineSettings, SettingsUpdate, EditOp, EditProject, EditProjectSummary, EditTimeline, EngineEvent, ExportOptions,
-  FileRef, ImportInspection, PlaySource, Profile, VoiceTags, VoiceUpdate, RealtimeConfig, RefAnalysis, StsRequest, SystemInfo,
+  FileRef, ImportInspection, PlaySource, Profile, VoiceTags, VoiceUpdate, RealtimeConfig, Recording, RefAnalysis, StsRequest, SystemInfo,
   TrainPreset, TtsRequest, VoiceLang,
 } from './types';
 
@@ -79,7 +79,15 @@ export interface EngineClient {
   startRealtime(cfg: RealtimeConfig): Promise<void>;
   /** profileId: đổi giọng đích khi đang live (giữ phím tắt 1-9). */
   updateRealtime(patch: Partial<Pick<RealtimeConfig, 'pitch' | 'gateDb' | 'profileId'>>): Promise<void>;
-  stopRealtime(): Promise<void>;
+  /** Dừng; trả bản ghi nếu đang ghi. */
+  stopRealtime(): Promise<Recording | null>;
+  /** Bật / tắt ghi file khi đang chạy; tắt thì trả bản ghi vừa xong. */
+  setRealtimeRecording(on: boolean): Promise<Recording | null>;
+  listRecordings(): Promise<Recording[]>;
+  deleteRecording(id: string): Promise<void>;
+  recordingAudio(id: string): PlaySource;
+  /** Mở một file engine đã tạo (vd. bản ghi live) trong Edit Audio. */
+  editFromFile(fileId: string): Promise<EditProject>;
 }
 
 let instance: EngineClient | null = null;

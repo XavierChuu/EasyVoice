@@ -4,16 +4,23 @@
 import { decodeDuration, estimateDuration } from '../lib/audioMeta';
 import { normalizePreview } from '../lib/normalize';
 import { isElectron, platform } from '../lib/platform';
+import type { components } from '../../../../packages/api-types/src/schema';
 import type { EngineClient } from './engine';
 import {
   EngineError,
   type AudioDevice, type DatasetFile, type DictEntry, type EditAsset, type EditOp, type EditProject, type EditProjectSummary,
   type EditTimeline, type EngineErrorCode, type EngineSettings, type SettingsUpdate, type EngineEvent, type ExportOptions,
-  type FileRef, type ImportInspection, type Job, type PlaySource, type Profile, type RefAnalysis, type StsRequest,
+  type FileRef, type ImportInspection, type RealtimeConfig, type RealtimeStats, type Recording, type Job, type PlaySource, type Profile, type RefAnalysis, type StsRequest,
   type SystemInfo, type TrainPreset, type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
 } from './types';
 
-const notYet = (phase: number) => Promise.reject(new EngineError('NOT_IMPLEMENTED', `Phase ${phase}`));
+type RealtimeWire = components['schemas']['RealtimeStatus'];
+
+/** Số đo live từ engine → dạng UI dùng. */
+const toStats = (s: RealtimeWire): RealtimeStats => ({
+  running: s.running, inDb: s.inDb, outDb: s.outDb, latencyMs: Math.round(s.latencyMs), underrun: s.underrun,
+  underruns: s.underruns, recording: s.recording, recordSec: s.recordSec, profileId: s.profileId, error: s.error,
+});
 
 export class HttpEngine implements EngineClient {
   readonly mode = 'sidecar' as const;
@@ -106,6 +113,7 @@ export class HttpEngine implements EngineClient {
       const ev = JSON.parse(m.data as string);
       if (ev.type === 'job') this.emit({ type: 'job', job: ev.job as Job });
       else if (ev.type === 'voices') this.emit({ type: 'voices', voices: ev.voices as Profile[] });
+      else if (ev.type === 'realtime') this.emit({ type: 'realtime', stats: toStats(ev.stats as RealtimeWire) });
     };
     ws.onclose = () => {
       this.ws = null;
@@ -241,7 +249,25 @@ export class HttpEngine implements EngineClient {
 
   // ---------- real-time (Phase 4) ----------
   audioDevices = () => this.req<{ inputs: AudioDevice[]; outputs: AudioDevice[] }>('GET', '/audio/devices');
-  startRealtime = () => notYet(4);
-  updateRealtime = async () => {};
-  stopRealtime = async () => {};
+
+  startRealtime = async (cfg: RealtimeConfig) => {
+    const st = await this.req<RealtimeWire>('POST', '/realtime/start', {
+      profileId: cfg.profileId, inputId: cfg.inputId, outputId: cfg.outputId || null, preset: cfg.preset,
+      blockMs: cfg.blockMs, contextSec: cfg.contextSec, crossfadeMs: cfg.crossfadeMs, pitch: cfg.pitch, gateDb: cfg.gateDb,
+      record: !!cfg.record, preloadProfileIds: cfg.preloadProfileIds ?? [],
+    });
+    this.emit({ type: 'realtime', stats: toStats(st) });
+  };
+
+  updateRealtime = async (patch: Partial<Pick<RealtimeConfig, 'pitch' | 'gateDb' | 'profileId'>>) => {
+    const st = await this.req<RealtimeWire>('PATCH', '/realtime', patch);
+    this.emit({ type: 'realtime', stats: toStats(st) });
+  };
+
+  stopRealtime = async () => (await this.req<{ recording: Recording | null }>('POST', '/realtime/stop')).recording;
+  setRealtimeRecording = async (on: boolean) => (await this.req<{ recording: Recording | null }>('POST', '/realtime/record', { on })).recording;
+  listRecordings = () => this.req<Recording[]>('GET', '/realtime/recordings');
+  deleteRecording = async (id: string) => { await this.req('DELETE', `/realtime/recordings/${id}`); };
+  recordingAudio = (id: string): PlaySource => ({ durationSec: 0, url: this.mediaUrl(`/realtime/recordings/${id}/audio`) });
+  editFromFile = (fileId: string) => this.req<EditProject>('POST', '/edit/projects/from-file', { fileId });
 }

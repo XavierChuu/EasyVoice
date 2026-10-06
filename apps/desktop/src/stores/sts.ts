@@ -29,6 +29,8 @@ interface StsState {
   contextSec: number;
   crossfadeMs: number;
   gateDb: number;
+  /** Ghi giọng đã đổi ra file ngay khi bật live. */
+  recordLive: boolean;
   set: (patch: Partial<Omit<StsState, 'set'>>) => void;
 }
 
@@ -47,5 +49,6 @@ export const useSts = create<StsState>((set) => ({
   preset: 'balanced',
   ...RT_PRESETS.balanced,
   gateDb: -45,
+  recordLive: false,
   set: (patch) => set(patch),
 }));

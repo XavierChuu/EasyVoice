@@ -94,7 +94,9 @@
     "BAD_REQUEST": "Yêu cầu không hợp lệ: {{detail}}",
     "UNAUTHORIZED": "App không xác thực được với engine. Hãy mở lại EasyVoice.",
     "GPU_REQUIRED": "Huấn luyện giọng cần GPU NVIDIA hoặc Apple Silicon. Máy này chỉ dùng được giọng Nhanh.",
-    "DOWNLOAD_FAILED": "Không tải được một số model."
+    "DOWNLOAD_FAILED": "Không tải được một số model.",
+    "REALTIME_GPU": "Đổi giọng trực tiếp cần GPU NVIDIA hoặc Apple Silicon.",
+    "AUDIO_DEVICE": "Không mở được thiết bị âm thanh. Kiểm tra micro / loa đã cắm và không bị ứng dụng khác giữ."
   },
   "voices": {
     "code": "01 / HỒ SƠ GIỌNG",
@@ -496,7 +498,14 @@
       "stable": "ỔN ĐỊNH",
       "underrun": "GIẬT TIẾNG · thử Cân bằng",
       "underrunCount_other": "{{count}} lần giật",
-      "start": "BẮT ĐẦU"
+      "start": "BẮT ĐẦU",
+      "noOutput": "Không phát · chỉ ghi file",
+      "noOutputHint": "Không phát ra loa hay thiết bị ảo: giọng đã đổi chỉ được ghi thành file (nhớ bật ● GHI).",
+      "record": "GHI",
+      "recordHint": "Ghi giọng đã đổi thẳng ra file WAV trên máy (không cần OBS hay phần mềm thu khác). Bấm trước khi bật để ghi từ đầu, hoặc bấm khi đang chạy.",
+      "recSaved": "Đã lưu bản ghi {{sec}} s",
+      "recordings": "BẢN GHI LIVE",
+      "crashed": "Đổi giọng trực tiếp đã dừng vì lỗi"
     },
     "mockNote": "MOCK · chỉ đổi cao độ để test phần nghe — chưa phải RVC",
     "hk": {

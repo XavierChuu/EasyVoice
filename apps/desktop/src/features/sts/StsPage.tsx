@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { engine } from '../../api/engine';
-import type { AudioDevice, FileRef, Profile } from '../../api/types';
+import type { AudioDevice, FileRef, Profile, Recording } from '../../api/types';
 import { Alert, Box, Btn, Check, DropZone, Label, OptionList, PageHead, Range, Segmented, Segs } from '../../components/ui';
 import { errorText } from '../../lib/errors';
 import { MEDIA_FILTER, platform } from '../../lib/platform';
@@ -236,6 +236,7 @@ function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; ta
   const s = useSts();
   const rt = useEngine((x) => x.rt);
   const setNotice = useUi((x) => x.setNotice);
+  const toast = useUi((x) => x.toast);
   const [devices, setDevices] = useState<{ inputs: AudioDevice[]; outputs: AudioDevice[] }>({ inputs: [], outputs: [] });
   const [guide, setGuide] = useState(false);
   const [advanced, setAdvanced] = useState(false);
@@ -256,7 +257,7 @@ function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; ta
     setDevices(d);
     const st = useSts.getState();
     if (!d.inputs.some((x) => x.id === st.inputId)) s.set({ inputId: d.inputs[0]?.id ?? '' });
-    if (!d.outputs.some((x) => x.id === st.outputId)) s.set({ outputId: d.outputs[0]?.id ?? '' });
+    if (st.outputId !== '' && !d.outputs.some((x) => x.id === st.outputId)) s.set({ outputId: d.outputs[0]?.id ?? '' });
   };
   useEffect(() => { void refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -264,14 +265,38 @@ function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; ta
   const virtualInstalled = devices.outputs.some((d) => d.virtual);
   const pickPreset = (preset: RtPreset) => s.set({ preset, ...RT_PRESETS[preset] });
 
+  const [recs, setRecs] = useState<Recording[]>([]);
+  const loadRecs = () => engine().listRecordings().then(setRecs).catch(() => setRecs([]));
+  useEffect(() => { void loadRecs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const recDone = (rec: Recording | null) => {
+    if (rec) toast(t('sts.rt.recSaved', { sec: rec.durationSec.toFixed(1) }));
+    void loadRecs();
+  };
+  const toggleRecord = async () => {
+    if (!rt.running) return s.set({ recordLive: !s.recordLive });
+    try {
+      recDone(await engine().setRealtimeRecording(!rt.recording));
+    } catch (err) {
+      setNotice(errorText(t, err));
+    }
+  };
+
   const toggle = async () => {
-    if (rt.running) return void engine().stopRealtime();
+    if (rt.running) {
+      try {
+        recDone(await engine().stopRealtime());
+      } catch (err) {
+        setNotice(errorText(t, err));
+      }
+      return;
+    }
     if (!targetId) return setNotice(t('errors.NO_STS_VOICE'));
     setStarting(true);
     try {
       await engine().startRealtime({
         profileId: targetId, inputId: s.inputId, outputId: s.outputId, preset: s.preset, blockMs: s.blockMs,
         contextSec: s.contextSec, crossfadeMs: s.crossfadeMs, pitch: s.pitch, gateDb: s.gateDb,
+        record: s.recordLive, preloadProfileIds: [...assigned].map((d) => rtHotkeys[d]),
       });
       setNotice('');
     } catch (err) {
@@ -299,8 +324,8 @@ function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; ta
           </button>
         )}
       </span>
-      {list.map((d) => (
-        <button key={d.id} type="button" onClick={() => s.set({ [key]: d.id })} aria-pressed={value === d.id} disabled={rt.running}
+      {(key === 'outputId' ? [{ id: '', name: t('sts.rt.noOutput'), virtual: false }, ...list] : list).map((d) => (
+        <button key={d.id || 'none'} type="button" onClick={() => s.set({ [key]: d.id })} aria-pressed={value === d.id} disabled={rt.running}
           className={`text-left border-0 border-b border-line2 px-3.5 py-2.5 cursor-pointer min-h-[44px] font-semibold ${value === d.id ? 'bg-fg text-bg' : 'bg-transparent text-fg'}`}>
           {d.name}
         </button>
@@ -315,7 +340,7 @@ function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; ta
         {deviceCol('OUTPUT', devices.outputs, s.outputId, 'outputId', true)}
       </div>
 
-      {out && !out.virtual && (
+      {s.outputId !== '' && out && !out.virtual && (
         <Alert title={t('sts.rt.virtualTitle')}>
           {virtualInstalled ? t('sts.rt.virtualSelect') : t('sts.rt.virtualInstall')}{' '}
           <a onClick={() => setGuide(true)} role="button" tabIndex={0}>{t('sts.rt.guide')}</a>
@@ -352,12 +377,19 @@ function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; ta
             <div className="font-bold pt-1.5" style={{ color: statusCol }}>{status}</div>
             {rt.running && rt.underruns > 0 && <div className="font-mono text-[11px] text-mute">{t('sts.rt.underrunCount', { count: rt.underruns })}</div>}
           </div>
+          <button type="button" onClick={() => void toggleRecord()} aria-pressed={rt.running ? !!rt.recording : s.recordLive}
+            title={t('sts.rt.recordHint')}
+            className={`flex-[0_1_104px] border-0 border-r border-line px-3 py-3.5 font-mono font-bold text-[13px] tracking-[.1em] cursor-pointer min-h-[64px] ${(rt.running ? rt.recording : s.recordLive) ? 'bg-acc text-bg' : 'bg-transparent text-fg hover:bg-line2'}`}>
+            {rt.running && rt.recording ? `■ ${(rt.recordSec ?? 0).toFixed(0)}s` : `● ${t('sts.rt.record')}`}
+          </button>
           <button type="button" onClick={() => void toggle()} disabled={starting}
             className={`flex-[0_1_200px] border-0 px-6 py-3.5 font-mono font-bold text-[14px] tracking-[.14em] cursor-pointer min-h-[64px] text-bg ${rt.running ? 'bg-fg' : 'bg-acc hover:bg-acc2'}`}>
             {rt.running ? `■ ${t('common.stop').toUpperCase()}` : `● ${t('sts.rt.start')}`}
           </button>
         </div>
       </div>
+      {rt.error && <Alert title={t('sts.rt.crashed')}>{rt.error}</Alert>}
+      {s.outputId === '' && !rt.running && <span className="text-[12px] text-mute -mt-2">{t('sts.rt.noOutputHint')}</span>}
       <HotkeyPanel voices={voices} hotkeys={rtHotkeys} active={hk.active} mode={hk.mode} error={hk.error} running={rt.running}
         defaultName={targetName}
         onChange={(d, id) => {
@@ -366,7 +398,41 @@ function RealtimePanel({ targetId, targetName, voices }: { targetId?: string; ta
           else delete next[d];
           setSettings({ rtHotkeys: next });
         }} />
+      <RecordingsList recs={recs} reload={() => void loadRecs()} />
       {guide && <VirtualDeviceGuide onClose={() => setGuide(false)} />}
     </div>
+  );
+}
+
+/** Bản ghi live: giọng đã đổi được ghi thẳng ra file trên máy, không cần OBS / phần mềm thu khác. */
+function RecordingsList({ recs, reload }: { recs: Recording[]; reload: () => void }) {
+  const { t } = useTranslation();
+  const player = usePlayer();
+  const setNotice = useUi((x) => x.setNotice);
+  if (!recs.length) return null;
+  const act = (fn: () => Promise<unknown>) => () => void fn().catch((err) => setNotice(errorText(t, err)));
+  return (
+    <Box title={t('sts.rt.recordings')} right={<span>{recs.length}</span>}>
+      {recs.map((r) => {
+        const key = `rec:${r.id}`;
+        const playing = player.key === key;
+        return (
+          <div key={r.id} className="flex items-center gap-3 px-3.5 py-2 border-b border-line2 last:border-b-0 flex-wrap">
+            <button type="button" aria-label={t('common.play')} onClick={() => (playing ? player.stop() : player.play(key, engine().recordingAudio(r.id)))}
+              className="bg-transparent border border-line3 text-fg w-8 h-8 cursor-pointer font-mono text-[11px] hover:border-fg">{playing ? '■' : '▶'}</button>
+            <div className="flex-1 min-w-[180px]">
+              <div className="font-semibold text-[13px] truncate">{r.profileName} · {formatDuration(r.durationSec)}</div>
+              <div className="font-mono text-[11px] text-mute truncate">{r.name}</div>
+            </div>
+            <Btn variant="link" onClick={act(async () => {
+              useEdit.getState().openProject(await engine().editFromFile(r.fileId));
+              useUi.getState().setTab('edit');
+            })}>[✂ {t('common.openInEdit')}]</Btn>
+            <Btn variant="link" onClick={act(() => engine().downloadFile(r.fileId))}>[↓ WAV]</Btn>
+            <Btn variant="link" onClick={act(async () => { player.stop(); await engine().deleteRecording(r.id); reload(); })}>[✕]</Btn>
+          </div>
+        );
+      })}
+    </Box>
   );
 }

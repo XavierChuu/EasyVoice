@@ -88,10 +88,6 @@ def test_tts_rejected_while_realtime(client, state, wav_file):
     state.queue.release_realtime()
 
 
-def test_not_implemented_features(client):
-    assert client.post("/realtime/start").status_code == 501
-
-
 def test_unsafe_pth_is_blocked(client, tmp_path):
     import torch
 

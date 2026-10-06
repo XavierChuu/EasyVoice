@@ -1056,16 +1056,120 @@
     "/realtime/start": {
       "post": {
         "tags": [
-          "sts"
+          "realtime"
         ],
         "summary": "Realtime Start",
         "operationId": "realtime_start_realtime_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RealtimeStart"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime": {
+      "patch": {
+        "tags": [
+          "realtime"
+        ],
+        "summary": "Realtime Update",
+        "operationId": "realtime_update_realtime_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RealtimeUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime/record": {
+      "post": {
+        "tags": [
+          "realtime"
+        ],
+        "summary": "Realtime Record",
+        "operationId": "realtime_record_realtime_record_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordToggle"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeStopResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -1075,7 +1179,7 @@
     "/realtime/stop": {
       "post": {
         "tags": [
-          "sts"
+          "realtime"
         ],
         "summary": "Realtime Stop",
         "operationId": "realtime_stop_realtime_stop_post",
@@ -1084,7 +1188,135 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeStopResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime/status": {
+      "get": {
+        "tags": [
+          "realtime"
+        ],
+        "summary": "Realtime Status",
+        "operationId": "realtime_status_realtime_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime/recordings": {
+      "get": {
+        "tags": [
+          "realtime"
+        ],
+        "summary": "Recordings",
+        "operationId": "recordings_realtime_recordings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Recording"
+                  },
+                  "type": "array",
+                  "title": "Response Recordings Realtime Recordings Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime/recordings/{rid}": {
+      "delete": {
+        "tags": [
+          "realtime"
+        ],
+        "summary": "Delete Recording",
+        "operationId": "delete_recording_realtime_recordings__rid__delete",
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/realtime/recordings/{rid}/audio": {
+      "get": {
+        "tags": [
+          "realtime"
+        ],
+        "summary": "Recording Audio",
+        "operationId": "recording_audio_realtime_recordings__rid__audio_get",
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rid"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Download"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -1447,6 +1679,48 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/FromJob"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditProject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/edit/projects/from-file": {
+      "post": {
+        "tags": [
+          "edit"
+        ],
+        "summary": "Project From File",
+        "description": "Mở một file engine đã tạo (vd. bản ghi đổi giọng trực tiếp) thành dự án Edit Audio.",
+        "operationId": "project_from_file_edit_projects_from_file_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FromFile"
               }
             }
           },
@@ -2981,6 +3255,30 @@
         ],
         "title": "FilterOp"
       },
+      "FromFile": {
+        "properties": {
+          "fileId": {
+            "type": "string",
+            "title": "Fileid"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fileId"
+        ],
+        "title": "FromFile"
+      },
       "FromJob": {
         "properties": {
           "jobId": {
@@ -3634,6 +3932,329 @@
         ],
         "title": "Profile",
         "description": "Dạng gửi cho UI."
+      },
+      "RealtimeStart": {
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "title": "Profileid"
+          },
+          "inputId": {
+            "type": "string",
+            "title": "Inputid",
+            "default": ""
+          },
+          "outputId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputid"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "low",
+              "balanced",
+              "quality"
+            ],
+            "title": "Preset",
+            "default": "balanced"
+          },
+          "blockMs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blockms"
+          },
+          "contextSec": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contextsec"
+          },
+          "crossfadeMs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crossfadems"
+          },
+          "pitch": {
+            "type": "number",
+            "title": "Pitch",
+            "default": 0.0
+          },
+          "gateDb": {
+            "type": "number",
+            "title": "Gatedb",
+            "default": -45.0
+          },
+          "indexRate": {
+            "type": "number",
+            "title": "Indexrate",
+            "default": 0.3
+          },
+          "protect": {
+            "type": "number",
+            "title": "Protect",
+            "default": 0.33
+          },
+          "record": {
+            "type": "boolean",
+            "title": "Record",
+            "default": false
+          },
+          "preloadProfileIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Preloadprofileids",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "profileId"
+        ],
+        "title": "RealtimeStart"
+      },
+      "RealtimeStatus": {
+        "properties": {
+          "running": {
+            "type": "boolean",
+            "title": "Running"
+          },
+          "inDb": {
+            "type": "number",
+            "title": "Indb",
+            "default": -120.0
+          },
+          "outDb": {
+            "type": "number",
+            "title": "Outdb",
+            "default": -120.0
+          },
+          "latencyMs": {
+            "type": "number",
+            "title": "Latencyms",
+            "default": 0.0
+          },
+          "underrun": {
+            "type": "boolean",
+            "title": "Underrun",
+            "default": false
+          },
+          "underruns": {
+            "type": "integer",
+            "title": "Underruns",
+            "default": 0
+          },
+          "procMs": {
+            "type": "number",
+            "title": "Procms",
+            "default": 0.0
+          },
+          "recording": {
+            "type": "boolean",
+            "title": "Recording",
+            "default": false
+          },
+          "recordSec": {
+            "type": "number",
+            "title": "Recordsec",
+            "default": 0.0
+          },
+          "profileId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profileid"
+          },
+          "sampleRate": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Samplerate"
+          },
+          "blockMs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blockms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "running",
+          "inDb",
+          "outDb",
+          "latencyMs",
+          "underrun",
+          "underruns",
+          "procMs",
+          "recording",
+          "recordSec",
+          "profileId",
+          "sampleRate",
+          "blockMs",
+          "error"
+        ],
+        "title": "RealtimeStatus"
+      },
+      "RealtimeStopResult": {
+        "properties": {
+          "recording": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Recording"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "recording"
+        ],
+        "title": "RealtimeStopResult"
+      },
+      "RealtimeUpdate": {
+        "properties": {
+          "pitch": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pitch"
+          },
+          "gateDb": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gatedb"
+          },
+          "profileId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profileid"
+          }
+        },
+        "type": "object",
+        "title": "RealtimeUpdate"
+      },
+      "RecordToggle": {
+        "properties": {
+          "on": {
+            "type": "boolean",
+            "title": "On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "on"
+        ],
+        "title": "RecordToggle"
+      },
+      "Recording": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "durationSec": {
+            "type": "number",
+            "title": "Durationsec"
+          },
+          "profileName": {
+            "type": "string",
+            "title": "Profilename"
+          },
+          "fileId": {
+            "type": "string",
+            "title": "Fileid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "durationSec",
+          "profileName",
+          "fileId"
+        ],
+        "title": "Recording"
       },
       "RedoRequest": {
         "properties": {

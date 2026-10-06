@@ -12,7 +12,7 @@ import {
   EngineError,
   type AudioDevice, type DatasetFile, type DictEntry, type EditAsset, type EditOp, type EditProject, type EditProjectSummary,
   type EditTimeline, type EngineEvent, type EngineSettings, type SettingsUpdate, type ExportOptions, type FileRef,
-  type ImportInspection, type Job, type ModelInfo, type PlaySource, type Profile, type RealtimeConfig, type RealtimeStats,
+  type ImportInspection, type Job, type ModelInfo, type PlaySource, type Profile, type RealtimeConfig, type RealtimeStats, type Recording,
   type RefAnalysis, type StsRequest, type StsStage, type SystemInfo, type TrainPreset, type TrainStage,
   type TtsRequest, type VoiceLang, type VoiceTags, type VoiceUpdate,
 } from './types';
@@ -761,10 +761,30 @@ export class MockEngine implements EngineClient {
     if (this.rt.cfg) this.rt.cfg = { ...this.rt.cfg, ...patch };
   }
 
-  async stopRealtime() {
+  async setRealtimeRecording(on: boolean): Promise<Recording | null> {
+    this.rt.stats = { ...this.rt.stats, recording: on, recordSec: 0 };
+    return null;
+  }
+
+  async listRecordings(): Promise<Recording[]> {
+    return [];
+  }
+
+  async deleteRecording(_id: string) {}
+
+  recordingAudio(_id: string): PlaySource {
+    return { durationSec: 0 };
+  }
+
+  async editFromFile(_fileId: string): Promise<EditProject> {
+    throw new EngineError('NOT_IMPLEMENTED', 'mock engine');
+  }
+
+  async stopRealtime(): Promise<Recording | null> {
     this.rt.cfg = null;
     this.rt.stats = { running: false, inDb: -120, outDb: -120, latencyMs: 0, underrun: false, underruns: 0 };
     this.emit({ type: 'realtime', stats: { ...this.rt.stats } });
     this.schedule();
+    return null;
   }
 }

@@ -81,13 +81,3 @@ def sts_audio(job_id: str, which: Literal["a", "b"] = "b", download: bool = Fals
         raise EngineError("NOT_FOUND", "chưa có audio")
     path, name = state.files[fid]
     return FileResponse(path, filename=name if download else None)
-
-
-@router.post("/realtime/start")
-def realtime_start() -> None:
-    raise EngineError("NOT_IMPLEMENTED", "đổi giọng trực tiếp có ở Phase 4")
-
-
-@router.post("/realtime/stop")
-def realtime_stop() -> None:
-    raise EngineError("NOT_IMPLEMENTED", "đổi giọng trực tiếp có ở Phase 4")

@@ -425,6 +425,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/realtime": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Realtime Update */
+        patch: operations["realtime_update_realtime_patch"];
+        trace?: never;
+    };
+    "/realtime/record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Realtime Record */
+        post: operations["realtime_record_realtime_record_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/realtime/stop": {
         parameters: {
             query?: never;
@@ -436,6 +470,74 @@ export interface paths {
         put?: never;
         /** Realtime Stop */
         post: operations["realtime_stop_realtime_stop_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/realtime/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Realtime Status */
+        get: operations["realtime_status_realtime_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/realtime/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recordings */
+        get: operations["recordings_realtime_recordings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/realtime/recordings/{rid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Recording */
+        delete: operations["delete_recording_realtime_recordings__rid__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/realtime/recordings/{rid}/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recording Audio */
+        get: operations["recording_audio_realtime_recordings__rid__audio_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -531,6 +633,26 @@ export interface paths {
          * @description Mở kết quả của trang Đọc văn bản / Đổi giọng trong Edit Audio (TTS kèm lời thoại theo từng câu).
          */
         post: operations["project_from_job_edit_projects_from_job_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/edit/projects/from-file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Project From File
+         * @description Mở một file engine đã tạo (vd. bản ghi đổi giọng trực tiếp) thành dự án Edit Audio.
+         */
+        post: operations["project_from_file_edit_projects_from_file_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1175,6 +1297,13 @@ export interface components {
             /** Amount */
             amount?: number | null;
         };
+        /** FromFile */
+        FromFile: {
+            /** Fileid */
+            fileId: string;
+            /** Name */
+            name?: string | null;
+        };
         /** FromJob */
         FromJob: {
             /** Jobid */
@@ -1391,6 +1520,146 @@ export interface components {
             country: string | null;
             /** Region */
             region: string | null;
+        };
+        /** RealtimeStart */
+        RealtimeStart: {
+            /** Profileid */
+            profileId: string;
+            /**
+             * Inputid
+             * @default
+             */
+            inputId: string;
+            /** Outputid */
+            outputId?: string | null;
+            /**
+             * Preset
+             * @default balanced
+             * @enum {string}
+             */
+            preset: "low" | "balanced" | "quality";
+            /** Blockms */
+            blockMs?: number | null;
+            /** Contextsec */
+            contextSec?: number | null;
+            /** Crossfadems */
+            crossfadeMs?: number | null;
+            /**
+             * Pitch
+             * @default 0
+             */
+            pitch: number;
+            /**
+             * Gatedb
+             * @default -45
+             */
+            gateDb: number;
+            /**
+             * Indexrate
+             * @default 0.3
+             */
+            indexRate: number;
+            /**
+             * Protect
+             * @default 0.33
+             */
+            protect: number;
+            /**
+             * Record
+             * @default false
+             */
+            record: boolean;
+            /**
+             * Preloadprofileids
+             * @default []
+             */
+            preloadProfileIds: string[];
+        };
+        /** RealtimeStatus */
+        RealtimeStatus: {
+            /** Running */
+            running: boolean;
+            /**
+             * Indb
+             * @default -120
+             */
+            inDb: number;
+            /**
+             * Outdb
+             * @default -120
+             */
+            outDb: number;
+            /**
+             * Latencyms
+             * @default 0
+             */
+            latencyMs: number;
+            /**
+             * Underrun
+             * @default false
+             */
+            underrun: boolean;
+            /**
+             * Underruns
+             * @default 0
+             */
+            underruns: number;
+            /**
+             * Procms
+             * @default 0
+             */
+            procMs: number;
+            /**
+             * Recording
+             * @default false
+             */
+            recording: boolean;
+            /**
+             * Recordsec
+             * @default 0
+             */
+            recordSec: number;
+            /** Profileid */
+            profileId: string | null;
+            /** Samplerate */
+            sampleRate: number | null;
+            /** Blockms */
+            blockMs: number | null;
+            /** Error */
+            error: string | null;
+        };
+        /** RealtimeStopResult */
+        RealtimeStopResult: {
+            recording: components["schemas"]["Recording"] | null;
+        };
+        /** RealtimeUpdate */
+        RealtimeUpdate: {
+            /** Pitch */
+            pitch?: number | null;
+            /** Gatedb */
+            gateDb?: number | null;
+            /** Profileid */
+            profileId?: string | null;
+        };
+        /** RecordToggle */
+        RecordToggle: {
+            /** On */
+            on: boolean;
+        };
+        /** Recording */
+        Recording: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Createdat */
+            createdAt: string;
+            /** Durationsec */
+            durationSec: number;
+            /** Profilename */
+            profileName: string;
+            /** Fileid */
+            fileId: string;
         };
         /** RedoRequest */
         RedoRequest: {
@@ -2508,7 +2777,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RealtimeStart"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -2516,7 +2789,82 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["RealtimeStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    realtime_update_realtime_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RealtimeUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RealtimeStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    realtime_record_realtime_record_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordToggle"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RealtimeStopResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2536,7 +2884,107 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["RealtimeStopResult"];
+                };
+            };
+        };
+    };
+    realtime_status_realtime_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RealtimeStatus"];
+                };
+            };
+        };
+    };
+    recordings_realtime_recordings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recording"][];
+                };
+            };
+        };
+    };
+    delete_recording_realtime_recordings__rid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recording_audio_realtime_recordings__rid__audio_get: {
+        parameters: {
+            query?: {
+                download?: boolean;
+            };
+            header?: never;
+            path: {
+                rid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2797,6 +3245,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["FromJob"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditProject"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_from_file_edit_projects_from_file_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromFile"];
             };
         };
         responses: {

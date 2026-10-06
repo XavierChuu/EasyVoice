@@ -95,7 +95,9 @@
     "BAD_REQUEST": "Invalid request: {{detail}}",
     "UNAUTHORIZED": "The app could not authenticate with the engine. Restart EasyVoice.",
     "GPU_REQUIRED": "Voice training needs an NVIDIA GPU or Apple Silicon. This computer can only use Quick voices.",
-    "DOWNLOAD_FAILED": "Some models could not be downloaded."
+    "DOWNLOAD_FAILED": "Some models could not be downloaded.",
+    "REALTIME_GPU": "Live voice changing needs an NVIDIA GPU or Apple Silicon.",
+    "AUDIO_DEVICE": "Could not open the audio device. Check that the mic / output is connected and not held by another app."
   },
   "voices": {
     "code": "01 / VOICE PROFILES",
@@ -498,7 +500,14 @@
       "underrun": "UNDERRUN · try Balanced",
       "underrunCount_one": "{{count}} dropout",
       "underrunCount_other": "{{count}} dropouts",
-      "start": "START"
+      "start": "START",
+      "noOutput": "No playback · record to file only",
+      "noOutputHint": "Nothing is sent to speakers or a virtual device: the converted voice is only recorded to a file (turn on ● REC).",
+      "record": "REC",
+      "recordHint": "Record the converted voice straight to a WAV file on this computer (no OBS or other recorder needed). Press before starting to record from the beginning, or while live.",
+      "recSaved": "Recording saved ({{sec}} s)",
+      "recordings": "LIVE RECORDINGS",
+      "crashed": "Live voice changing stopped because of an error"
     },
     "mockNote": "MOCK · pitch shift only for testing playback — not RVC yet",
     "hk": {
