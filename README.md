@@ -1,6 +1,8 @@
-# EasyVoice
+# Evoice
 
-Ứng dụng desktop chạy Voice AI 100% local: Text-to-Speech (F5-TTS), đổi giọng offline/real-time (RVC v2),
+<img src="docs/brand/evoice-logo.svg" alt="Evoice" height="48">
+
+Evoice (tên dự án/mã nguồn: EasyVoice) là ứng dụng desktop chạy Voice AI 100% local: Text-to-Speech (F5-TTS), đổi giọng offline/real-time (RVC v2),
 quản lý và huấn luyện giọng. Ưu tiên tiếng Việt. Windows 10/11 (NVIDIA CUDA) và macOS 13+ (Apple Silicon).
 
 ## Trạng thái

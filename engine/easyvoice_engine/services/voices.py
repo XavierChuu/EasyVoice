@@ -4,6 +4,7 @@ model.safetensors + model.index + rvc.json (STS)."""
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import threading
 import uuid
@@ -134,6 +135,21 @@ def clean_reference(audio: np.ndarray, sr: int) -> tuple[np.ndarray, dict[str, f
     return audio_io.peak_normalize(trimmed.astype(np.float32)), stats
 
 
+REF_MAX_SEC = 120  # giọng mẫu zero-shot chỉ dùng 5–12 s; file dài hơn nhiều là chọn nhầm file (cả buổi thu, video…)
+
+
+def load_ref(path: Path) -> tuple[np.ndarray, int]:
+    """Đọc audio mẫu cho giọng nhanh / biến thể; báo đúng lỗi khi quá ngắn hoặc quá dài (không đọc cả file dài vào RAM)."""
+    name = re.sub(r"^[0-9a-f]{8}_", "", path.name)  # bỏ tiền tố của file upload tạm
+    duration = audio_io.info(path)[0]
+    if duration > REF_MAX_SEC:
+        raise EngineError("FILE_TOO_LARGE", f"{name}: audio dài {duration / 60:.1f} phút, giọng mẫu tối đa {REF_MAX_SEC} giây")
+    audio, sr = audio_io.load(path, REF_SR)
+    if len(audio) < sr:
+        raise EngineError("BAD_FILE", f"{name}: audio quá ngắn (dưới 1 giây)")
+    return audio, sr
+
+
 def analyze_reference(path: Path) -> RefAnalysis:
     duration, sr, channels = audio_io.info(path)
     audio, sr = audio_io.load(path)
@@ -210,9 +226,7 @@ class VoiceStore:
             raise EngineError("BAD_REQUEST", "cần xác nhận quyền sử dụng giọng")
         if not transcript.strip():
             raise EngineError("BAD_REQUEST", "thiếu lời thoại")
-        audio, sr = audio_io.load(upload, REF_SR)
-        if len(audio) < sr:
-            raise EngineError("BAD_FILE", "audio quá ngắn")
+        audio, sr = load_ref(upload)
         clean, _ = clean_reference(audio, sr)
         p = self._new(name, language, capabilities=["tts"], ref_audio="ref.wav", ref_text=transcript.strip(),
                       consent_confirmed=True, **(tags or {}))
@@ -301,9 +315,7 @@ class VoiceStore:
             raise EngineError("BAD_REQUEST", "tên biến thể trống")
         if not transcript.strip():
             raise EngineError("BAD_REQUEST", "thiếu lời thoại")
-        audio, sr = audio_io.load(upload, REF_SR)
-        if len(audio) < sr:
-            raise EngineError("BAD_FILE", "audio quá ngắn")
+        audio, sr = load_ref(upload)
         clean, _ = clean_reference(audio, sr)
         with self._lock:
             p = self.get(voice_id)

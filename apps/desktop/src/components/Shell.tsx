@@ -5,6 +5,7 @@ import { pad2 } from '../lib/text';
 import { runningJob, useEngine } from '../stores/engine';
 import { useSettings } from '../stores/settings';
 import { useUi, type Tab } from '../stores/ui';
+import { Logo } from './Logo';
 import { Alert, Btn, CloseBtn, Icon, ICONS } from './ui';
 
 function useBusy() {
@@ -45,10 +46,7 @@ export function Header() {
   return (
     <header className="flex items-center justify-between gap-4 flex-wrap px-5 py-2.5 border-b border-line font-mono text-[11px] tracking-[.08em] text-mute">
       <div className="flex items-center gap-3">
-        <div className="w-[22px] h-[22px] bg-acc flex items-center justify-center text-bg">
-          <Icon d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4" size={14} stroke={2.6} />
-        </div>
-        <span className="text-fg font-bold tracking-brand">EASYVOICE</span>
+        <span className="text-fg flex"><Logo height={18} /></span>
         <span>v{system?.appVersion ?? '0.1.0'}</span>
       </div>
       <div className="flex gap-5 flex-wrap items-center">

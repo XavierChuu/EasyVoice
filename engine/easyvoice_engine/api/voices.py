@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import shutil
 import uuid
+from pathlib import Path
 from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
@@ -105,26 +107,62 @@ def delete_variant(voice_id: str, variant_id: str, state: EngineState = Depends(
     return state.voices.to_api(state.voices.delete_variant(voice_id, variant_id))
 
 
+class _Src:
+    """File nhập: upload (trình duyệt, xoá sau khi dùng) hoặc đường dẫn trên máy (app desktop — .evoice có thể nặng
+    hàng GB, không đọc vào renderer)."""
+
+    def __init__(self, name: str, path: Path, temp: bool):
+        self.name, self.path, self.temp = name, path, temp
+
+    def done(self) -> None:
+        if self.temp:
+            self.path.unlink(missing_ok=True)
+
+
+def _sources(state: EngineState, files: list[UploadFile], paths: str) -> list[_Src]:
+    out: list[_Src] = []
+    for raw in json.loads(paths or "[]"):
+        p = Path(raw)
+        if not p.is_absolute() or not p.is_file():
+            raise EngineError("BAD_FILE", f"không tìm thấy file {p.name}")
+        out.append(_Src(p.name, p, temp=False))
+    return out + [_Src(f.filename or "upload", save_upload(state, f), temp=True) for f in files]
+
+
 @router.post("/voices/import/inspect", response_model=ImportInspection)
-def inspect_import(files: list[UploadFile] = File(...), state: EngineState = Depends(get_state)) -> ImportInspection:
-    evo = next((f for f in files if (f.filename or "").lower().endswith(".evoice")), None)
+def inspect_import(
+    files: list[UploadFile] = File(default=[]),
+    paths: str = Form("[]", description="JSON: đường dẫn file trên máy (app desktop gửi đường dẫn thay vì upload)"),
+    state: EngineState = Depends(get_state),
+) -> ImportInspection:
+    srcs = _sources(state, files, paths)
+    try:
+        return _inspect(state, srcs)
+    finally:
+        for s in srcs:
+            s.done()
+
+
+def _inspect(state: EngineState, srcs: list[_Src]) -> ImportInspection:
+    pick = lambda ext: next((s for s in srcs if s.name.lower().endswith(ext)), None)  # noqa: E731
+    evo = pick(".evoice")
     if evo is not None:
         return _inspect_evoice(state, evo)
-    pth = next((f for f in files if (f.filename or "").lower().endswith(".pth")), None)
+    pth = pick(".pth")
     if pth is None:
-        raise EngineError("BAD_FILE", "cần file .pth (và .index nếu có)")
-    idx = next((f for f in files if (f.filename or "").lower().endswith(".index")), None)
+        names = ", ".join(s.name for s in srcs) or "—"
+        raise EngineError("BAD_FILE", f"{names}: cần file .evoice, hoặc .pth (kèm .index nếu có)")
+    idx = pick(".index")
     token = uuid.uuid4().hex[:12]
     staging = state.paths.tmp / f"import_{token}"
     staging.mkdir(parents=True)
-    pth_path = save_upload(state, pth)
     index_path = None
     if idx:
         index_path = staging / "model.index"
-        shutil.move(save_upload(state, idx), index_path)
-    label = " + ".join(n for n in (pth.filename, idx.filename if idx else None) if n)
+        shutil.copy2(idx.path, index_path)
+    label = " + ".join(s.name for s in (pth, idx) if s)
     try:
-        meta = convert_pth(pth_path, staging / "converted")
+        meta = convert_pth(pth.path, staging / "converted")
     except EngineError as err:
         if err.code != "UNSAFE_MODEL":
             raise
@@ -135,9 +173,7 @@ def inspect_import(files: list[UploadFile] = File(...), state: EngineState = Dep
             checks=[ImportCheck(key="format", value="PyTorch pickle"),
                     ImportCheck(key="safeLoad", value="FAILED · code objects found", bad=True),
                     ImportCheck(key="result", value="BLOCKED", bad=True)])
-    finally:
-        pth_path.unlink(missing_ok=True)
-    name = (pth.filename or "voice").rsplit(".", 1)[0]
+    name = pth.name.rsplit(".", 1)[0] or "voice"
     state.imports[token] = ImportStaging(dir=staging, index=index_path, meta=meta, name=name)
     return ImportInspection(
         token=token, kind="rvc", file_label=label, blocked=False, suggested_name=name, author="unknown",
@@ -148,20 +184,16 @@ def inspect_import(files: list[UploadFile] = File(...), state: EngineState = Dep
                 ImportCheck(key="index", value="faiss · OK" if index_path else "missing · lower similarity", bad=not index_path)])
 
 
-def _inspect_evoice(state: EngineState, upload: UploadFile) -> ImportInspection:
+def _inspect_evoice(state: EngineState, src: _Src) -> ImportInspection:
     token = uuid.uuid4().hex[:12]
     staging = state.paths.tmp / f"import_{token}"
-    path = save_upload(state, upload)
-    try:
-        ins = inspect_evoice(path, staging / "files")
-    finally:
-        path.unlink(missing_ok=True)
+    ins = inspect_evoice(src.path, staging / "files")
     m = ins.manifest
     if not ins.blocked:
         state.imports[token] = ImportStaging(dir=staging, index=None, meta=m, name=str(m.get("name") or ""), kind="evoice")
     caps = [c for c in m.get("capabilities") or [] if c in ("tts", "sts")]
     return ImportInspection(
-        token=token, kind="evoice", file_label=upload.filename or "voice.evoice", blocked=ins.blocked,
+        token=token, kind="evoice", file_label=src.name, blocked=ins.blocked,
         checks=[ImportCheck(key=k, value=v, bad=bad) for k, v, bad in ins.checks],
         suggested_name=str(m.get("name") or ""), author=str(m.get("author") or "unknown"),
         language=m.get("language") if m.get("language") in ("vi", "en") else "unknown",

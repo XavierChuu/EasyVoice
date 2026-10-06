@@ -82,7 +82,8 @@ export class HttpEngine implements EngineClient {
     const fd = new FormData();
     for (const [k, v] of Object.entries(fields)) fd.append(k, String(v));
     for (const [k, ref] of files) {
-      if (!ref.file) throw new EngineError('BAD_FILE', ref.name);
+      // App desktop không đọc file > 100 MB vào renderer: báo đúng là file quá lớn (không phải sai định dạng).
+      if (!ref.file) throw new EngineError('FILE_TOO_LARGE', `${ref.name} · ${(ref.size / 1e6).toFixed(0)} MB`);
       fd.append(k, ref.file, ref.name);
     }
     return fd;
@@ -174,7 +175,14 @@ export class HttpEngine implements EngineClient {
 
   deleteVariant = async (voiceId: string, variantId: string) => { await this.req('DELETE', `/voices/${voiceId}/variants/${variantId}`); };
 
-  inspectImport = (files: FileRef[]) => this.req<ImportInspection>('POST', '/voices/import/inspect', this.form({}, files.map((f) => ['files', f])));
+  /** App desktop gửi đường dẫn (.evoice có thể nặng hàng GB, không đọc vào renderer); trình duyệt thì upload. */
+  inspectImport = (files: FileRef[]) => {
+    const local = isElectron() ? files.filter((f) => /^([a-zA-Z]:[\\/]|\/)/.test(f.path)) : [];
+    const upload = files.filter((f) => !local.includes(f));
+    return this.req<ImportInspection>('POST', '/voices/import/inspect', this.form(
+      { paths: JSON.stringify(local.map((f) => f.path)) }, upload.map((f) => ['files', f]),
+    ));
+  };
   importVoice = (token: string, name: string) => this.req<Profile>('POST', '/voices/import', { token, name });
   /** Xuất .evoice vào thư mục Tải về của máy (engine chạy cùng máy nên ghi thẳng file, trả đường dẫn). */
   exportVoice = async (id: string, opts: ExportOptions) => {

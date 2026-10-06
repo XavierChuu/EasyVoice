@@ -160,6 +160,7 @@ export type EngineErrorCode =
   | 'NO_STS_VOICE'
   | 'UNSAFE_MODEL'
   | 'BAD_FILE'
+  | 'FILE_TOO_LARGE'
   | 'ENGINE_OFFLINE'
   | 'MODEL_MISSING'
   | 'NOT_IMPLEMENTED'

@@ -35,7 +35,7 @@ export function ImportPanel({ onClose }: { onClose: () => void }) {
   };
   const pick = async (kind: 'evoice' | 'rvc') => inspect(await platform.pickFiles(
     kind === 'evoice'
-      ? { title: t('import.chooseEvoice'), filters: [{ name: 'EasyVoice', extensions: ['evoice'] }] }
+      ? { title: t('import.chooseEvoice'), filters: [{ name: 'Evoice', extensions: ['evoice'] }] }
       : { title: t('import.chooseRvc'), multiple: true, filters: [{ name: 'RVC', extensions: ['pth', 'index'] }] },
   ));
 

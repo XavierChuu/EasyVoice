@@ -77,7 +77,7 @@
     },
     "offline": {
       "title": "Engine không chạy",
-      "body": "EasyVoice không khởi động được engine trên máy. Hãy khởi động lại, hoặc xem file log để biết chi tiết."
+      "body": "Evoice không khởi động được engine trên máy. Hãy khởi động lại, hoặc xem file log để biết chi tiết."
     }
   },
   "errors": {
@@ -86,14 +86,15 @@
     "GPU_OOM": "Hết bộ nhớ GPU, hãy đóng tác vụ khác rồi thử lại.",
     "NO_STS_VOICE": "Chưa có giọng nào huấn luyện xong. Hãy tạo một giọng Chất lượng cao trước.",
     "UNSAFE_MODEL": "File này chứa mã thực thi, không chỉ là trọng số model. Không có gì được nhập.",
-    "BAD_FILE": "Không hỗ trợ loại file này.",
+    "BAD_FILE": "Không đọc được file hoặc định dạng không hỗ trợ ({{detail}}).",
+    "FILE_TOO_LARGE": "File quá lớn cho thao tác này ({{detail}}).",
     "ENGINE_OFFLINE": "Engine không chạy.",
     "MODEL_MISSING": "Thiếu model cần thiết ({{detail}}). Vào Cài đặt → Chạy lại thiết lập ban đầu để tải.",
     "UNKNOWN": "Đã có lỗi xảy ra. Chi tiết đã được ghi vào file log.",
     "NOT_IMPLEMENTED": "Tính năng này chưa có trong bản engine hiện tại ({{detail}}).",
     "NOT_FOUND": "Không tìm thấy ({{detail}}).",
     "BAD_REQUEST": "Yêu cầu không hợp lệ: {{detail}}",
-    "UNAUTHORIZED": "App không xác thực được với engine. Hãy mở lại EasyVoice.",
+    "UNAUTHORIZED": "App không xác thực được với engine. Hãy mở lại Evoice.",
     "GPU_REQUIRED": "Huấn luyện giọng cần GPU NVIDIA hoặc Apple Silicon. Máy này chỉ dùng được giọng Nhanh.",
     "DOWNLOAD_FAILED": "Không tải được một số model.",
     "REALTIME_GPU": "Đổi giọng trực tiếp cần GPU NVIDIA hoặc Apple Silicon.",
@@ -153,7 +154,8 @@
       "drop": "Thả một file audio — giọng rõ, không có nhạc nền",
       "choose": "Chọn file",
       "record": "Thu âm ngay",
-      "analyzing": "ĐANG PHÂN TÍCH…"
+      "analyzing": "ĐANG PHÂN TÍCH…",
+      "tooLarge": "File {{name}} nặng {{size}} MB — quá lớn cho giọng nhanh. Giọng mẫu chỉ cần đoạn 5–12 giây (vài MB): hãy cắt ngắn file, hoặc chọn \"Chất lượng cao\" để huấn luyện từ file dài."
     },
     "hq": {
       "title": "Chất lượng cao",
@@ -245,7 +247,7 @@
     "use": "DÙNG BẢN THU NÀY",
     "tooShort": "Quá ngắn — hãy thu ít nhất {{min}} giây.",
     "noMic": "Không truy cập được micro",
-    "noMicBody": "Cho phép EasyVoice dùng micro trong cài đặt hệ thống, hoặc chọn file thay thế.",
+    "noMicBody": "Cho phép Evoice dùng micro trong cài đặt hệ thống, hoặc chọn file thay thế.",
     "device": "MICRO",
     "defaultDevice": "Mặc định của hệ thống",
     "mic": "Micro",
@@ -258,7 +260,7 @@
       "denied": {
         "title": "Micro đang bị chặn",
         "windows": "Mở Settings của Windows → Privacy & security → Microphone, bật “Microphone access” và “Let desktop apps access your microphone”, rồi thử lại.",
-        "mac": "Mở System Settings → Privacy & Security → Microphone, bật EasyVoice (hoặc Electron khi đang chạy dev), rồi mở lại app.",
+        "mac": "Mở System Settings → Privacy & Security → Microphone, bật Evoice (hoặc Electron khi đang chạy dev), rồi mở lại app.",
         "browser": "Bấm biểu tượng ổ khóa cạnh thanh địa chỉ, cho phép Micro với trang này, rồi thử lại."
       },
       "notFound": {
@@ -346,7 +348,7 @@
     "author": "TÁC GIẢ",
     "authorPlaceholder": "Tên hoặc biệt danh của bạn",
     "submit": "XUẤT .EVOICE",
-    "doneBody": "Gửi file này cho bất kỳ ai dùng EasyVoice. Họ mở bằng Nhập, file được kiểm tra an toàn rồi xuất hiện trong thư viện của họ."
+    "doneBody": "Gửi file này cho bất kỳ ai dùng Evoice. Họ mở bằng Nhập, file được kiểm tra an toàn rồi xuất hiện trong thư viện của họ."
   },
   "training": {
     "aria": "Chi tiết huấn luyện",
@@ -385,7 +387,7 @@
     "code": "02 / ĐỌC VĂN BẢN",
     "title": "Đọc văn bản",
     "desc": "Dán văn bản, chọn giọng, bấm Đọc. Văn bản dài được tách thành từng câu.",
-    "sample": "Xin chào, mình là EasyVoice. Giá vàng tại TP.HCM tăng 10% so với tuần trước! Hãy dán một đoạn dài hơn để xem app tách câu như thế nào.",
+    "sample": "Xin chào, mình là Evoice. Giá vàng tại TP.HCM tăng 10% so với tuần trước! Hãy dán một đoạn dài hơn để xem app tách câu như thế nào.",
     "chars": "KÝ TỰ",
     "sent": "CÂU",
     "openTxt": "MỞ .TXT",
@@ -442,7 +444,7 @@
   },
   "dict": {
     "title": "TỪ_ĐIỂN_PHÁT_ÂM",
-    "desc": "Chỉ cho EasyVoice cách đọc những từ hay bị đọc sai: tên riêng, thương hiệu, viết tắt. Áp dụng trước khi đọc.",
+    "desc": "Chỉ cho Evoice cách đọc những từ hay bị đọc sai: tên riêng, thương hiệu, viết tắt. Áp dụng trước khi đọc.",
     "from": "VIẾT",
     "to": "ĐỌC LÀ",
     "toPlaceholder": "ây ai",
@@ -516,7 +518,7 @@
       "none": "— chưa gán —",
       "hint": "Gán giọng trước khi live. Khi live: giữ phím số lúc nói để đổi sang giọng đó, nhả ra là về giọng mặc định (giọng đích bên trái). Hàng số và numpad đều được.",
       "global": "Bắt phím toàn cục: dùng được cả khi đang ở Discord / OBS / game (phím số vẫn gõ vào ứng dụng đó như bình thường).",
-      "window": "Chỉ bắt được phím khi cửa sổ EasyVoice đang được chọn."
+      "window": "Chỉ bắt được phím khi cửa sổ Evoice đang được chọn."
     }
   },
   "guide": {
@@ -526,7 +528,7 @@
       "steps": [
         "Tải VB-Cable từ trang chính thức của VB-Audio và giải nén.",
         "Chuột phải VBCABLE_Setup_x64.exe → Run as administrator → Install Driver. Khởi động lại máy.",
-        "Trong EasyVoice → Đổi giọng → TRỰC TIẾP, chọn “CABLE Input (VB-Audio)” làm Output rồi bấm BẮT ĐẦU.",
+        "Trong Evoice → Đổi giọng → TRỰC TIẾP, chọn “CABLE Input (VB-Audio)” làm Output rồi bấm BẮT ĐẦU.",
         "Trong Discord / OBS / Zoom, chọn “CABLE Output (VB-Audio)” làm micro.",
         "Muốn tự nghe giọng mình: bật “Listen to this device” cho CABLE Output trong cài đặt Sound của Windows."
       ]
@@ -534,12 +536,12 @@
     "mac": {
       "steps": [
         "Tải BlackHole 2ch từ trang chính thức của Existential Audio và chạy trình cài.",
-        "Mở EasyVoice → Đổi giọng → TRỰC TIẾP, chọn “BlackHole 2ch” làm Output rồi bấm BẮT ĐẦU.",
+        "Mở Evoice → Đổi giọng → TRỰC TIẾP, chọn “BlackHole 2ch” làm Output rồi bấm BẮT ĐẦU.",
         "Trong Discord / OBS / Zoom, chọn “BlackHole 2ch” làm micro.",
         "Muốn tự nghe giọng mình: tạo Multi-Output Device trong Audio MIDI Setup gồm loa + BlackHole."
       ]
     },
-    "note": "EasyVoice không tự cài driver âm thanh. Các link mở trang chính thức của nhà phát triển."
+    "note": "Evoice không tự cài driver âm thanh. Các link mở trang chính thức của nhà phát triển."
   },
   "settings": {
     "code": "CÀI ĐẶT",
@@ -571,7 +573,7 @@
   "licenses": {
     "code": "GIẤY PHÉP",
     "title": "Giấy phép",
-    "desc": "Tất cả model AI EasyVoice dùng và giấy phép của chúng cho phép gì.",
+    "desc": "Tất cả model AI Evoice dùng và giấy phép của chúng cho phép gì.",
     "model": "MODEL",
     "role": "VAI TRÒ",
     "license": "GIẤY PHÉP",
@@ -582,8 +584,8 @@
     "appNote": "Code của app và các thư viện đi kèm được liệt kê trong file NOTICE cài cùng app."
   },
   "firstRun": {
-    "title": "CHÀO_MỪNG_ĐẾN_EASYVOICE",
-    "intro": "EasyVoice chạy hoàn toàn trên máy bạn. Lần đầu cần tải các model AI một lần, sau đó dùng offline.",
+    "title": "CHÀO_MỪNG_ĐẾN_EVOICE",
+    "intro": "Evoice chạy hoàn toàn trên máy bạn. Lần đầu cần tải các model AI một lần, sau đó dùng offline.",
     "check": "KIỂM TRA HỆ THỐNG",
     "driver": "DRIVER GPU",
     "driverOld": "Quá cũ — hãy cập nhật",
@@ -598,7 +600,7 @@
     "downloading": "ĐANG TẢI…",
     "done": "ĐÃ XONG",
     "resumeNote": "Nếu rớt mạng, lần sau sẽ tải tiếp từ chỗ dừng.",
-    "start": "BẮT ĐẦU DÙNG EASYVOICE",
+    "start": "BẮT ĐẦU DÙNG EVOICE",
     "retry": "THỬ LẠI",
     "waiting": "ĐANG CHỜ…",
     "failed": "Tải model bị lỗi",
@@ -911,8 +913,8 @@
     }
   },
   "runtime": {
-    "title": "Cài đặt EasyVoice lần đầu",
-    "intro": "EasyVoice cần cài bộ chạy AI (Python + PyTorch + thư viện engine) vào máy. Chỉ cần làm một lần, tất cả nằm trong thư mục dữ liệu của app và không ảnh hưởng tới Python khác trên máy. Sau bước này bạn sẽ chọn model để tải.",
+    "title": "Cài đặt Evoice lần đầu",
+    "intro": "Evoice cần cài bộ chạy AI (Python + PyTorch + thư viện engine) vào máy. Chỉ cần làm một lần, tất cả nằm trong thư mục dữ liệu của app và không ảnh hưởng tới Python khác trên máy. Sau bước này bạn sẽ chọn model để tải.",
     "install": "Cài đặt (~{{size}} GB)",
     "dir": "Thư mục",
     "torch": {

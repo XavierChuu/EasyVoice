@@ -39,6 +39,11 @@ export function RefClipInput({ id, language, clip, onClip, transcript, onTranscr
   const playKey = `ref:${id}`;
 
   const setFile = async (ref: FileRef) => {
+    if (!ref.file) {
+      // File quá lớn để đọc vào app (> 100 MB): giọng mẫu chỉ cần vài giây, báo rõ thay vì "không hỗ trợ".
+      setNotice(`${t('wizard.quick.tooLarge', { name: ref.name, size: (ref.size / 1e6).toFixed(0) })} [FILE_TOO_LARGE]`);
+      return;
+    }
     onClip({ ref, analysis: null });
     try {
       onClip({ ref, analysis: await engine().analyzeRef(ref) });

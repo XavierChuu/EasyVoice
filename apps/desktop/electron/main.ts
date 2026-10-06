@@ -28,7 +28,9 @@ function createWindow() {
     minWidth: 960,
     minHeight: 640,
     backgroundColor: '#0A0A0A',
-    title: 'EasyVoice',
+    title: 'Evoice',
+    // Bản cài đặt dùng icon của file .exe/.app; khi chạy dev thì lấy build/icon.png.
+    ...(app.isPackaged ? {} : { icon: path.join(app.getAppPath(), 'build', 'icon.png') }),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

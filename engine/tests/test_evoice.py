@@ -130,3 +130,34 @@ def test_tampered_or_unsafe_evoice_is_blocked(client, state, tmp_path, wav_file)
     (tmp_path / "junk.evoice").write_bytes(b"not a zip")
     assert inspect(client, tmp_path / "junk.evoice")["blocked"]
     assert client.post("/voices/import", json={"token": ins["token"], "name": "x"}).json()["code"] == "NOT_FOUND"
+
+
+def test_import_by_local_path_and_clear_errors(client, state, tmp_path, wav_file):
+    """App desktop gửi đường dẫn (file .evoice lớn không đọc vào renderer); file sai loại báo rõ tên file."""
+    vid = make_full_voice(client, state, tmp_path, wav_file)
+    out = export(client, vid, destDir=str(tmp_path)).json()["path"]
+    ins = client.post("/voices/import/inspect", data={"paths": json.dumps([out])}).json()
+    assert ins["kind"] == "evoice" and not ins["blocked"], ins
+    assert ins["fileLabel"] == "giọng-minh.evoice"
+    from pathlib import Path
+
+    assert Path(out).exists()  # file của người dùng không bị xoá sau khi kiểm tra
+    p = client.post("/voices/import", json={"token": ins["token"], "name": "Qua đường dẫn"}).json()
+    assert p["imported"]
+    r = client.post("/voices/import/inspect", data={"paths": json.dumps([str(wav_file)])}).json()
+    assert r["code"] == "BAD_FILE" and wav_file.name in r["detail"]
+    r = client.post("/voices/import/inspect", data={"paths": json.dumps([str(tmp_path / "missing.evoice")])}).json()
+    assert r["code"] == "BAD_FILE" and "missing.evoice" in r["detail"]
+
+
+def test_quick_voice_rejects_overlong_reference_with_clear_error(client, tmp_path):
+    import numpy as np
+    import soundfile as sf
+
+    long = tmp_path / "ca-buoi-thu.wav"
+    sf.write(long, np.zeros(16000 * 125, dtype=np.float32), 16000)
+    with long.open("rb") as f:
+        r = client.post("/voices", data={"name": "Dài", "language": "vi", "transcript": "xin chào", "consent": "true"},
+                        files={"file": ("ca-buoi-thu.wav", f)})
+    assert r.status_code == 413 and r.json()["code"] == "FILE_TOO_LARGE"
+    assert r.json()["detail"].startswith("ca-buoi-thu.wav: audio dài 2.1 phút")

@@ -825,8 +825,17 @@ export interface components {
         };
         /** Body_inspect_import_voices_import_inspect_post */
         Body_inspect_import_voices_import_inspect_post: {
-            /** Files */
+            /**
+             * Files
+             * @default []
+             */
             files: string[];
+            /**
+             * Paths
+             * @description JSON: đường dẫn file trên máy (app desktop gửi đường dẫn thay vì upload)
+             * @default []
+             */
+            paths: string;
         };
         /** Body_start_offline_sts_offline_post */
         Body_start_offline_sts_offline_post: {
@@ -2448,7 +2457,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "multipart/form-data": components["schemas"]["Body_inspect_import_voices_import_inspect_post"];
             };

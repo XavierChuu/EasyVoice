@@ -78,7 +78,7 @@
     },
     "offline": {
       "title": "The engine is not running",
-      "body": "EasyVoice could not start its local engine. Restart it, or check the log for details."
+      "body": "Evoice could not start its local engine. Restart it, or check the log for details."
     }
   },
   "errors": {
@@ -87,14 +87,15 @@
     "GPU_OOM": "Out of GPU memory. Close other tasks and try again.",
     "NO_STS_VOICE": "No voice has finished training yet. Create a High quality voice first.",
     "UNSAFE_MODEL": "This file contains executable code, not just model weights. Nothing was imported.",
-    "BAD_FILE": "This file type is not supported.",
+    "BAD_FILE": "Could not read the file or the format is not supported ({{detail}}).",
+    "FILE_TOO_LARGE": "The file is too large for this action ({{detail}}).",
     "ENGINE_OFFLINE": "The engine is not running.",
     "MODEL_MISSING": "A required model is not installed ({{detail}}). Open Settings → Re-run first-time setup.",
     "UNKNOWN": "Something went wrong. Details were written to the log.",
     "NOT_IMPLEMENTED": "This feature is not in this engine version yet ({{detail}}).",
     "NOT_FOUND": "Not found ({{detail}}).",
     "BAD_REQUEST": "Invalid request: {{detail}}",
-    "UNAUTHORIZED": "The app could not authenticate with the engine. Restart EasyVoice.",
+    "UNAUTHORIZED": "The app could not authenticate with the engine. Restart Evoice.",
     "GPU_REQUIRED": "Voice training needs an NVIDIA GPU or Apple Silicon. This computer can only use Quick voices.",
     "DOWNLOAD_FAILED": "Some models could not be downloaded.",
     "REALTIME_GPU": "Live voice changing needs an NVIDIA GPU or Apple Silicon.",
@@ -154,7 +155,8 @@
       "drop": "Drop one audio file — clear voice, no background music",
       "choose": "Choose file",
       "record": "Record now",
-      "analyzing": "ANALYZING…"
+      "analyzing": "ANALYZING…",
+      "tooLarge": "{{name}} is {{size}} MB — too large for a quick voice. A reference only needs a 5–12 second clip (a few MB): trim the file, or choose \"High quality\" to train from long recordings."
     },
     "hq": {
       "title": "High quality",
@@ -246,7 +248,7 @@
     "use": "USE RECORDING",
     "tooShort": "Too short — record at least {{min}} seconds.",
     "noMic": "Can't access the microphone",
-    "noMicBody": "Allow microphone access for EasyVoice in your system settings, or choose a file instead.",
+    "noMicBody": "Allow microphone access for Evoice in your system settings, or choose a file instead.",
     "device": "MICROPHONE",
     "defaultDevice": "System default",
     "mic": "Microphone",
@@ -259,7 +261,7 @@
       "denied": {
         "title": "Microphone access is blocked",
         "windows": "Open Windows Settings → Privacy & security → Microphone, turn on “Microphone access” and “Let desktop apps access your microphone”, then try again.",
-        "mac": "Open System Settings → Privacy & Security → Microphone, turn on EasyVoice (or Electron while developing), then restart the app.",
+        "mac": "Open System Settings → Privacy & Security → Microphone, turn on Evoice (or Electron while developing), then restart the app.",
         "browser": "Click the lock icon next to the address bar, allow Microphone for this site, then try again."
       },
       "notFound": {
@@ -347,7 +349,7 @@
     "author": "AUTHOR",
     "authorPlaceholder": "Your name or handle",
     "submit": "EXPORT .EVOICE",
-    "doneBody": "Send this file to anyone with EasyVoice. They open it with Import, it is checked for safety, then it appears in their library."
+    "doneBody": "Send this file to anyone with Evoice. They open it with Import, it is checked for safety, then it appears in their library."
   },
   "training": {
     "aria": "Training details",
@@ -386,7 +388,7 @@
     "code": "02 / TEXT-TO-SPEECH",
     "title": "Text to Speech",
     "desc": "Paste your text, pick a voice, hit Read. Long text is split into sentences.",
-    "sample": "Hello, I am EasyVoice. Gold prices in NYC rose 10% compared to last week! Try pasting a longer passage to see how the app splits it into sentences.",
+    "sample": "Hello, I am Evoice. Gold prices in NYC rose 10% compared to last week! Try pasting a longer passage to see how the app splits it into sentences.",
     "chars": "CHARS",
     "sent": "SENT",
     "openTxt": "OPEN .TXT",
@@ -443,7 +445,7 @@
   },
   "dict": {
     "title": "PRONUNCIATION_DICTIONARY",
-    "desc": "Tell EasyVoice how to say words it gets wrong: names, brands, abbreviations. Applied before reading.",
+    "desc": "Tell Evoice how to say words it gets wrong: names, brands, abbreviations. Applied before reading.",
     "from": "WRITTEN",
     "to": "SAY AS",
     "toPlaceholder": "ay eye",
@@ -518,7 +520,7 @@
       "none": "— not set —",
       "hint": "Assign voices before going live. While live, hold a number key as you speak to switch to that voice; release to return to the default (target voice on the left). Top-row and numpad keys both work.",
       "global": "Global hotkeys: works while you are in Discord / OBS / a game (the number still types into that app as usual).",
-      "window": "Hotkeys only work while the EasyVoice window is focused."
+      "window": "Hotkeys only work while the Evoice window is focused."
     }
   },
   "guide": {
@@ -528,7 +530,7 @@
       "steps": [
         "Download VB-Cable from the official VB-Audio website and unzip it.",
         "Right-click VBCABLE_Setup_x64.exe → Run as administrator → Install Driver. Restart your computer.",
-        "In EasyVoice → Voice Changer → LIVE, pick “CABLE Input (VB-Audio)” as Output, then press START.",
+        "In Evoice → Voice Changer → LIVE, pick “CABLE Input (VB-Audio)” as Output, then press START.",
         "In Discord / OBS / Zoom, choose “CABLE Output (VB-Audio)” as your microphone.",
         "To hear yourself, enable “Listen to this device” for CABLE Output in Windows Sound settings."
       ]
@@ -536,12 +538,12 @@
     "mac": {
       "steps": [
         "Download BlackHole 2ch from the official Existential Audio website and run the installer.",
-        "Open EasyVoice → Voice Changer → LIVE, pick “BlackHole 2ch” as Output, then press START.",
+        "Open Evoice → Voice Changer → LIVE, pick “BlackHole 2ch” as Output, then press START.",
         "In Discord / OBS / Zoom, choose “BlackHole 2ch” as your microphone.",
         "To hear yourself too, create a Multi-Output Device in Audio MIDI Setup with your speakers + BlackHole."
       ]
     },
-    "note": "EasyVoice does not install audio drivers itself. Links open the developers' official pages."
+    "note": "Evoice does not install audio drivers itself. Links open the developers' official pages."
   },
   "settings": {
     "code": "SETTINGS",
@@ -573,7 +575,7 @@
   "licenses": {
     "code": "LICENSES",
     "title": "Licenses",
-    "desc": "Every AI model EasyVoice uses, and what its license allows.",
+    "desc": "Every AI model Evoice uses, and what its license allows.",
     "model": "MODEL",
     "role": "ROLE",
     "license": "LICENSE",
@@ -581,11 +583,11 @@
     "size": "SIZE",
     "installed": "INSTALLED",
     "ncWarn": "Some models are licensed for non-commercial use only. Audio you create with them should not be used in paid work.",
-    "appNote": "EasyVoice app code and bundled libraries are listed in the NOTICE file that ships with the app."
+    "appNote": "Evoice app code and bundled libraries are listed in the NOTICE file that ships with the app."
   },
   "firstRun": {
-    "title": "WELCOME_TO_EASYVOICE",
-    "intro": "EasyVoice runs entirely on your computer. First, it needs to download its AI models once. After that it works offline.",
+    "title": "WELCOME_TO_EVOICE",
+    "intro": "Evoice runs entirely on your computer. First, it needs to download its AI models once. After that it works offline.",
     "check": "SYSTEM CHECK",
     "driver": "GPU DRIVER",
     "driverOld": "Too old — please update",
@@ -600,7 +602,7 @@
     "downloading": "DOWNLOADING…",
     "done": "ALL SET",
     "resumeNote": "If your connection drops, the download continues where it left off.",
-    "start": "START USING EASYVOICE",
+    "start": "START USING EVOICE",
     "retry": "RETRY",
     "waiting": "WAITING…",
     "failed": "Model download failed",
@@ -918,7 +920,7 @@
   },
   "runtime": {
     "title": "First-time setup",
-    "intro": "EasyVoice needs to install its AI runtime (Python + PyTorch + engine libraries). This happens once; everything lives in the app's data folder and doesn't touch any other Python on this computer. Next you'll pick which models to download.",
+    "intro": "Evoice needs to install its AI runtime (Python + PyTorch + engine libraries). This happens once; everything lives in the app's data folder and doesn't touch any other Python on this computer. Next you'll pick which models to download.",
     "install": "Install (~{{size}} GB)",
     "dir": "Folder",
     "torch": {

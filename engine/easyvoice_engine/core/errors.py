@@ -10,6 +10,7 @@ MESSAGES: dict[str, tuple[str, str]] = {
     "UNSAFE_MODEL": ("File chứa mã thực thi, không chỉ là trọng số model. Không có gì được nhập.",
                      "The file contains executable code, not just weights. Nothing was imported."),
     "BAD_FILE": ("Không đọc được file hoặc định dạng không hỗ trợ.", "Could not read the file or the format is not supported."),
+    "FILE_TOO_LARGE": ("File quá lớn cho thao tác này.", "The file is too large for this action."),
     "BAD_REQUEST": ("Yêu cầu không hợp lệ.", "Invalid request."),
     "NOT_FOUND": ("Không tìm thấy.", "Not found."),
     "MODEL_MISSING": ("Thiếu model cần thiết. Hãy tải model trong màn hình thiết lập.", "A required model is not installed."),
@@ -25,7 +26,7 @@ MESSAGES: dict[str, tuple[str, str]] = {
 }
 
 STATUS: dict[str, int] = {
-    "BAD_FILE": 400, "BAD_REQUEST": 400, "UNSAFE_MODEL": 400, "NO_STS_VOICE": 400, "UNAUTHORIZED": 401,
+    "BAD_FILE": 400, "FILE_TOO_LARGE": 413, "BAD_REQUEST": 400, "UNSAFE_MODEL": 400, "NO_STS_VOICE": 400, "UNAUTHORIZED": 401,
     "NOT_FOUND": 404, "GPU_BUSY_REALTIME": 409, "GPU_BUSY_JOB": 409, "MODEL_MISSING": 424,
     "NOT_IMPLEMENTED": 501, "DOWNLOAD_FAILED": 502, "GPU_OOM": 507, "GPU_REQUIRED": 409, "REALTIME_GPU": 409, "AUDIO_DEVICE": 400,
 }

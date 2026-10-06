@@ -595,8 +595,7 @@
                 "$ref": "#/components/schemas/Body_inspect_import_voices_import_inspect_post"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -2250,13 +2249,17 @@
               "contentMediaType": "application/octet-stream"
             },
             "type": "array",
-            "title": "Files"
+            "title": "Files",
+            "default": []
+          },
+          "paths": {
+            "type": "string",
+            "title": "Paths",
+            "description": "JSON: đường dẫn file trên máy (app desktop gửi đường dẫn thay vì upload)",
+            "default": "[]"
           }
         },
         "type": "object",
-        "required": [
-          "files"
-        ],
         "title": "Body_inspect_import_voices_import_inspect_post"
       },
       "Body_start_offline_sts_offline_post": {

@@ -2,11 +2,11 @@
 # cài ở lần chạy đầu (electron/runtime.ts), model tải ở màn hình First-run. Ký số: đặt CSC_LINK/CSC_KEY_PASSWORD
 # (Windows) hoặc CSC_NAME + APPLE_ID/APPLE_APP_SPECIFIC_PASSWORD/APPLE_TEAM_ID (macOS) trong môi trường build.
 appId: app.easyvoice.desktop
-productName: EasyVoice
-copyright: Copyright © EasyVoice
+productName: Evoice
+copyright: Copyright © Evoice
 directories:
   output: release
-  buildResources: build
+  buildResources: build # icon.png (1024 px) → .ico / .icns tự sinh khi build
 files:
   - dist/**
   - dist-electron/**
@@ -67,4 +67,4 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
   notarize: true
   extendInfo:
-    NSMicrophoneUsageDescription: EasyVoice dùng micro để thu giọng mẫu và đổi giọng trực tiếp.
+    NSMicrophoneUsageDescription: Evoice dùng micro để thu giọng mẫu và đổi giọng trực tiếp.
