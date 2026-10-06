@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { clipEnd, deleteClip, deleteRange, duplicateClip, formatTime, splitAt, updateClip } from '../../lib/editTimeline';
+import { clipEnd, deleteClip, deleteRange, duplicateClip, formatTime, splitAt, updateClip, type ExportScope } from '../../lib/editTimeline';
 import { useEdit } from '../../stores/edit';
 import type { DialogKind } from './Inspector';
 
@@ -26,8 +26,8 @@ interface Item {
 }
 type Entry = Item | 'sep' | { title: string };
 
-export function ContextMenu({ req, onClose, openDialog, onImport, onRecord }: {
-  req: MenuRequest; onClose: () => void; openDialog: (d: DialogKind) => void;
+export function ContextMenu({ req, onClose, openDialog, onExport, onImport, onRecord }: {
+  req: MenuRequest; onClose: () => void; openDialog: (d: DialogKind) => void; onExport: (s: ExportScope) => void;
   onImport: (trackId: string, at: number) => void; onRecord: (trackId: string, at: number) => void;
 }) {
   const { t } = useTranslation();
@@ -107,6 +107,7 @@ export function ContextMenu({ req, onClose, openDialog, onImport, onRecord }: {
         onClick: () => ed().commit((x) => splitAt(x, req.time, [clip.trackId])) },
       { label: t('edit.clip.select'), onClick: () => ed().setSelection({ trackId: clip.trackId, start: clip.start, end: clipEnd(clip) }) },
       { label: t('edit.menu.duplicate'), onClick: () => ed().commit((x) => duplicateClip(x, clip.id)) },
+      { label: t('edit.menu.exportClip'), onClick: () => onExport({ kind: 'clip', clipId: clip.id }) },
       'sep',
       ...process,
       'sep',
@@ -131,6 +132,8 @@ export function ContextMenu({ req, onClose, openDialog, onImport, onRecord }: {
       'sep',
       { label: `+ ${t('edit.menu.importHere')}`, onClick: () => onImport(req.trackId, req.time) },
       { label: `● ${t('edit.menu.recordHere')}`, onClick: () => onRecord(req.trackId, req.time) },
+      { label: t('edit.menu.exportTrack'), disabled: !timeline.clips.some((x) => x.trackId === req.trackId),
+        onClick: () => onExport({ kind: 'track', trackId: req.trackId }) },
       { label: t('edit.menu.speakHere'), onClick: () => { ed().seek(req.time); ed().selectTrack(req.trackId); ed().setSelection(null); openDialog('speak'); } },
     ];
   }

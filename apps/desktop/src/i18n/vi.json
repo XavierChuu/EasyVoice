@@ -890,7 +890,9 @@
         "podcast": "Podcast",
         "broadcast": "Phát thanh EBU"
       },
-      "hint": "Trộn mọi track đang bật (theo M/S, âm lượng, fade). Chuẩn loudness có giới hạn đỉnh −1 dBFS."
+      "hint": "Trộn mọi track đang bật (theo M/S, âm lượng, fade). Chuẩn loudness có giới hạn đỉnh −1 dBFS.",
+      "titleTrack": "XUẤT TRACK",
+      "titleClip": "XUẤT CLIP"
     },
     "importing": "Đang nhập audio…",
     "menu": {
@@ -909,7 +911,9 @@
       "playHere": "Nghe từ đây",
       "importHere": "Nhập file vào đây…",
       "recordHere": "Thu âm tại đây…",
-      "speakHere": "Đọc bằng giọng tại đây…"
+      "speakHere": "Đọc bằng giọng tại đây…",
+      "exportTrack": "Xuất cả track…",
+      "exportClip": "Xuất clip này…"
     }
   },
   "runtime": {

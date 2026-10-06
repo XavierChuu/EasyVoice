@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { EditAsset, EditTimeline } from '../api/types';
 import {
-  applySeparation, deleteRange, duplicateClip, deleteRanges, fillerRanges, makeClip, replaceRange, replaceSegments, segmentsInRange, splitAt,
+  applySeparation, deleteRange, duplicateClip, deleteRanges, exportTimeline, fillerRanges, makeClip, replaceRange, replaceSegments, segmentsInRange, splitAt,
   splitBySpeakers, timelineEnd, timelineWords, trimClip,
 } from './editTimeline';
 
@@ -103,5 +103,38 @@ describe('editTimeline', () => {
     const busy = duplicateClip(d, 'c1');
     expect(busy.tracks.length).toBe(3);
     expect(spans(busy, busy.tracks[2].id)).toEqual([[2, 0, 2]]);
+  });
+});
+
+describe('exportTimeline', () => {
+  const base: EditTimeline = {
+    name: 'Dự án', ripple: 'all', speakers: [],
+    tracks: [{ id: 't1', name: 'Giọng', mute: true, solo: false, gainDb: 0, color: '#fff' } as never,
+      { id: 't2', name: 'Nhạc', mute: false, solo: true, gainDb: 0, color: '#fff' } as never],
+    clips: [makeClip({ id: 'c1', trackId: 't1', assetId: 'a', start: 5, duration: 2, label: 'Câu 1' }),
+      makeClip({ id: 'c2', trackId: 't1', assetId: 'a', start: 9, duration: 1 }),
+      makeClip({ id: 'c3', trackId: 't2', assetId: 'b', start: 0, duration: 30 })],
+  };
+  it('exports a whole track alone (even if muted), keeping positions', () => {
+    const x = exportTimeline(base, { kind: 'track', trackId: 't1' });
+    expect(x.name).toBe('Dự án - Giọng');
+    expect(x.tracks).toHaveLength(1);
+    expect(x.tracks[0]).toMatchObject({ id: 't1', mute: false, solo: false });
+    expect(x.clips.map((c) => [c.id, c.start])).toEqual([['c1', 5], ['c2', 9]]);
+  });
+  it('exports one clip from 0 s with its own settings', () => {
+    const x = exportTimeline(base, { kind: 'clip', clipId: 'c1' });
+    expect(x.name).toBe('Dự án - Câu 1');
+    expect(x.clips).toHaveLength(1);
+    expect(x.clips[0]).toMatchObject({ id: 'c1', start: 0, duration: 2 });
+    expect(x.tracks.map((t) => t.id)).toEqual(['t1']);
+    expect(base.clips[0].start).toBe(5); // không sửa timeline gốc
+  });
+  it('does not repeat the name when track and project share it', () => {
+    expect(exportTimeline({ ...base, name: 'Giọng' }, { kind: 'track', trackId: 't1' }).name).toBe('Giọng');
+  });
+  it('returns the project unchanged for scope all / unknown ids', () => {
+    expect(exportTimeline(base, { kind: 'all' })).toBe(base);
+    expect(exportTimeline(base, { kind: 'clip', clipId: 'zz' })).toBe(base);
   });
 });

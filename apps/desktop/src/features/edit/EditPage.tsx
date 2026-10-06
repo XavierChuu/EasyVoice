@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { engine } from '../../api/engine';
 import { Btn, ConfirmModal, DropZone, PageHead, Segmented, TextInput } from '../../components/ui';
 import { filesToRefs } from '../../components/RefClipInput';
-import { deleteClip, deleteRange, formatTime, makeTrack, splitAt, timelineEnd } from '../../lib/editTimeline';
+import { deleteClip, deleteRange, formatTime, makeTrack, splitAt, timelineEnd, type ExportScope } from '../../lib/editTimeline';
 import { MEDIA_FILTER, platform } from '../../lib/platform';
 import { formatDuration } from '../../lib/text';
 import { useEdit } from '../../stores/edit';
@@ -92,6 +92,7 @@ function Editor() {
   const ed = useEdit.getState;
   const [dialog, setDialog] = useState<DialogKind | null>(null);
   const [menu, setMenu] = useState<MenuRequest | null>(null);
+  const [exportScope, setExportScope] = useState<ExportScope | null>(null);
   const [recordAt, setRecordAt] = useState<{ trackId?: string; at: number } | null>(null);
   const [recording, setRecording] = useState(false);
   const [name, setName] = useState(timeline.name);
@@ -101,7 +102,7 @@ function Editor() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement;
-      if (dialog || recording || menu || el.closest('input, textarea, select, [role=dialog]')) return;
+      if (dialog || exportScope || recording || menu || el.closest('input, textarea, select, [role=dialog]')) return;
       const s = ed();
       const mod = e.ctrlKey || e.metaKey;
       if (e.code === 'Space') s.toggle();
@@ -127,7 +128,7 @@ function Editor() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [dialog, recording, menu]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dialog, exportScope, recording, menu]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const importPick = async (trackId?: string, at?: number) => {
     const files = await platform.pickFiles({ title: t('edit.import'), multiple: true, filters: [MEDIA_FILTER] });
@@ -202,13 +203,14 @@ function Editor() {
       {dialog === 'silences' && <SilencesDialog onClose={() => setDialog(null)} />}
       {dialog === 'duck' && <DuckDialog onClose={() => setDialog(null)} />}
       {dialog === 'export' && <ExportDialog onClose={() => setDialog(null)} />}
+      {exportScope && <ExportDialog scope={exportScope} onClose={() => setExportScope(null)} />}
       {recording && <Recorder maxSec={3600} minSec={0.3} onClose={() => setRecording(false)}
         onDone={(ref) => {
           setRecording(false);
           void ed().importFiles([ref], 'record', recordAt ?? { trackId: ed().trackId ?? undefined, at: ed().playhead });
         }} />}
       {menu && (
-        <ContextMenu req={menu} onClose={() => setMenu(null)} openDialog={setDialog}
+        <ContextMenu req={menu} onClose={() => setMenu(null)} openDialog={setDialog} onExport={setExportScope}
           onImport={(trackId, at) => void importPick(trackId, at)}
           onRecord={(trackId, at) => { setRecordAt({ trackId, at }); setRecording(true); }} />
       )}

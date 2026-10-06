@@ -111,7 +111,7 @@ export function Sidebar() {
       <div className="mx-5 border border-line font-mono text-[11px]">
         <div className="px-3 py-2 border-b border-line tracking-wide2 text-mute">{t('shell.hardware')}</div>
         <div className="p-3 flex flex-col gap-2.5">
-          <div className="flex justify-between"><span className="text-mute">GPU</span><span>{system?.gpu ?? '—'}</span></div>
+          <div className="flex justify-between gap-3"><span className="text-mute">GPU</span><span className="text-right">{system?.gpu ?? '—'}</span></div>
           <div className="flex justify-between"><span className="text-mute">BACKEND</span><span>{system?.device ?? '—'}</span></div>
           <div className="flex justify-between"><span className="text-mute">VRAM</span><span>{vramUsed.toFixed(1)}/{vramTotal.toFixed(1)} GB</span></div>
           <div className="flex gap-[2px]">

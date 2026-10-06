@@ -9,7 +9,8 @@ import { Alert, Btn, Check, Label, Modal, OptionList, Progress, Range, Segmented
 import { Recorder } from '../voices/Recorder';
 import { editAudio } from '../../lib/editPlayer';
 import {
-  clipEnd, deleteRanges, formatTime, makeClip, replaceRange, replaceSegments, segmentsInRange, timelineWords,
+  clipEnd, deleteRanges, exportTimeline, formatTime, makeClip, replaceRange, replaceSegments, segmentsInRange, timelineWords,
+  type ExportScope,
 } from '../../lib/editTimeline';
 import { MEDIA_FILTER, platform } from '../../lib/platform';
 import { useEdit, type Selection } from '../../stores/edit';
@@ -485,9 +486,10 @@ const LOUDNESS: { id: string; lufs: number | null }[] = [
   { id: 'none', lufs: null }, { id: 'youtube', lufs: -14 }, { id: 'podcast', lufs: -16 }, { id: 'broadcast', lufs: -23 },
 ];
 
-export function ExportDialog({ onClose }: { onClose: () => void }) {
+export function ExportDialog({ onClose, scope = { kind: 'all' } }: { onClose: () => void; scope?: ExportScope }) {
   const { t } = useTranslation();
-  const timeline = useEdit((s) => s.timeline)!;
+  const full = useEdit((s) => s.timeline)!;
+  const timeline = useMemo(() => exportTimeline(full, scope), [full, scope]);
   const assets = useEdit((s) => s.assets);
   const toast = useUi((s) => s.toast);
   const [format, setFormat] = useState<'wav' | 'mp3' | 'flac'>('wav');
@@ -512,13 +514,14 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
     setJobId(id);
   };
   return (
-    <Modal title={t('edit.export.title')} onClose={onClose} width={520} footer={
+    <Modal title={scope.kind === 'all' ? t('edit.export.title') : (scope.kind === 'track' ? t('edit.export.titleTrack') : t('edit.export.titleClip'))} onClose={onClose} width={520} footer={
       <>
         <Btn variant="ghost" onClick={onClose}>{t('common.cancel')}</Btn>
         <Btn variant="ghost" onClick={() => void run(false)} disabled={running}>{t('edit.export.measure')}</Btn>
         <Btn variant="primary" onClick={() => void run(true)} disabled={running || !timeline.clips.length}>{running ? t('common.working') : t('edit.export.go')}</Btn>
       </>
     }>
+      {scope.kind !== 'all' && <div className="font-mono text-[12px] text-soft border border-line px-3 py-2 truncate">{timeline.name}</div>}
       <Label>{t('edit.export.format')}</Label>
       <Segmented mono value={format} onChange={setFormat} options={[{ id: 'wav', label: 'WAV' }, { id: 'mp3', label: 'MP3' }, { id: 'flac', label: 'FLAC' }]} />
       <Label>{t('edit.export.loudness')}</Label>

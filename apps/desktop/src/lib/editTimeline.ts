@@ -393,3 +393,27 @@ export function formatTime(sec: number, precise = true): string {
   const rest = s - m * 60;
   return `${String(m).padStart(2, '0')}:${precise ? rest.toFixed(2).padStart(5, '0') : String(Math.floor(rest)).padStart(2, '0')}`;
 }
+
+/** Phạm vi xuất file: cả dự án, một track, hoặc một clip. */
+export type ExportScope = { kind: 'all' } | { kind: 'track'; trackId: string } | { kind: 'clip'; clipId: string };
+
+/**
+ * Timeline con để xuất: track riêng (bỏ mute/solo, giữ nguyên vị trí trên timeline để ghép lại khớp dự án) hoặc một clip
+ * (dời về 0 s, âm lượng / fade của clip và track giữ nguyên). Tên dự án thành "<dự án> - <track|clip>" → tên file xuất.
+ */
+const joinName = (a: string, b: string) => (a.trim().toLowerCase() === b.trim().toLowerCase() ? a : `${a} - ${b}`);
+
+export function exportTimeline(t: EditTimeline, scope: ExportScope): EditTimeline {
+  if (scope.kind === 'all') return t;
+  if (scope.kind === 'track') {
+    const track = t.tracks.find((x) => x.id === scope.trackId);
+    if (!track) return t;
+    return { ...t, name: joinName(t.name, track.name), tracks: [{ ...track, mute: false, solo: false }],
+      clips: t.clips.filter((c) => c.trackId === track.id) };
+  }
+  const clip = t.clips.find((c) => c.id === scope.clipId);
+  const track = clip && t.tracks.find((x) => x.id === clip.trackId);
+  if (!clip || !track) return t;
+  return { ...t, name: joinName(t.name, clip.label ?? track.name), tracks: [{ ...track, mute: false, solo: false }],
+    clips: [{ ...clip, start: 0 }] };
+}

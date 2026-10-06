@@ -896,7 +896,9 @@
         "podcast": "Podcast",
         "broadcast": "EBU broadcast"
       },
-      "hint": "Mixes every audible track (M/S, volume, fades). Loudness targets use a −1 dBFS peak ceiling."
+      "hint": "Mixes every audible track (M/S, volume, fades). Loudness targets use a −1 dBFS peak ceiling.",
+      "titleTrack": "EXPORT TRACK",
+      "titleClip": "EXPORT CLIP"
     },
     "importing": "Importing audio…",
     "menu": {
@@ -915,7 +917,9 @@
       "playHere": "Play from here",
       "importHere": "Import file here…",
       "recordHere": "Record here…",
-      "speakHere": "Read with a voice here…"
+      "speakHere": "Read with a voice here…",
+      "exportTrack": "Export whole track…",
+      "exportClip": "Export this clip…"
     }
   },
   "runtime": {
