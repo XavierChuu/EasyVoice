@@ -174,3 +174,20 @@ def test_manifest_hashes_are_well_formed():
         for f in m["files"]:
             assert f["sha256"] is None or re.fullmatch(r"[0-9a-f]{64}", f["sha256"]), f["path"]
     assert ManifestFile(path="x", url="u", sha256="abc").sha256 is None
+
+
+def test_runtime_requirements_match_pyproject():
+    """Bản đóng gói cài requirements/runtime.txt thay vì `-e .[...]`: phải đủ mọi thư viện engine cần."""
+    import re
+    import tomllib
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    py = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    want = list(py["dependencies"]) + [d for k, v in py["optional-dependencies"].items() if k != "dev" for d in v]
+    lines = [x.strip() for x in (root / "requirements" / "runtime.txt").read_text(encoding="utf-8").splitlines()]
+    have = {x for x in lines if x and not x.startswith("#")}
+    assert set(want) <= have, set(want) - have
+    torch_pins = {x for x in (root / "requirements" / "base.txt").read_text().splitlines() if x.startswith("torch")}
+    assert torch_pins <= have and torch_pins <= set((root / "requirements" / "cpu.txt").read_text().splitlines())
+    assert not any(re.match(r"-e\b", x) for x in have)

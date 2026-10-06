@@ -12,6 +12,9 @@ desktop.ini
 node_modules/
 dist/
 build/
+!apps/desktop/build/
+apps/desktop/vendor/
+apps/desktop/release/
 .next/
 __pycache__/
 *.pyc

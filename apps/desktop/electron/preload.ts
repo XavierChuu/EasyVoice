@@ -13,6 +13,13 @@ contextBridge.exposeInMainWorld('easyvoice', {
   engineInfo: () => ipcRenderer.invoke('engine:info'),
   restartEngine: () => ipcRenderer.invoke('engine:restart'),
   appPaths: () => ipcRenderer.invoke('app:paths'),
+  runtimeInfo: () => ipcRenderer.invoke('runtime:info'),
+  installRuntime: () => ipcRenderer.invoke('runtime:install'),
+  onRuntimeProgress: (cb: (p: unknown) => void) => {
+    const h = (_e: unknown, p: unknown) => cb(p);
+    ipcRenderer.on('runtime:progress', h);
+    return () => ipcRenderer.removeListener('runtime:progress', h);
+  },
   enableHotkeys: (on: boolean) => ipcRenderer.invoke('hotkeys:enable', on),
   onHotkey: (cb: (ev: unknown) => void) => {
     const h = (_e: unknown, ev: unknown) => cb(ev);

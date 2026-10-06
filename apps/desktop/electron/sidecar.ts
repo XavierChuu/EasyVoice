@@ -6,7 +6,8 @@ import { existsSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
 
-export type EngineStatus = 'starting' | 'online' | 'restarting' | 'offline' | 'mock';
+// setup: bản cài đặt chưa có runtime Python → renderer hiện màn hình cài runtime lần đầu.
+export type EngineStatus = 'starting' | 'online' | 'restarting' | 'offline' | 'mock' | 'setup';
 
 export interface EngineInfo {
   status: EngineStatus;
@@ -40,6 +41,7 @@ export class Sidecar {
     private readonly engineDir: string,
     private readonly python: string,
     private readonly onChange: (info: EngineInfo) => void,
+    private readonly extraEnv: NodeJS.ProcessEnv = {},
   ) {}
 
   static locate(appRoot: string): { engineDir: string; python: string } | null {
@@ -64,7 +66,8 @@ export class Sidecar {
     this.set({ status: this.info.restarts ? 'restarting' : 'starting', port, token });
     const proc = spawn(this.python, ['-m', 'easyvoice_engine.main', '--port', String(port)], {
       cwd: this.engineDir,
-      env: { ...process.env, EASYVOICE_TOKEN: token, PYTHONUNBUFFERED: '1', PYTHONIOENCODING: 'utf-8' }, // token qua env, không lộ trên argv
+      // token qua env, không lộ trên argv
+      env: { ...process.env, ...this.extraEnv, EASYVOICE_TOKEN: token, PYTHONUNBUFFERED: '1', PYTHONIOENCODING: 'utf-8' },
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
     });

@@ -1,0 +1,25 @@
+# App đã đóng gói (Phase 6): first-run cài file này SAU torch (cuda.txt / mps.txt / cpu.txt) vào runtime/ trong thư mục
+# dữ liệu. Không cài dạng -e: mã engine chạy thẳng từ thư mục cài đặt app (cwd của sidecar). Giữ khớp pyproject.toml
+# (test_runtime_requirements_match_pyproject kiểm tra).
+torch==2.8.0
+torchaudio==2.8.0
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+pydantic>=2.6
+numpy
+scipy
+soundfile
+soxr
+pyloudnorm
+safetensors
+faiss-cpu
+librosa
+transformers
+f5-tts==1.1.22
+datasets>=3
+faster-whisper>=1.0
+demucs>=4.0
+noisereduce>=3.0
+scikit-learn
+sounddevice

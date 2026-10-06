@@ -5,6 +5,7 @@ import { EngineError } from './api/types';
 
 import { EngineBanner, Footer, Header, NoticeBar, Sidebar, Toasts } from './components/Shell';
 import { FirstRunModal } from './features/settings/FirstRunModal';
+import { RuntimeSetupModal } from './features/settings/RuntimeSetupModal';
 import { LicensesPage } from './features/settings/LicensesPage';
 import { SettingsPage } from './features/settings/SettingsPage';
 import { EditPage } from './features/edit/EditPage';
@@ -20,6 +21,7 @@ export function App() {
   const tab = useUi((s) => s.tab);
   const ready = useEngine((s) => s.ready);
   const firstRunDone = useSettings((s) => s.firstRunDone);
+  const status = useEngine((s) => s.info.status);
 
   const { t } = useTranslation();
   useEffect(() => {
@@ -55,7 +57,8 @@ export function App() {
       </div>
       <Footer />
       <Toasts />
-      {ready && !firstRunDone && <FirstRunModal />}
+      {status === 'setup' && <RuntimeSetupModal />}
+      {ready && !firstRunDone && (status === 'online' || status === 'mock') && <FirstRunModal />}
     </div>
   );
 }

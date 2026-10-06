@@ -1,8 +1,11 @@
-import { app, BrowserWindow, dialog, ipcMain, session, shell, systemPreferences } from 'electron';
-import { readFileSync, statSync } from 'node:fs';
+import { app, BrowserWindow, dialog, ipcMain, net, session, shell, systemPreferences } from 'electron';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 import { setupHotkeys } from './hotkeys';
+import {
+  dataDir, detectTorch, ensureRuntime, estimateGb, runtimeDirs, runtimeReady, type RuntimeProgress, type TorchFlavor,
+} from './runtime';
 import { Sidecar, type EngineInfo } from './sidecar';
 
 let win: BrowserWindow | null = null;
@@ -92,16 +95,76 @@ ipcMain.handle('fs:readText', (_e, p: string) => {
   return readFileSync(p, 'utf8');
 });
 ipcMain.handle('engine:info', () => engineInfo);
+
+// ---------- runtime Python của bản cài đặt (Phase 6) ----------
+let installing: Promise<void> | null = null;
+let torchFlavor: TorchFlavor | null = null;
+ipcMain.handle('runtime:info', () => {
+  const dirs = runtimeDirs(dataDir(app.getPath('appData')));
+  torchFlavor ??= detectTorch();
+  return { torch: torchFlavor, sizeGb: estimateGb(torchFlavor), dir: dirs.root, installing: !!installing };
+});
+ipcMain.handle('runtime:install', () => {
+  installing ??= (async () => {
+    const engineDir = packagedEngineDir();
+    const dirs = runtimeDirs(dataDir(app.getPath('appData')));
+    torchFlavor ??= detectTorch();
+    try {
+      const python = await ensureRuntime(engineDir, dirs, torchFlavor, (p: RuntimeProgress) => win?.webContents.send('runtime:progress', p),
+        { fetcher: (url) => net.fetch(url) });
+      await startSidecar(engineDir, python);
+    } finally {
+      installing = null;
+    }
+  })();
+  return installing;
+});
 ipcMain.handle('engine:restart', () => sidecar?.restart());
 ipcMain.handle('app:paths', () => ({ downloads: app.getPath('downloads'), userData: app.getPath('userData') }));
+
+/** Bản cài đặt: mã engine nằm trong resources/engine (electron-builder extraResources). */
+function packagedEngineDir(): string {
+  return process.env.EASYVOICE_ENGINE_DIR ?? path.join(process.resourcesPath, 'engine');
+}
+
+/** FFmpeg bản LGPL đóng kèm app (scripts/fetch-ffmpeg.mjs); không có thì engine dùng FFmpeg trong PATH. */
+function bundledFfmpeg(): NodeJS.ProcessEnv {
+  const exe = path.join(process.resourcesPath ?? '', 'ffmpeg', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
+  return app.isPackaged && existsSync(exe) ? { EASYVOICE_FFMPEG: exe } : {};
+}
+
+async function startSidecar(engineDir: string, python: string) {
+  sidecar?.stop();
+  sidecar = new Sidecar(engineDir, python, broadcast, bundledFfmpeg());
+  await sidecar.start().catch((err: Error) => broadcast({ ...engineInfo, status: 'offline', lastError: err.message }));
+}
+
+function setupAutoUpdate() {
+  // Chỉ bản cài đặt: kiểm tra bản mới của app shell (gói nhỏ) và cài khi thoát app (spec mục 8).
+  if (!app.isPackaged || process.env.EASYVOICE_NO_UPDATE === '1') return;
+  import('electron-updater')
+    .then(({ autoUpdater }) => {
+      autoUpdater.autoDownload = true;
+      autoUpdater.autoInstallOnAppQuit = true;
+      return autoUpdater.checkForUpdatesAndNotify();
+    })
+    .catch(() => { /* không có mạng / chưa cấu hình kênh phát hành: bỏ qua */ });
+}
 
 void app.whenReady().then(async () => {
   setupPermissions();
   createWindow();
-  const loc = Sidecar.locate(app.getAppPath());
+  setupAutoUpdate();
+  // 1) Chạy từ source (dev): engine/.venv cạnh repo. 2) Bản cài đặt: runtime trong thư mục dữ liệu, chưa có thì cài.
+  const loc = !app.isPackaged && process.env.EASYVOICE_FORCE_SETUP !== '1' ? Sidecar.locate(app.getAppPath()) : null;
   if (loc) {
-    sidecar = new Sidecar(loc.engineDir, loc.python, broadcast);
-    await sidecar.start().catch((err: Error) => broadcast({ ...engineInfo, status: 'offline', lastError: err.message }));
+    await startSidecar(loc.engineDir, loc.python);
+  } else if ((app.isPackaged || process.env.EASYVOICE_FORCE_SETUP === '1') && process.env.EASYVOICE_MOCK !== '1') {
+    const engineDir = packagedEngineDir();
+    const dirs = runtimeDirs(dataDir(app.getPath('appData')));
+    torchFlavor = detectTorch();
+    if (runtimeReady(dirs, engineDir, torchFlavor)) await startSidecar(engineDir, dirs.python);
+    else broadcast({ status: 'setup', restarts: 0 });
   } else {
     broadcast({ status: 'mock', restarts: 0 });
   }

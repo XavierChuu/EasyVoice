@@ -11,6 +11,8 @@ quản lý và huấn luyện giọng. Ưu tiên tiếng Việt. Windows 10/11 (
   (tách nhạc nền Demucs), quản lý giọng, **huấn luyện giọng RVC** (tạm dừng / tiếp tục), **Edit Audio** (cắt ghép nhiều
   track, lọc âm, tách nhạc, nhận diện người nói, sửa lời bằng văn bản), tải model.
   Cài theo `engine/README.md`.
+- **Phase 4–6**: đổi giọng trực tiếp (kèm ghi thẳng ra file), chia sẻ giọng `.evoice`, cài đặt engine, bản cài đặt
+  Windows/macOS (tự cài runtime Python lần đầu, FFmpeg LGPL đóng kèm, tự cập nhật, gỡ cài đặt hỏi xoá dữ liệu).
 - **App desktop** (`apps/desktop`): giao diện theo UI mẫu, tự bật engine nếu đã cài (không thì chạy mock).
   `cd apps/desktop && npm install && npm run electron:dev`.
 - Đề xuất kỹ thuật: `docs/adr/0001-de-xuat-ky-thuat.md`.

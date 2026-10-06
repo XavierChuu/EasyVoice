@@ -8,7 +8,22 @@ export interface FileFilter {
   extensions: string[];
 }
 
-export type EngineStatus = 'starting' | 'online' | 'restarting' | 'offline' | 'mock';
+export type EngineStatus = 'setup' | 'starting' | 'online' | 'restarting' | 'offline' | 'mock';
+
+export interface RuntimeInfo {
+  torch: 'cuda' | 'mps' | 'cpu';
+  sizeGb: number;
+  dir: string;
+  installing: boolean;
+}
+
+export interface RuntimeProgress {
+  step: 'uv' | 'python' | 'venv' | 'torch' | 'packages' | 'done';
+  index: number;
+  total: number;
+  fraction: number | null;
+  line: string;
+}
 
 export interface EngineInfo {
   status: EngineStatus;
@@ -31,6 +46,9 @@ interface Bridge {
   restartEngine(): Promise<void>;
   appPaths(): Promise<{ downloads: string; userData: string }>;
   onEngineStatus(cb: (info: EngineInfo) => void): () => void;
+  runtimeInfo?(): Promise<RuntimeInfo>;
+  installRuntime?(): Promise<void>;
+  onRuntimeProgress?(cb: (p: RuntimeProgress) => void): () => void;
   enableHotkeys?(on: boolean): Promise<{ global: boolean; error?: string }>;
   onHotkey?(cb: (ev: { digit: string; down: boolean }) => void): () => void;
 }
@@ -105,6 +123,10 @@ export const platform = {
   /** Bật/tắt bắt phím 1-9 toàn cục (Electron). Trình duyệt / lỗi hook → { global: false }. */
   enableHotkeys: async (on: boolean) => (await bridge()?.enableHotkeys?.(on)) ?? { global: false },
   onHotkey: (cb: (ev: { digit: string; down: boolean }) => void) => bridge()?.onHotkey?.(cb) ?? (() => {}),
+  /** Bản cài đặt lần đầu: runtime Python (uv + torch + thư viện engine) chưa có. */
+  runtimeInfo: async () => (await bridge()?.runtimeInfo?.()) ?? null,
+  installRuntime: () => bridge()?.installRuntime?.() ?? Promise.resolve(),
+  onRuntimeProgress: (cb: (p: RuntimeProgress) => void) => bridge()?.onRuntimeProgress?.(cb) ?? (() => {}),
 };
 
 export const AUDIO_FILTER: FileFilter = { name: 'Audio', extensions: ['wav', 'mp3', 'm4a', 'flac', 'ogg'] };

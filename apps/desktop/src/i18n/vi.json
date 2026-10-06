@@ -48,7 +48,8 @@
       "online": "SẴN SÀNG",
       "restarting": "ĐANG KHỞI ĐỘNG LẠI",
       "offline": "KHÔNG CHẠY",
-      "mock": "MOCK"
+      "mock": "MOCK",
+      "setup": "CẦN CÀI ĐẶT"
     },
     "busy": {
       "idle": "RẢNH",
@@ -908,5 +909,29 @@
       "recordHere": "Thu âm tại đây…",
       "speakHere": "Đọc bằng giọng tại đây…"
     }
+  },
+  "runtime": {
+    "title": "Cài đặt EasyVoice lần đầu",
+    "intro": "EasyVoice cần cài bộ chạy AI (Python + PyTorch + thư viện engine) vào máy. Chỉ cần làm một lần, tất cả nằm trong thư mục dữ liệu của app và không ảnh hưởng tới Python khác trên máy. Sau bước này bạn sẽ chọn model để tải.",
+    "install": "Cài đặt (~{{size}} GB)",
+    "dir": "Thư mục",
+    "torch": {
+      "cuda": "CUDA (GPU NVIDIA)",
+      "mps": "Apple Silicon (MPS)",
+      "cpu": "CPU (không có GPU phù hợp)"
+    },
+    "cpuTitle": "Không tìm thấy GPU NVIDIA",
+    "cpuBody": "App vẫn chạy được trên CPU nhưng chậm, và đổi giọng trực tiếp sẽ không dùng được. Nếu máy có GPU NVIDIA, hãy cập nhật driver rồi mở lại app.",
+    "step": {
+      "uv": "Tải trình cài đặt",
+      "python": "Cài Python",
+      "venv": "Tạo môi trường",
+      "torch": "Cài PyTorch",
+      "packages": "Cài thư viện engine",
+      "done": "Hoàn tất"
+    },
+    "hint": "Có thể mất 5–20 phút tùy tốc độ mạng. Nếu bị gián đoạn, bấm Thử lại sẽ tiếp tục từ phần đã tải.",
+    "failed": "Cài đặt chưa xong",
+    "failedHint": "Kiểm tra kết nối mạng và dung lượng ổ đĩa rồi bấm Thử lại; phần đã tải được giữ lại."
   }
 }

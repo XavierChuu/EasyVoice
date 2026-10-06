@@ -53,7 +53,8 @@ export const useEngine = create<EngineState>((set, get) => ({
         }
       }
     };
-    set({ info: e.mode === 'mock' ? { ...info0, status: info0.status === 'offline' ? 'offline' : 'mock' } : info0 });
+    set({ info: e.mode === 'mock' && info0.status !== 'setup' ? { ...info0, status: info0.status === 'offline' ? 'offline' : 'mock' } : info0 });
+    if (info0.status === 'setup') return; // chờ cài runtime xong (RuntimeSetupModal tải lại cửa sổ)
     await refresh();
   },
 }));

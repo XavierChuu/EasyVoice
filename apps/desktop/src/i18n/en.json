@@ -48,7 +48,8 @@
       "online": "ONLINE",
       "restarting": "RESTARTING",
       "offline": "OFFLINE",
-      "mock": "MOCK"
+      "mock": "MOCK",
+      "setup": "SETUP NEEDED"
     },
     "busy": {
       "idle": "IDLE",
@@ -914,5 +915,29 @@
       "recordHere": "Record here…",
       "speakHere": "Read with a voice here…"
     }
+  },
+  "runtime": {
+    "title": "First-time setup",
+    "intro": "EasyVoice needs to install its AI runtime (Python + PyTorch + engine libraries). This happens once; everything lives in the app's data folder and doesn't touch any other Python on this computer. Next you'll pick which models to download.",
+    "install": "Install (~{{size}} GB)",
+    "dir": "Folder",
+    "torch": {
+      "cuda": "CUDA (NVIDIA GPU)",
+      "mps": "Apple Silicon (MPS)",
+      "cpu": "CPU (no suitable GPU)"
+    },
+    "cpuTitle": "No NVIDIA GPU found",
+    "cpuBody": "The app still works on CPU but slowly, and live voice changing won't be available. If you have an NVIDIA GPU, update its driver and reopen the app.",
+    "step": {
+      "uv": "Downloading installer",
+      "python": "Installing Python",
+      "venv": "Creating environment",
+      "torch": "Installing PyTorch",
+      "packages": "Installing engine libraries",
+      "done": "Done"
+    },
+    "hint": "This can take 5–20 minutes depending on your connection. If interrupted, Retry resumes from what was already downloaded.",
+    "failed": "Setup didn't finish",
+    "failedHint": "Check your internet connection and free disk space, then Retry; downloaded parts are kept."
   }
 }

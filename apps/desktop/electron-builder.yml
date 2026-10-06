@@ -1,7 +1,12 @@
+# Đóng gói (spec mục 8 / Phase 6). Bộ cài chỉ chứa app shell + mã engine (vài chục MB); runtime Python/PyTorch được
+# cài ở lần chạy đầu (electron/runtime.ts), model tải ở màn hình First-run. Ký số: đặt CSC_LINK/CSC_KEY_PASSWORD
+# (Windows) hoặc CSC_NAME + APPLE_ID/APPLE_APP_SPECIFIC_PASSWORD/APPLE_TEAM_ID (macOS) trong môi trường build.
 appId: app.easyvoice.desktop
 productName: EasyVoice
+copyright: Copyright © EasyVoice
 directories:
   output: release
+  buildResources: build
 files:
   - dist/**
   - dist-electron/**
@@ -9,13 +14,57 @@ files:
 # Module native (hook bàn phím toàn cục cho phím tắt live) không chạy được từ trong asar.
 asarUnpack:
   - node_modules/uiohook-napi/**
+extraResources:
+  # Mã engine Python chạy thẳng từ resources/engine (cwd của sidecar), không cài vào venv.
+  - from: ../../engine
+    to: engine
+    filter:
+      - easyvoice_engine/**
+      - third_party/**
+      - requirements/**
+      - pyproject.toml
+      - "!**/__pycache__/**"
+      - "!**/*.pyc"
+  # services/models.py tìm manifest ở thư mục cha của engine/ → resources/models.manifest.json
+  - from: ../../models.manifest.json
+    to: models.manifest.json
+  # FFmpeg LGPL (npm run fetch:ffmpeg); thư mục trống thì engine dùng FFmpeg trong PATH.
+  - from: vendor/ffmpeg/${platform}-${arch}
+    to: ffmpeg
+    filter:
+      - "**/*"
+publish:
+  # electron-updater đọc latest.yml / latest-mac.yml từ GitHub Releases (EASYVOICE_NO_UPDATE=1 để tắt).
+  provider: github
+  owner: XavierChuu
+  repo: EasyVoice
+  releaseType: release
 win:
-  target: nsis
-mac:
-  target: dmg
-  category: public.app-category.music
-  extendInfo:
-    NSMicrophoneUsageDescription: EasyVoice dùng micro để thu giọng mẫu và đổi giọng trực tiếp.
+  target:
+    - target: nsis
+      arch: [x64]
+  # Ký Authenticode khi có CSC_LINK; không có thì bộ cài chưa ký (SmartScreen sẽ cảnh báo).
+  signtoolOptions:
+    signingHashAlgorithms: [sha256]
 nsis:
   oneClick: false
+  perMachine: false
   allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  deleteAppDataOnUninstall: false
+  # Gỡ cài đặt hỏi có xoá dữ liệu người dùng (giọng, model, runtime) hay giữ lại để cài lại sau.
+  include: build/installer.nsh
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip # electron-updater trên macOS cần bản zip
+      arch: [arm64, x64]
+  category: public.app-category.music
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  notarize: true
+  extendInfo:
+    NSMicrophoneUsageDescription: EasyVoice dùng micro để thu giọng mẫu và đổi giọng trực tiếp.

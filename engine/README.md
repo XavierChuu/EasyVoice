@@ -50,7 +50,32 @@ Cần các model: ContentVec, RMVPE, RVC pretrained v2 40k; thêm Demucs nếu b
 Thao tác AI là job `edit` (xếp hàng GPU); lọc / trộn / xuất là job `mix` chạy CPU ngay cả khi GPU đang train.
 Model tùy chọn mới: `wavlm-base-plus-sv` (nhận diện người nói chính xác hơn).
 
-Chưa có (trả lỗi `NOT_IMPLEMENTED`, UI báo rõ): real-time (Phase 4), nhập/xuất `.evoice` (Phase 5).
+## Phase 4 — đổi giọng trực tiếp (real-time) — đã có
+
+| Phần | File |
+|---|---|
+| Luồng micro → RVC → loa ảo theo khối (preset low / balanced / quality), ngữ cảnh + SOLA + crossfade, ngưỡng gate, đo trễ / underrun | `services/rvc/realtime.py` (`BlockConverter`, `RealtimeSession`) |
+| Đổi giọng giữa chừng (nạp sẵn, không ngắt luồng), chỉnh pitch / index / gate trực tiếp | `PATCH /realtime` |
+| **Ghi trực tiếp ra file** (WAV 16-bit trong `outputs/recordings/`), kể cả chế độ chỉ ghi không phát ra loa ảo — không cần OBS / app khác | `Recorder`, `POST /realtime/record`, `/realtime/recordings` |
+| Trạng thái đẩy qua WebSocket `/ws/realtime` (10 lần/giây) | `api/realtime.py` |
+
+Real-time giữ GPU độc quyền (job nặng chờ tới khi dừng). CPU bị từ chối (`REALTIME_GPU`) trừ khi đặt
+`EASYVOICE_ALLOW_CPU_REALTIME=1` (chỉ để thử).
+
+## Phase 5 — chia sẻ giọng `.evoice` + cài đặt — đã có
+
+- `.evoice` = zip: `manifest.json` (format_version 1, tác giả, giấy phép, sha256 từng file) + model RVC safetensors,
+  ref TTS / biến thể (tùy chọn), preview. Nhập: kiểm tra allowlist tên file (không `.pth`/pickle), checksum, phiên bản
+  app tối thiểu, tổng dung lượng ≤ 3 GB. Giọng đã nhập không bao giờ xuất lại ref và giữ nguyên tác giả / giấy phép;
+  giấy phép `noredist` chặn xuất. (`services/evoice.py`, `POST /voices/{id}/export`, `/voices/import`)
+- Cài đặt engine: thiết bị (áp dụng ngay, dỡ model), thư mục model / output (cần khởi động lại) — `GET/PUT /system/settings`.
+
+## Phase 6 — bản cài đặt
+
+App đã đóng gói chứa mã engine trong `resources/engine`. Lần mở đầu, app tải `uv` → cài Python 3.11
+(python-build-standalone) → venv → PyTorch (`requirements/cuda.txt` | `mps.txt` | `cpu.txt`, tự chọn theo máy) →
+`requirements/runtime.txt`, tất cả trong `<thư mục dữ liệu>/runtime`. Danh sách thư viện đổi (app cập nhật) → tự cài bù.
+`runtime.txt` phải khớp `pyproject.toml` (có test). Chi tiết đóng gói: `apps/desktop/README.md`.
 
 ## Cài đặt (dev)
 

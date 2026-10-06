@@ -1,0 +1,4 @@
+# Windows không có GPU NVIDIA: torch bản CPU (chạy được nhưng chậm, không có đổi giọng trực tiếp / huấn luyện).
+--index-url https://download.pytorch.org/whl/cpu
+torch==2.8.0
+torchaudio==2.8.0
