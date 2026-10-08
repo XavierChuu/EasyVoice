@@ -1,14 +1,16 @@
 // Timeline nhiều track: thước thời gian, đầu track (tên, M/S, âm lượng), làn clip vẽ bằng canvas từ peaks.
 // Thao tác: kéo thanh tiêu đề clip để di chuyển (kể cả sang track khác), kéo mép để cắt bớt, kéo trên thân để chọn
-// vùng, bấm để đặt đầu phát. Ctrl/⌘ + cuộn để zoom quanh con trỏ. Thả file vào để nhập.
+// vùng, bấm để đặt đầu phát (bấm vào chỗ trống giữa hai clip thì chọn khoảng trống đó). Ctrl/⌘ + cuộn để zoom quanh
+// con trỏ. Thả file vào để nhập. Khi đang xem kết quả "Dọn khoảng lặng", các khoảng sẽ cắt được đánh dấu trên làn.
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type MouseEvent as RMouseEvent, type PointerEvent as RPointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { EditClip, EditTimeline, EditTrack } from '../../api/types';
 import { filesToRefs } from '../../components/RefClipInput';
 import { PEAK_RATE, editAudio } from '../../lib/editPlayer';
-import { clipEnd, formatTime, moveClip, speakerColor, timelineEnd, trimClip, updateTrack } from '../../lib/editTimeline';
-import { useEdit } from '../../stores/edit';
+import { clipEnd, closeGaps, formatTime, gapAt, moveClip, speakerColor, timelineEnd, trimClip, updateTrack } from '../../lib/editTimeline';
+import { useEdit, type SilenceReview } from '../../stores/edit';
+import { useSettings } from '../../stores/settings';
 import type { MenuRequest } from './ContextMenu';
 
 export const HEADER_W = 196;
@@ -47,6 +49,9 @@ export function Timeline({ onMenu }: { onMenu?: (req: MenuRequest) => void }) {
   const trackId = useEdit((s) => s.trackId);
   const audioVersion = useEdit((s) => s.audioVersion);
   const importing = useEdit((s) => s.importing);
+  const review = useEdit((s) => s.silenceReview);
+  const snapOn = useSettings((s) => s.editSnap);
+  const packed = useSettings((s) => s.editCloseGaps);
   const ed = useEdit.getState;
   const scroller = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);
@@ -90,15 +95,17 @@ export function Timeline({ onMenu }: { onMenu?: (req: MenuRequest) => void }) {
   }, []);
 
   // Timeline hiển thị (có áp bản xem trước khi đang kéo)
+  // (bật "Đóng khoảng trống" thì bản xem trước cũng được xếp liền như khi thả chuột)
   const shown: EditTimeline = useMemo(() => {
-    if (drag?.kind === 'move' && drag.preview) return moveClip(timeline, drag.clipId, drag.preview.start, drag.preview.trackId);
+    const pack = (x: EditTimeline) => (packed ? closeGaps(x) : x);
+    if (drag?.kind === 'move' && drag.preview) return pack(moveClip(timeline, drag.clipId, drag.preview.start, drag.preview.trackId));
     if (drag?.kind === 'trim' && drag.preview !== undefined) {
       const c = timeline.clips.find((x) => x.id === drag.clipId);
       const a = c && assets[c.assetId];
-      return a ? trimClip(timeline, drag.clipId, drag.edge, drag.preview, a.durationSec) : timeline;
+      return a ? pack(trimClip(timeline, drag.clipId, drag.edge, drag.preview, a.durationSec)) : timeline;
     }
     return timeline;
-  }, [timeline, drag, assets]);
+  }, [timeline, drag, assets, packed]);
 
   const end = timelineEnd(shown);
   const contentW = Math.max(view.width, (end + Math.max(10, view.width / pps / 3)) * pps);
@@ -118,6 +125,7 @@ export function Timeline({ onMenu }: { onMenu?: (req: MenuRequest) => void }) {
     return pts;
   }, [timeline, playhead]);
   const snap = (v: number, exclude?: string) => {
+    if (!snapOn) return v;
     const pts = exclude ? [0, playhead, ...timeline.clips.filter((c) => c.id !== exclude).flatMap((c) => [c.start, clipEnd(c)])] : snapPoints;
     let best = v;
     let dist = SNAP_PX / pps;
@@ -213,7 +221,8 @@ export function Timeline({ onMenu }: { onMenu?: (req: MenuRequest) => void }) {
     } else if (d.kind === 'range' && !d.moved) {
       const tr = timeline.tracks.find((x) => x.id === d.trackId)!;
       const c = hit(tr, d.t0);
-      ed().setSelection(null);
+      const gap = c ? null : gapAt(timeline, tr.id, d.t0);
+      ed().setSelection(gap ? { trackId: tr.id, start: gap[0], end: gap[1], gap: true } : null);
       ed().selectClip(c?.id ?? null);
       ed().seek(d.t0);
     }
@@ -259,6 +268,7 @@ export function Timeline({ onMenu }: { onMenu?: (req: MenuRequest) => void }) {
               onPointerDown={(e) => onLaneDown(e, tr)} onContextMenu={(e) => onLaneMenu(e, tr)}>
               <Lane track={tr} timeline={shown} view={view} pps={pps} selectedClip={clipId} audioVersion={audioVersion}
                 selection={selection?.trackId === tr.id ? selection : null} highlighted={tr.id === trackId} />
+              {review && (!review.trackId || review.trackId === tr.id) && <SilenceMarks review={review} pps={pps} />}
             </div>
           ))}
           {!shown.tracks.length && (
@@ -270,6 +280,32 @@ export function Timeline({ onMenu }: { onMenu?: (req: MenuRequest) => void }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Điểm đánh dấu khoảng lặng sẽ cắt (xem trước "Dọn khoảng lặng"); bấm để bỏ qua / cắt lại khoảng đó. */
+function SilenceMarks({ review, pps }: { review: SilenceReview; pps: number }) {
+  const { t } = useTranslation();
+  return (
+    <>
+      {review.ranges.map(([s, e], i) => {
+        const skip = review.skip[i];
+        return (
+          <button key={i} type="button" aria-pressed={!skip}
+            title={`${formatTime(s)} – ${formatTime(e)} · ${(e - s).toFixed(2)}s · ${t('edit.silences.reviewHint')}`}
+            onPointerDown={(ev) => ev.stopPropagation()} onContextMenu={(ev) => ev.stopPropagation()}
+            onClick={() => useEdit.getState().toggleSilence(i)}
+            className="absolute top-0 bottom-0 p-0 cursor-pointer border-0 border-x"
+            style={{
+              left: s * pps, width: Math.max(2, (e - s) * pps),
+              borderColor: skip ? 'rgba(255,255,255,0.25)' : ACC,
+              borderStyle: skip ? 'dashed' : 'solid',
+              background: skip ? 'transparent'
+                : 'repeating-linear-gradient(135deg, rgba(255,91,20,0.38) 0 4px, rgba(255,91,20,0.12) 4px 8px)',
+            }} />
+        );
+      })}
+    </>
   );
 }
 
@@ -346,7 +382,7 @@ function Ruler({ view, pps, duration, onDown }: { view: { left: number; width: n
 
 function Lane({ track, timeline, view, pps, selection, selectedClip, highlighted, audioVersion }: {
   track: EditTrack; timeline: EditTimeline; view: { left: number; width: number }; pps: number;
-  selection: { start: number; end: number } | null; selectedClip: string | null; highlighted: boolean; audioVersion: number;
+  selection: { start: number; end: number; gap?: boolean } | null; selectedClip: string | null; highlighted: boolean; audioVersion: number;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const speakers = timeline.speakers;
@@ -369,7 +405,29 @@ function Lane({ track, timeline, view, pps, selection, selectedClip, highlighted
     const t1 = (view.left + W) / pps;
     const clips = timeline.clips.filter((x) => x.trackId === track.id && clipEnd(x) > t0 && x.start < t1);
     for (const clip of clips) drawClip(ctx, clip, track, speakers, assets[clip.assetId]?.name ?? '', view.left, pps, W, clip.id === selectedClip);
-    if (selection) {
+    if (selection?.gap) {
+      // Khoảng trống được chọn: gạch chéo + viền nét đứt
+      const x0 = Math.round(selection.start * pps - view.left);
+      const x1 = Math.round(selection.end * pps - view.left);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x0, 0, x1 - x0, TRACK_H);
+      ctx.clip();
+      ctx.fillStyle = 'rgba(255,91,20,0.08)';
+      ctx.fillRect(x0, 0, x1 - x0, TRACK_H);
+      ctx.strokeStyle = 'rgba(255,91,20,0.45)';
+      ctx.beginPath();
+      for (let x = x0 - TRACK_H; x < x1; x += 8) {
+        ctx.moveTo(x, TRACK_H);
+        ctx.lineTo(x + TRACK_H, 0);
+      }
+      ctx.stroke();
+      ctx.restore();
+      ctx.strokeStyle = ACC;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(x0 + 0.5, 0.5, x1 - x0 - 1, TRACK_H - 1);
+      ctx.setLineDash([]);
+    } else if (selection) {
       const x0 = selection.start * pps - view.left;
       const x1 = selection.end * pps - view.left;
       ctx.fillStyle = 'rgba(255,91,20,0.16)';

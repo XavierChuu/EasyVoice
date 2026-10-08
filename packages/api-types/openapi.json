@@ -4569,6 +4569,16 @@
             "type": "number",
             "title": "Minsec",
             "default": 0.8
+          },
+          "padBefore": {
+            "type": "number",
+            "title": "Padbefore",
+            "default": 0.25
+          },
+          "padAfter": {
+            "type": "number",
+            "title": "Padafter",
+            "default": 0.25
           }
         },
         "type": "object",

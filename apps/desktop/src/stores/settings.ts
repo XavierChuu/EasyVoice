@@ -19,6 +19,10 @@ export interface SettingsState {
   author: string;
   /** Phím tắt live: '1'..'9' → id giọng (giữ phím khi nói để đổi sang giọng đó). */
   rtHotkeys: Record<string, string>;
+  /** Edit Audio: hút clip vào mép clip khác / đầu phát khi kéo. */
+  editSnap: boolean;
+  /** Edit Audio: tự kéo các clip trên cùng track lại sát nhau sau mỗi thao tác. */
+  editCloseGaps: boolean;
   set: (patch: Partial<Omit<SettingsState, 'set'>>) => void;
 }
 
@@ -35,6 +39,8 @@ export const useSettings = create<SettingsState>()(
       dict: [],
       author: '',
       rtHotkeys: {},
+      editSnap: true,
+      editCloseGaps: false,
       set: (patch) => set(patch),
     }),
     { name: 'ev.settings' },

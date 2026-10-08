@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { EditClip } from '../../api/types';
 import { Label, Progress } from '../../components/ui';
 import {
-  applySeparation, clipEnd, deleteClip, deleteRange, deleteTrack, ensureSpeakers, formatTime, segmentsInRange, splitAt,
+  applySeparation, clipEnd, deleteClip, deleteGap, deleteRange, deleteTrack, ensureSpeakers, formatTime, segmentsInRange, splitAt,
   splitBySpeakers, updateClip,
 } from '../../lib/editTimeline';
 import { useEdit } from '../../stores/edit';
@@ -92,7 +92,17 @@ export function Inspector({ openDialog }: { openDialog: (d: DialogKind) => void 
   return (
     <div className="border border-line flex flex-col min-w-0">
       <Pending />
-      {selection && (
+      {selection?.gap && (
+        <Section title={t('edit.gap.title')} right={<span className="font-mono">{(selection.end - selection.start).toFixed(2)}s</span>}>
+          <span className="font-mono text-[11px] text-mute">{formatTime(selection.start)} – {formatTime(selection.end)} · {timeline.tracks.find((x) => x.id === selection.trackId)?.name}</span>
+          <span className="text-[12px] text-mute">{t('edit.gap.hint')}</span>
+          <div className="grid grid-cols-2 gap-1.5">
+            <Act accent onClick={() => { ed().commit((x) => deleteGap(x, selection.trackId, selection.start, selection.end)); ed().setSelection(null); }}>✕ {t('edit.gap.delete')}</Act>
+            <Act onClick={() => ed().setSelection(null)}>{t('edit.sel.clear')}</Act>
+          </div>
+        </Section>
+      )}
+      {selection && !selection.gap && (
         <Section title={t('edit.sel.title')} right={<span className="font-mono">{(selection.end - selection.start).toFixed(2)}s</span>}>
           <span className="font-mono text-[11px] text-mute">{formatTime(selection.start)} – {formatTime(selection.end)} · {timeline.tracks.find((x) => x.id === selection.trackId)?.name}</span>
           <div className="grid grid-cols-2 gap-1.5">

@@ -9,7 +9,7 @@ import { Alert, Btn, Check, Label, Modal, OptionList, Progress, Range, Segmented
 import { Recorder } from '../voices/Recorder';
 import { editAudio } from '../../lib/editPlayer';
 import {
-  clipEnd, deleteRanges, exportTimeline, formatTime, makeClip, replaceRange, replaceSegments, segmentsInRange, timelineWords,
+  clipEnd, exportTimeline, formatTime, makeClip, replaceRange, replaceSegments, segmentsInRange, timelineWords,
   type ExportScope,
 } from '../../lib/editTimeline';
 import { MEDIA_FILTER, platform } from '../../lib/platform';
@@ -398,37 +398,51 @@ export function SilencesDialog({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const timeline = useEdit((s) => s.timeline)!;
   const trackId = useEdit((s) => s.trackId);
-  const [scope, setScope] = useState<'track' | 'all'>(trackId ? 'track' : 'all');
-  const [threshold, setThreshold] = useState(-45);
-  const [minSec, setMinSec] = useState(0.8);
+  const p0 = useEdit((s) => s.silenceParams);
+  const [scope, setScope] = useState<'track' | 'all'>(trackId ? p0.scope : 'all');
+  const [threshold, setThreshold] = useState(p0.thresholdDb);
+  const [minSec, setMinSec] = useState(p0.minSec);
+  const [padBefore, setPadBefore] = useState(p0.padBefore);
+  const [padAfter, setPadAfter] = useState(p0.padAfter);
   const [jobId, setJobId] = useState<string | null>(null);
-  const [ranges, setRanges] = useState<[number, number][] | null>(null);
+  const [none, setNone] = useState(false);
   const { running } = useJob(jobId);
   const find = async () => {
-    setRanges(null);
-    const id = await useEdit.getState().runOp({ op: 'silences', timeline, trackIds: scope === 'track' && trackId ? [trackId] : null, thresholdDb: threshold, minSec },
-      t('edit.silences.title'), (res) => setRanges(res.ranges ?? []));
+    setNone(false);
+    const ed = useEdit.getState();
+    const target = scope === 'track' && trackId ? trackId : null;
+    useEdit.setState({ silenceParams: { scope, thresholdDb: threshold, minSec, padBefore, padAfter }, silenceReview: null });
+    const id = await ed.runOp({ op: 'silences', timeline, trackIds: target ? [target] : null, thresholdDb: threshold, minSec, padBefore, padAfter },
+      t('edit.silences.title'), (res) => {
+        const ranges = res.ranges ?? [];
+        if (!ranges.length) return setNone(true);
+        // Xem các điểm đánh dấu trên timeline trước khi cắt (thanh xác nhận phía trên timeline)
+        useEdit.getState().setSilenceReview({ ranges, skip: ranges.map(() => false), trackId: target });
+        onClose();
+      });
     setJobId(id);
   };
-  const total = ranges?.reduce((m, [s, e]) => m + e - s, 0) ?? 0;
+  const sec = (v: number) => `${v.toFixed(2)} s`;
   return (
     <Modal title={t('edit.silences.title')} onClose={onClose} width={520} footer={
       <>
         <Btn variant="ghost" onClick={onClose}>{t('common.cancel')}</Btn>
-        <Btn variant="inverse" onClick={() => void find()} disabled={running}>{running ? t('common.working') : t('edit.silences.find')}</Btn>
-        {!!ranges?.length && (
-          <Btn variant="primary" onClick={() => { useEdit.getState().commit((x) => deleteRanges(x, scope === 'track' ? trackId : null, ranges)); onClose(); }}>
-            {t('edit.silences.remove', { count: ranges.length })}
-          </Btn>
-        )}
+        <Btn variant="primary" onClick={() => void find()} disabled={running}>{running ? t('common.working') : t('edit.silences.find')}</Btn>
       </>
     }>
       <p className="m-0 text-soft">{t('edit.silences.body')}</p>
       {trackId && <Segmented value={scope} onChange={setScope} options={[{ id: 'track', label: t('edit.silences.thisTrack') }, { id: 'all', label: t('edit.silences.allTracks') }]} />}
-      <Range label={t('edit.silences.threshold')} valueText={`${threshold} dB`} min={-65} max={-25} step={1} value={threshold} onChange={setThreshold} />
-      <Range label={t('edit.silences.min')} valueText={`${minSec.toFixed(1)} s`} min={0.3} max={3} step={0.1} value={minSec} onChange={setMinSec} />
+      <Range label={t('edit.silences.threshold')} valueText={`${threshold} dB`} min={-65} max={-10} step={1} value={threshold} onChange={setThreshold}
+        hint={t('edit.silences.thresholdHint')} />
+      <Range label={t('edit.silences.min')} valueText={`${minSec.toFixed(1)} s`} min={0.1} max={3} step={0.1} value={minSec} onChange={setMinSec} />
+      <div className="grid grid-cols-2 gap-4">
+        <Range label={t('edit.silences.padBefore')} valueText={sec(padBefore)} min={0} max={1} step={0.01} value={padBefore} onChange={setPadBefore} />
+        <Range label={t('edit.silences.padAfter')} valueText={sec(padAfter)} min={0} max={1} step={0.01} value={padAfter} onChange={setPadAfter} />
+      </div>
+      <span className="text-[12px] text-mute">{t('edit.silences.padHint')}</span>
+      {padBefore + padAfter >= minSec && <span className="text-[12px] text-acc">{t('edit.silences.padTooLong')}</span>}
       <JobLine jobId={jobId} />
-      {ranges && <Alert tone="line" title={ranges.length ? t('edit.silences.found', { count: ranges.length, sec: total.toFixed(1) }) : t('edit.silences.none')} />}
+      {none && <Alert tone="line" title={t('edit.silences.none')} />}
       {timeline.ripple !== 'all' && <span className="text-[12px] text-mute">{t('edit.silences.rippleHint')}</span>}
     </Modal>
   );

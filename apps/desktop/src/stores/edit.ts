@@ -6,10 +6,11 @@ import { engine } from '../api/engine';
 import type { EditAsset, EditOp, EditOpResult, EditProjectSummary, EditTimeline, FileRef, Job } from '../api/types';
 import i18n from '../i18n';
 import { editAudio } from '../lib/editPlayer';
-import { appendAsset, timelineEnd } from '../lib/editTimeline';
+import { appendAsset, closeGaps, deleteRanges, timelineEnd } from '../lib/editTimeline';
 import { errorText } from '../lib/errors';
 import { useEngine } from './engine';
 import { usePlayer } from './player';
+import { useSettings } from './settings';
 import { useUi } from './ui';
 
 const HISTORY = 100;
@@ -18,6 +19,26 @@ export interface Selection {
   trackId: string;
   start: number;
   end: number;
+  /** Vùng chọn là một khoảng trống giữa các clip (bấm vào chỗ trống) — xóa thì kéo các clip phía sau lại. */
+  gap?: boolean;
+}
+
+/** Tham số "Dọn khoảng lặng" — giữ lại để mở lại hộp thoại với giá trị cũ. */
+export interface SilenceParams {
+  scope: 'track' | 'all';
+  thresholdDb: number;
+  minSec: number;
+  padBefore: number;
+  padAfter: number;
+}
+
+/** Kết quả tìm khoảng lặng đang được xem trên timeline trước khi cắt. */
+export interface SilenceReview {
+  ranges: [number, number][];
+  /** Khoảng người dùng bấm bỏ qua (không cắt). */
+  skip: boolean[];
+  /** Track được phân tích; null = mọi track. */
+  trackId: string | null;
 }
 
 export interface PendingOp {
@@ -43,6 +64,11 @@ interface EditState {
   saveState: 'saved' | 'saving' | 'dirty' | 'error';
   audioVersion: number;
   importing: number;
+  silenceParams: SilenceParams;
+  silenceReview: SilenceReview | null;
+  setSilenceReview: (r: SilenceReview | null) => void;
+  toggleSilence: (i: number) => void;
+  applySilences: () => void;
   refreshList: () => Promise<void>;
   open: (id: string) => Promise<void>;
   openProject: (p: { id: string; assets: EditAsset[] } & EditTimeline) => void;
@@ -136,6 +162,21 @@ export const useEdit = create<EditState>((set, get) => {
     saveState: 'saved',
     audioVersion: 0,
     importing: 0,
+    silenceParams: { scope: 'track', thresholdDb: -45, minSec: 0.8, padBefore: 0.25, padAfter: 0.25 },
+    silenceReview: null,
+
+    setSilenceReview: (silenceReview) => set({ silenceReview }),
+    toggleSilence: (i) => {
+      const r = get().silenceReview;
+      if (r) set({ silenceReview: { ...r, skip: r.skip.map((v, k) => (k === i ? !v : v)) } });
+    },
+    applySilences: () => {
+      const r = get().silenceReview;
+      if (!r) return;
+      const ranges = r.ranges.filter((_, i) => !r.skip[i]);
+      if (ranges.length) get().commit((x) => deleteRanges(x, r.trackId, ranges));
+      set({ silenceReview: null });
+    },
 
     refreshList: async () => {
       try {
@@ -158,7 +199,7 @@ export const useEdit = create<EditState>((set, get) => {
       get().pause();
       const assets = Object.fromEntries(p.assets.map((a) => [a.id, a]));
       set({ projectId: p.id, assets, timeline: strip(p), past: [], future: [], selection: null, clipId: null,
-        trackId: p.tracks[0]?.id ?? null, playhead: 0, saveState: 'saved', pending: [] });
+        trackId: p.tracks[0]?.id ?? null, playhead: 0, saveState: 'saved', pending: [], silenceReview: null });
       loadAudio(p.assets);
     },
 
@@ -185,7 +226,7 @@ export const useEdit = create<EditState>((set, get) => {
     close: () => {
       get().pause();
       void flush();
-      set({ projectId: null, timeline: null, assets: {}, past: [], future: [], selection: null, clipId: null, pending: [] });
+      set({ projectId: null, timeline: null, assets: {}, past: [], future: [], selection: null, clipId: null, pending: [], silenceReview: null });
       void get().refreshList();
     },
 
@@ -202,11 +243,13 @@ export const useEdit = create<EditState>((set, get) => {
     commit: (fn) => {
       const cur = get().timeline;
       if (!cur) return;
-      const next = fn(cur);
+      let next = fn(cur);
+      if (useSettings.getState().editCloseGaps) next = closeGaps(next);
       if (next === cur) return;
       const sel = get().selection;
       set({
         timeline: next,
+        silenceReview: null, // vị trí khoảng lặng tìm được không còn đúng
         past: [...get().past, cur].slice(-HISTORY),
         future: [],
         selection: sel && next.tracks.some((x) => x.id === sel.trackId) ? sel : null,
@@ -221,7 +264,8 @@ export const useEdit = create<EditState>((set, get) => {
       const { past, timeline } = get();
       if (!past.length || !timeline) return;
       const prev = past[past.length - 1];
-      set({ timeline: prev, past: past.slice(0, -1), future: [timeline, ...get().future], clipId: null, trackId: keepTrack(prev, get().trackId) });
+      set({ timeline: prev, past: past.slice(0, -1), future: [timeline, ...get().future], clipId: null, trackId: keepTrack(prev, get().trackId),
+        silenceReview: null });
       scheduleSave();
       restartIfPlaying();
     },
@@ -229,7 +273,8 @@ export const useEdit = create<EditState>((set, get) => {
     redo: () => {
       const { future, timeline } = get();
       if (!future.length || !timeline) return;
-      set({ timeline: future[0], future: future.slice(1), past: [...get().past, timeline], clipId: null, trackId: keepTrack(future[0], get().trackId) });
+      set({ timeline: future[0], future: future.slice(1), past: [...get().past, timeline], clipId: null, trackId: keepTrack(future[0], get().trackId),
+        silenceReview: null });
       scheduleSave();
       restartIfPlaying();
     },

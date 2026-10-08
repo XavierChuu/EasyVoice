@@ -162,6 +162,7 @@ export type EngineErrorCode =
   | 'BAD_FILE'
   | 'FILE_TOO_LARGE'
   | 'ENGINE_OFFLINE'
+  | 'ENGINE_RESTARTED'
   | 'MODEL_MISSING'
   | 'NOT_IMPLEMENTED'
   | 'GPU_REQUIRED'

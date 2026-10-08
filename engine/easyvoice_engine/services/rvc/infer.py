@@ -91,21 +91,44 @@ class RvcModel:
 
 
 class Index:
+    """Index đặc trưng của giọng. faiss chỉ dùng để đọc file (định dạng chung với RVC); tìm k láng giềng làm bằng torch:
+    trên macOS torch và faiss-cpu mỗi bên mang một libomp riêng, mọi vùng OpenMP của faiss (search, train IVF) làm
+    tiến trình abort ("OMP: Error #15") — engine chết, job biến mất giữa chừng. Tìm chính xác cũng tốt hơn IVF nprobe=1."""
+
+    K = 8
+
     def __init__(self, path: Path) -> None:
         import faiss
 
-        self.index = faiss.read_index(str(path))
-        self.big_npy = self.index.reconstruct_n(0, self.index.ntotal)
+        index = faiss.read_index(str(path))
+        self.big_npy = index.reconstruct_n(0, index.ntotal)
+        self._big = self._big_sq = None
 
-    def blend(self, feats, rate: float):
+    def search(self, q):
+        """(khoảng cách L2 bình phương, chỉ số) của K vector gần nhất — như faiss IndexFlatL2.search."""
         import torch
 
-        npy = feats[0].float().cpu().numpy()
-        score, ix = self.index.search(npy, k=8)
-        weight = np.square(1 / np.maximum(score, 1e-9))
-        weight /= weight.sum(axis=1, keepdims=True)
-        retrieved = np.sum(self.big_npy[ix] * np.expand_dims(weight, axis=2), axis=1)
-        return torch.from_numpy(retrieved).unsqueeze(0).to(feats.device, feats.dtype) * rate + (1 - rate) * feats
+        if self._big is None or self._big.device != q.device:
+            self._big = torch.from_numpy(self.big_npy).to(q.device)
+            self._big_sq = (self._big * self._big).sum(1)
+        k = min(self.K, len(self._big))
+        step = max(1, 2 ** 25 // max(1, len(self._big)))  # ~128 MB ma trận khoảng cách mỗi lượt
+        scores, ixs = [], []
+        for i in range(0, len(q), step):
+            qq = q[i: i + step]
+            d = (qq * qq).sum(1, keepdim=True) - 2 * qq @ self._big.T + self._big_sq
+            s, ix = torch.topk(d, k, dim=1, largest=False)
+            scores.append(s.clamp_min(0))
+            ixs.append(ix)
+        return torch.cat(scores), torch.cat(ixs)
+
+    def blend(self, feats, rate: float):
+        q = feats[0].float()
+        score, ix = self.search(q)
+        weight = 1 / score.clamp_min(1e-9).square()
+        weight = weight / weight.sum(1, keepdim=True)
+        retrieved = (self._big[ix] * weight.unsqueeze(2)).sum(1)
+        return retrieved.unsqueeze(0).to(feats.dtype) * rate + (1 - rate) * feats
 
 
 def convert(model: RvcModel, encoder: ContentEncoder, f0x: F0Extractor, index: Index | None,

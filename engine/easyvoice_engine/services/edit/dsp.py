@@ -241,8 +241,9 @@ def frame_db(x: np.ndarray, sr: int, frame_ms: float = 10.0) -> tuple[np.ndarray
 
 
 def find_silences(x: np.ndarray, sr: int, threshold_db: float = -45.0, min_sec: float = 0.8,
-                  keep_sec: float = 0.25) -> list[tuple[float, float]]:
-    """Khoảng lặng dài hơn min_sec; mỗi bên giữ lại keep_sec để lời không bị cụt. Trả [(bắt đầu, kết thúc)] giây."""
+                  pad_before: float = 0.25, pad_after: float = 0.25) -> list[tuple[float, float]]:
+    """Khoảng lặng dài hơn min_sec, trả [(bắt đầu, kết thúc)] giây của phần sẽ cắt. Để lời không bị cụt, giữ lại
+    pad_before sau tiếng nói phía trước và pad_after trước tiếng nói phía sau (đầu / cuối file không cần giữ)."""
     db, n = frame_db(x, sr)
     silent = db < threshold_db
     out: list[tuple[float, float]] = []
@@ -255,9 +256,9 @@ def find_silences(x: np.ndarray, sr: int, threshold_db: float = -45.0, min_sec: 
         while j < len(silent) and silent[j]:
             j += 1
         s, e = i * n / sr, min(len(x), j * n) / sr
-        if e - s >= min_sec:
-            a, b = (s + keep_sec if i > 0 else s), (e - keep_sec if j < len(silent) else e)
-            if b - a > 0.05:
+        if e - s >= min_sec - 1e-6:
+            a, b = (s + max(0.0, pad_before) if i > 0 else s), (e - max(0.0, pad_after) if j < len(silent) else e)
+            if b - a >= 0.02:
                 out.append((round(a, 3), round(b, 3)))
         i = j
     return out

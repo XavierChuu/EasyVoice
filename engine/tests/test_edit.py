@@ -81,9 +81,15 @@ def test_filters_keep_length_and_shape_spectrum():
 
 def test_silences_and_ducking():
     x = np.concatenate([voice_like(SR, 2.0), np.zeros(SR * 2, np.float32), voice_like(SR, 1.0)])
-    ranges = dsp.find_silences(x, SR, -45, 0.8, keep_sec=0.25)
+    ranges = dsp.find_silences(x, SR, -45, 0.8, pad_before=0.25, pad_after=0.25)
     long = [r for r in ranges if r[1] - r[0] > 1.0]
     assert len(long) == 1 and abs(long[0][0] - 2.25) < 0.1 and abs(long[0][1] - 3.75) < 0.1
+    # padding hai bên độc lập; khoảng lặng ngắn 0.1 s vẫn tìm được
+    ranges = dsp.find_silences(x, SR, -45, 0.8, pad_before=0.1, pad_after=0.5)
+    long = [r for r in ranges if r[1] - r[0] > 1.0]
+    assert len(long) == 1 and abs(long[0][0] - 2.1) < 0.1 and abs(long[0][1] - 3.5) < 0.1
+    short = np.concatenate([voice_like(SR, 1.0), np.zeros(int(SR * 0.15), np.float32), voice_like(SR, 1.0)])
+    assert any(s <= 1.01 and e >= 1.14 for s, e in dsp.find_silences(short, SR, -45, 0.1, 0.0, 0.0))
     voice = np.concatenate([np.zeros(SR, np.float32), sine(200, 2.0, 0.3), np.zeros(SR * 2, np.float32)])
     env = dsp.duck_envelope(voice, SR, len(voice), -12)
     assert env[int(0.5 * SR)] > 0.95 and abs(env[int(2.0 * SR)] - 10 ** (-12 / 20)) < 0.05 and env[-1] > 0.9

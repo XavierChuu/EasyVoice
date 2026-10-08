@@ -1,4 +1,4 @@
-"""Build faiss index từ đặc trưng ContentVec của dataset (theo train_index của RVC: IVF + Flat)."""
+"""Build faiss index từ đặc trưng ContentVec của dataset (theo train_index của RVC, nhưng Flat thay cho IVF)."""
 
 from __future__ import annotations
 
@@ -20,17 +20,10 @@ def build_index(feat_dir: Path, out: Path) -> int:
         from sklearn.cluster import MiniBatchKMeans
 
         big = MiniBatchKMeans(n_clusters=10_000, batch_size=8192, n_init=3, random_state=0).fit(big).cluster_centers_.astype(np.float32)
-    n_ivf = min(int(16 * np.sqrt(len(big))), len(big) // 39)
-    if n_ivf >= 1:
-        index = faiss.index_factory(big.shape[1], f"IVF{n_ivf},Flat")
-        ivf = faiss.extract_index_ivf(index)
-        ivf.nprobe = 1
-        index.train(big)
-        for i in range(0, len(big), 8192):
-            index.add(big[i: i + 8192])
-        ivf.make_direct_map()  # để lúc suy luận reconstruct_n được
-    else:  # dataset rất nhỏ
-        index = faiss.IndexFlatL2(big.shape[1])
-        index.add(big)
+    # Flat (không IVF): train IVF chạy OpenMP của faiss — trên macOS xung đột libomp với torch, tiến trình abort.
+    # Suy luận tự tìm k láng giềng bằng torch (infer.Index) nên IVF không còn lợi gì về tốc độ.
+    index = faiss.IndexFlatL2(big.shape[1])
+    for i in range(0, len(big), 8192):
+        index.add(big[i: i + 8192])
     faiss.write_index(index, str(out))
     return int(index.ntotal)

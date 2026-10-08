@@ -1799,6 +1799,16 @@ export interface components {
              * @default 0.8
              */
             minSec: number;
+            /**
+             * Padbefore
+             * @default 0.25
+             */
+            padBefore: number;
+            /**
+             * Padafter
+             * @default 0.25
+             */
+            padAfter: number;
         };
         /** SpeakOp */
         SpeakOp: {

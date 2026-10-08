@@ -105,6 +105,8 @@ class SilencesOp(ApiModel):
     track_ids: list[str] | None = None
     threshold_db: float = -45.0
     min_sec: float = 0.8
+    pad_before: float = 0.25  # giữ lại sau tiếng nói phía trước (đầu khoảng lặng)
+    pad_after: float = 0.25  # giữ lại trước tiếng nói phía sau (cuối khoảng lặng)
 
 
 class DuckOp(ApiModel):
@@ -292,7 +294,8 @@ def _dispatch(state: EngineState, ctx: JobContext, pid: str, req) -> dict:
     if isinstance(req, SpeakOp):
         return ops.run_speak(state, ctx, pid, req.profile_id, req.variant_id, req.text, req.speed, req.seed)
     if isinstance(req, SilencesOp):
-        return ops.run_silences(state, ctx, pid, req.timeline, req.track_ids, req.threshold_db, req.min_sec)
+        return ops.run_silences(state, ctx, pid, req.timeline, req.track_ids, req.threshold_db, req.min_sec,
+                               req.pad_before, req.pad_after)
     if isinstance(req, DuckOp):
         return ops.run_duck(state, ctx, pid, req.timeline, req.music_track_ids, req.voice_track_ids, req.amount_db)
     if isinstance(req, RenderOp):

@@ -5,10 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { engine } from '../../api/engine';
 import { Btn, ConfirmModal, DropZone, PageHead, Segmented, TextInput } from '../../components/ui';
 import { filesToRefs } from '../../components/RefClipInput';
-import { deleteClip, deleteRange, formatTime, makeTrack, splitAt, timelineEnd, type ExportScope } from '../../lib/editTimeline';
+import { closeGaps, deleteClip, deleteGap, deleteRange, formatTime, makeTrack, splitAt, timelineEnd, type ExportScope } from '../../lib/editTimeline';
 import { MEDIA_FILTER, platform } from '../../lib/platform';
 import { formatDuration } from '../../lib/text';
 import { useEdit } from '../../stores/edit';
+import { useSettings } from '../../stores/settings';
 import { Recorder } from '../voices/Recorder';
 import { ConvertDialog, DuckDialog, ExportDialog, FilterDialog, ReplaceDialog, RetextDialog, SilencesDialog, SpeakDialog } from './dialogs';
 import { ContextMenu, type MenuRequest } from './ContextMenu';
@@ -112,14 +113,14 @@ function Editor() {
       else if (e.key === 'Delete' || e.key === 'Backspace') {
         if (s.selection) {
           const sel = s.selection;
-          s.commit((x) => deleteRange(x, sel.trackId, sel.start, sel.end));
+          s.commit((x) => (sel.gap ? deleteGap : deleteRange)(x, sel.trackId, sel.start, sel.end));
           s.setSelection(null);
         } else if (s.clipId) {
           const id = s.clipId;
           s.commit((x) => deleteClip(x, id));
           s.selectClip(null);
         } else return;
-      } else if (e.key === 'Escape') { s.setSelection(null); s.selectClip(null); }
+      } else if (e.key === 'Escape') { s.setSelection(null); s.selectClip(null); s.setSilenceReview(null); }
       else if (e.key === 'Home') s.seek(0);
       else if (e.key === '=' || e.key === '+') s.setZoom(s.pxPerSec * 1.25);
       else if (e.key === '-') s.setZoom(s.pxPerSec / 1.25);
@@ -133,6 +134,12 @@ function Editor() {
   const importPick = async (trackId?: string, at?: number) => {
     const files = await platform.pickFiles({ title: t('edit.import'), multiple: true, filters: [MEDIA_FILTER] });
     if (files.length) await ed().importFiles(files, 'import', { trackId, at });
+  };
+  const snap = useSettings((s) => s.editSnap);
+  const packed = useSettings((s) => s.editCloseGaps);
+  const setPacked = (on: boolean) => {
+    useSettings.getState().set({ editCloseGaps: on });
+    if (on) ed().commit((x) => closeGaps(x)); // kéo lại ngay các khoảng trống đang có
   };
   const saveLabel = { saved: t('edit.save.saved'), saving: t('edit.save.saving'), dirty: t('edit.save.dirty'), error: t('edit.save.error') }[saveState];
   const end = timelineEnd(timeline);
@@ -179,6 +186,8 @@ function Editor() {
             { id: 'all', label: t('edit.ripple.all') }, { id: 'track', label: t('edit.ripple.track') }, { id: 'off', label: t('edit.ripple.off') },
           ]} />
         </div>
+        <ToolbarCheck checked={snap} onChange={(v) => useSettings.getState().set({ editSnap: v })} label={t('edit.snap')} title={t('edit.snapHint')} />
+        <ToolbarCheck checked={packed} onChange={setPacked} label={t('edit.closeGaps')} title={t('edit.closeGapsHint')} />
         <div className="flex gap-2 ml-auto flex-wrap">
           <Btn variant="ghost" onClick={() => void importPick()}>+ {t('edit.import')}</Btn>
           <Btn variant="ghost" onClick={() => { setRecordAt(null); setRecording(true); }}>● {t('edit.record')}</Btn>
@@ -187,6 +196,7 @@ function Editor() {
         </div>
       </div>
 
+      <SilenceReviewBar onAdjust={() => setDialog('silences')} />
       <Timeline onMenu={setMenu} />
       <div className="font-mono text-[10px] text-mute -mt-3">{t('edit.shortcuts')}</div>
 
@@ -214,6 +224,39 @@ function Editor() {
           onImport={(trackId, at) => void importPick(trackId, at)}
           onRecord={(trackId, at) => { setRecordAt({ trackId, at }); setRecording(true); }} />
       )}
+    </div>
+  );
+}
+
+function ToolbarCheck({ checked, onChange, label, title }: { checked: boolean; onChange: (v: boolean) => void; label: string; title: string }) {
+  return (
+    <label className="flex items-center gap-1.5 font-mono text-[11px] text-mute cursor-pointer hover:text-fg" title={title}>
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span className="uppercase">{label}</span>
+    </label>
+  );
+}
+
+/** Xem trước "Dọn khoảng lặng": các khoảng sẽ cắt đang được đánh dấu trên timeline — cắt, điều chỉnh, hoặc bỏ. */
+function SilenceReviewBar({ onAdjust }: { onAdjust: () => void }) {
+  const { t } = useTranslation();
+  const review = useEdit((s) => s.silenceReview);
+  if (!review) return null;
+  const ed = useEdit.getState;
+  const active = review.ranges.filter((_, i) => !review.skip[i]);
+  const sec = active.reduce((m, [a, b]) => m + b - a, 0);
+  return (
+    <div className="border border-acc px-3 py-2 flex flex-wrap items-center gap-3 -mb-2" role="status">
+      <span className="w-3 h-3 shrink-0" style={{ background: 'repeating-linear-gradient(135deg, #FF5B14 0 3px, transparent 3px 6px)' }} />
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="font-semibold text-[13px]">{t('edit.silences.review', { count: active.length, sec: sec.toFixed(1) })}</span>
+        <span className="text-[12px] text-mute">{t('edit.silences.reviewHint')}</span>
+      </div>
+      <Btn variant="ghost" onClick={onAdjust}>{t('edit.silences.adjust')}</Btn>
+      <Btn variant="ghost" onClick={() => ed().setSilenceReview(null)} title="Esc">{t('edit.silences.discard')}</Btn>
+      <Btn variant="primary" disabled={!active.length} onClick={() => ed().applySilences()}>
+        {t('edit.silences.apply', { count: active.length })}
+      </Btn>
     </div>
   );
 }

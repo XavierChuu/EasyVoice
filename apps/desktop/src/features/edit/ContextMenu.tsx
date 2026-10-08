@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { clipEnd, deleteClip, deleteRange, duplicateClip, formatTime, splitAt, updateClip, type ExportScope } from '../../lib/editTimeline';
+import { clipEnd, deleteClip, deleteGap, deleteRange, duplicateClip, formatTime, gapAt, splitAt, updateClip, type ExportScope } from '../../lib/editTimeline';
 import { useEdit } from '../../stores/edit';
 import type { DialogKind } from './Inspector';
 
@@ -82,7 +82,19 @@ export function ContextMenu({ req, onClose, openDialog, onExport, onImport, onRe
   ];
 
   let entries: Entry[];
-  if (sel) {
+  const gap = !sel && !clip ? gapAt(timeline, req.trackId, req.time) : null;
+  const removeGap = (trackId: string, a: number, b: number) => { ed().commit((x) => deleteGap(x, trackId, a, b)); ed().setSelection(null); };
+  if (sel?.gap) {
+    entries = [
+      { title: `${t('edit.gap.title')} · ${formatTime(sel.start)} – ${formatTime(sel.end)} · ${(sel.end - sel.start).toFixed(2)}s` },
+      { label: t('edit.menu.seekHere'), onClick: () => ed().seek(req.time) },
+      { label: `+ ${t('edit.menu.importHere')}`, onClick: () => onImport(req.trackId, sel.start) },
+      { label: `● ${t('edit.menu.recordHere')}`, onClick: () => onRecord(req.trackId, sel.start) },
+      'sep',
+      { label: t('edit.sel.clear'), hint: 'Esc', onClick: () => ed().setSelection(null) },
+      { label: `✕ ${t('edit.gap.delete')}`, hint: 'Del', danger: true, onClick: () => removeGap(sel.trackId, sel.start, sel.end) },
+    ];
+  } else if (sel) {
     entries = [
       { title: `${formatTime(sel.start)} – ${formatTime(sel.end)} · ${(sel.end - sel.start).toFixed(2)}s` },
       { label: `▶ ${t('edit.sel.play')}`, onClick: () => ed().play(sel.start, sel.end) },
@@ -135,6 +147,8 @@ export function ContextMenu({ req, onClose, openDialog, onExport, onImport, onRe
       { label: t('edit.menu.exportTrack'), disabled: !timeline.clips.some((x) => x.trackId === req.trackId),
         onClick: () => onExport({ kind: 'track', trackId: req.trackId }) },
       { label: t('edit.menu.speakHere'), onClick: () => { ed().seek(req.time); ed().selectTrack(req.trackId); ed().setSelection(null); openDialog('speak'); } },
+      ...(gap ? ['sep' as const, { label: `✕ ${t('edit.gap.deleteAt', { sec: (gap[1] - gap[0]).toFixed(2) })}`, danger: true,
+        onClick: () => removeGap(req.trackId, gap[0], gap[1]) }] : []),
     ];
   }
 

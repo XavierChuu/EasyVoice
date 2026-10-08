@@ -260,10 +260,10 @@ def _loader(state: "EngineState", pid: str):
 
 
 def run_silences(state: "EngineState", ctx: JobContext, pid: str, t: EditTimeline, track_ids: list[str] | None,
-                 threshold_db: float, min_sec: float) -> dict:
+                 threshold_db: float, min_sec: float, pad_before: float = 0.25, pad_after: float = 0.25) -> dict:
     ctx.progress(0.1, "analyze")
     mix = dsp.render(t, _loader(state, pid), SR, track_ids)
-    ranges = dsp.find_silences(mix, SR, threshold_db, min_sec)
+    ranges = dsp.find_silences(mix, SR, threshold_db, min_sec, pad_before, pad_after)
     ctx.log(f"Tìm thấy {len(ranges)} khoảng lặng dài · tổng {sum(e - s for s, e in ranges):.1f}s")
     return {"ranges": [[s, e] for s, e in ranges]}
 

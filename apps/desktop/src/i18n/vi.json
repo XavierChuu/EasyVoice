@@ -89,6 +89,7 @@
     "BAD_FILE": "Không đọc được file hoặc định dạng không hỗ trợ ({{detail}}).",
     "FILE_TOO_LARGE": "File quá lớn cho thao tác này ({{detail}}).",
     "ENGINE_OFFLINE": "Engine không chạy.",
+    "ENGINE_RESTARTED": "Engine bị dừng đột ngột và đã tự khởi động lại — tác vụ đang chạy đã mất. Hãy chạy lại; nếu vẫn lặp lại, gửi file log cho nhóm phát triển.",
     "MODEL_MISSING": "Thiếu model cần thiết ({{detail}}). Vào Cài đặt → Chạy lại thiết lập ban đầu để tải.",
     "UNKNOWN": "Đã có lỗi xảy ra. Chi tiết đã được ghi vào file log.",
     "NOT_IMPLEMENTED": "Tính năng này chưa có trong bản engine hiện tại ({{detail}}).",
@@ -722,7 +723,7 @@
       "off": "TẮT"
     },
     "rippleHint": "Khi xóa / chèn: dời mọi track cho khớp nhau, chỉ dời track đang sửa, hoặc không dời (để lại khoảng trống / ghi đè).",
-    "shortcuts": "SPACE phát/dừng · S tách tại đầu phát · DEL xóa vùng chọn/clip · CTRL+Z hoàn tác · CTRL+SHIFT+Z làm lại · CTRL+CUỘN zoom · kéo thanh trên clip để di chuyển, kéo mép để cắt bớt, kéo thân để chọn vùng · chuột phải để mở lệnh nhanh",
+    "shortcuts": "SPACE phát/dừng · S tách tại đầu phát · DEL xóa vùng chọn/clip/khoảng trống · CTRL+Z hoàn tác · CTRL+SHIFT+Z làm lại · CTRL+CUỘN zoom · kéo thanh trên clip để di chuyển, kéo mép để cắt bớt, kéo thân để chọn vùng · bấm vào chỗ trống giữa hai clip để chọn khoảng trống · chuột phải để mở lệnh nhanh",
     "running": "ĐANG CHẠY",
     "inspectorEmpty": "Chọn một track, clip, hoặc kéo trên timeline / lời thoại để chọn một vùng.",
     "sel": {
@@ -856,7 +857,7 @@
     },
     "silences": {
       "title": "DỌN KHOẢNG LẶNG",
-      "body": "Tìm các khoảng lặng dài rồi rút ngắn (mỗi bên giữ 0,25 s cho tự nhiên).",
+      "body": "Tìm các khoảng lặng rồi xem các điểm đánh dấu trên timeline trước khi cắt.",
       "thisTrack": "Track đang chọn",
       "allTracks": "Mọi track",
       "threshold": "Ngưỡng im lặng",
@@ -865,7 +866,17 @@
       "found_other": "Tìm thấy {{count}} khoảng · tổng {{sec}} s",
       "none": "Không có khoảng lặng nào đủ dài.",
       "remove_other": "Xóa {{count}} khoảng",
-      "rippleHint": "Ripple đang không ở chế độ TẤT CẢ: các track khác sẽ không được dời theo."
+      "rippleHint": "Ripple đang không ở chế độ TẤT CẢ: các track khác sẽ không được dời theo.",
+      "thresholdHint": "Âm thanh nhỏ hơn mức này được coi là im lặng. Càng gần 0 dB càng cắt nhiều.",
+      "padBefore": "Giữ trước điểm cắt",
+      "padAfter": "Giữ sau điểm cắt",
+      "padHint": "Phần im lặng giữ lại sau tiếng nói phía trước / trước tiếng nói phía sau để lời không bị cụt.",
+      "padTooLong": "Tổng hai phần giữ lại ≥ độ dài tối thiểu: các khoảng lặng ngắn sẽ không còn gì để cắt.",
+      "review": "{{count}} khoảng lặng · sẽ cắt {{sec}} s",
+      "reviewHint": "Bấm vào một điểm đánh dấu trên timeline để bỏ qua / cắt lại khoảng đó.",
+      "adjust": "Điều chỉnh…",
+      "discard": "Bỏ",
+      "apply_other": "Cắt {{count}} khoảng"
     },
     "duck": {
       "title": "HẠ NHẠC NỀN THEO GIỌNG",
@@ -914,6 +925,16 @@
       "speakHere": "Đọc bằng giọng tại đây…",
       "exportTrack": "Xuất cả track…",
       "exportClip": "Xuất clip này…"
+    },
+    "snap": "Snap",
+    "snapHint": "Khi kéo, hút clip vào mép clip khác và đầu phát.",
+    "closeGaps": "Đóng khoảng trống",
+    "closeGapsHint": "Tự kéo các clip trên cùng track lại sát nhau sau mỗi thao tác (không để lại khoảng trống).",
+    "gap": {
+      "title": "KHOẢNG TRỐNG",
+      "delete": "Xóa khoảng trống",
+      "deleteAt": "Xóa khoảng trống ({{sec}} s)",
+      "hint": "Xóa sẽ kéo các clip phía sau lại cho liền."
     }
   },
   "runtime": {

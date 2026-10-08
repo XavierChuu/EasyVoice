@@ -90,6 +90,7 @@
     "BAD_FILE": "Could not read the file or the format is not supported ({{detail}}).",
     "FILE_TOO_LARGE": "The file is too large for this action ({{detail}}).",
     "ENGINE_OFFLINE": "The engine is not running.",
+    "ENGINE_RESTARTED": "The engine stopped unexpectedly and restarted — the running task was lost. Run it again; if it keeps happening, send the log file to the developers.",
     "MODEL_MISSING": "A required model is not installed ({{detail}}). Open Settings → Re-run first-time setup.",
     "UNKNOWN": "Something went wrong. Details were written to the log.",
     "NOT_IMPLEMENTED": "This feature is not in this engine version yet ({{detail}}).",
@@ -725,7 +726,7 @@
       "off": "OFF"
     },
     "rippleHint": "When deleting / inserting: shift every track to stay in sync, only the edited track, or nothing (leave a gap / overwrite).",
-    "shortcuts": "SPACE play/pause · S split at playhead · DEL delete selection/clip · CTRL+Z undo · CTRL+SHIFT+Z redo · CTRL+WHEEL zoom · drag a clip's top bar to move, edges to trim, body to select · right-click for quick actions",
+    "shortcuts": "SPACE play/pause · S split at playhead · DEL delete selection/clip/gap · CTRL+Z undo · CTRL+SHIFT+Z redo · CTRL+WHEEL zoom · drag a clip's top bar to move, edges to trim, body to select · click empty space between clips to select the gap · right-click for quick actions",
     "running": "RUNNING",
     "inspectorEmpty": "Pick a track or clip, or drag on the timeline / transcript to select a range.",
     "sel": {
@@ -860,7 +861,7 @@
     },
     "silences": {
       "title": "TRIM SILENCES",
-      "body": "Find long silences and shorten them (keeps 0.25 s on each side).",
+      "body": "Find silent parts, then review the markers on the timeline before cutting.",
       "thisTrack": "Selected track",
       "allTracks": "All tracks",
       "threshold": "Silence threshold",
@@ -871,7 +872,18 @@
       "none": "No silence long enough.",
       "remove_one": "Remove {{count}} gap",
       "remove_other": "Remove {{count}} gaps",
-      "rippleHint": "Ripple is not set to ALL: other tracks won't shift."
+      "rippleHint": "Ripple is not set to ALL: other tracks won't shift.",
+      "thresholdHint": "Anything quieter than this counts as silence. Closer to 0 dB cuts more.",
+      "padBefore": "Keep before cut",
+      "padAfter": "Keep after cut",
+      "padHint": "Silence kept after the preceding speech / before the next speech so words are not clipped.",
+      "padTooLong": "Both paddings together ≥ the minimum length: short silences will have nothing left to cut.",
+      "review": "{{count}} silences · {{sec}} s will be cut",
+      "reviewHint": "Click a marker on the timeline to skip / re-include that silence.",
+      "adjust": "Adjust…",
+      "discard": "Discard",
+      "apply_one": "Cut {{count}} silence",
+      "apply_other": "Cut {{count}} silences"
     },
     "duck": {
       "title": "DUCK MUSIC UNDER VOICE",
@@ -920,6 +932,16 @@
       "speakHere": "Read with a voice here…",
       "exportTrack": "Export whole track…",
       "exportClip": "Export this clip…"
+    },
+    "snap": "Snap",
+    "snapHint": "While dragging, snap clips to other clips' edges and the playhead.",
+    "closeGaps": "Close empty space",
+    "closeGapsHint": "Pull clips on the same track together after every edit (no empty space left).",
+    "gap": {
+      "title": "EMPTY SPACE",
+      "delete": "Delete empty space",
+      "deleteAt": "Delete empty space ({{sec}} s)",
+      "hint": "Deleting pulls the following clips back."
     }
   },
   "runtime": {

@@ -108,6 +108,43 @@ export function deleteRanges(t: EditTimeline, trackId: string | null, ranges: [n
   return [...ranges].sort((a, b) => b[0] - a[0]).reduce((acc, [s, e]) => deleteRange(acc, trackId, s, e), t);
 }
 
+/** Khoảng trống trên một track chứa thời điểm `at` (giữa hai clip, hoặc từ 0 tới clip đầu); không có thì null. */
+export function gapAt(t: EditTimeline, trackId: string, at: number): [number, number] | null {
+  const clips = t.clips.filter((c) => c.trackId === trackId);
+  if (clips.some((c) => at >= c.start - EPS && at <= clipEnd(c) + EPS)) return null;
+  const next = clips.filter((c) => c.start > at).reduce((m, c) => Math.min(m, c.start), Infinity);
+  if (!Number.isFinite(next)) return null; // sau clip cuối: không có gì để kéo lại
+  const prev = clips.filter((c) => clipEnd(c) < at).reduce((m, c) => Math.max(m, clipEnd(c)), 0);
+  return next - prev > MIN_CLIP ? [r4(prev), r4(next)] : null;
+}
+
+/** Xóa một khoảng trống: kéo các clip phía sau lại. Ripple "all" dời cả các track khác (giữ đồng bộ), còn lại chỉ track đó. */
+export function deleteGap(t: EditTimeline, trackId: string, s: number, e: number): EditTimeline {
+  const out = deleteRange({ ...t, ripple: t.ripple === 'all' ? 'all' : 'track' }, trackId, s, e);
+  return { ...out, ripple: t.ripple };
+}
+
+/**
+ * "Đóng khoảng trống": trên mỗi track, các clip xếp liền nhau theo thứ tự bắt đầu — clip đầu giữ vị trí, các clip sau
+ * bám vào cuối clip trước (bỏ cả chỗ chồng lấn). Trả lại đúng object cũ nếu không có gì đổi.
+ */
+export function closeGaps(t: EditTimeline, trackIds: string[] | null = null): EditTimeline {
+  const ids = trackIds ? new Set(trackIds) : null;
+  const moved = new Map<string, number>();
+  for (const tr of t.tracks) {
+    if (ids && !ids.has(tr.id)) continue;
+    const clips = t.clips.filter((c) => c.trackId === tr.id).sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+    let end = clips.length ? clips[0].start : 0;
+    for (const c of clips) {
+      const start = r4(Math.max(0, end));
+      if (Math.abs(start - c.start) > EPS) moved.set(c.id, start);
+      end = (moved.get(c.id) ?? c.start) + c.duration;
+    }
+  }
+  if (!moved.size) return t;
+  return { ...t, clips: t.clips.map((c) => (moved.has(c.id) ? { ...c, start: moved.get(c.id)! } : c)) };
+}
+
 /** Chèn khoảng trống dài `dur` tại `at` trên các track. */
 export function insertGap(t: EditTimeline, ids: Set<string> | null, at: number, dur: number): EditTimeline {
   const split = splitAt(t, at, ids ? [...ids] : null);

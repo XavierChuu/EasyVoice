@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import type { EditAsset, EditTimeline } from '../api/types';
 import {
-  applySeparation, deleteRange, duplicateClip, deleteRanges, exportTimeline, fillerRanges, makeClip, replaceRange, replaceSegments, segmentsInRange, splitAt,
-  splitBySpeakers, timelineEnd, timelineWords, trimClip,
+  applySeparation, closeGaps, deleteGap, deleteRange, duplicateClip, deleteRanges, exportTimeline, fillerRanges, makeClip, replaceRange, replaceSegments, segmentsInRange, splitAt,
+  gapAt, splitBySpeakers, timelineEnd, timelineWords, trimClip,
 } from './editTimeline';
 
 const asset = (id: string, durationSec: number, extra: Partial<EditAsset> = {}): EditAsset => ({
@@ -136,5 +136,36 @@ describe('exportTimeline', () => {
   it('returns the project unchanged for scope all / unknown ids', () => {
     expect(exportTimeline(base, { kind: 'all' })).toBe(base);
     expect(exportTimeline(base, { kind: 'clip', clipId: 'zz' })).toBe(base);
+  });
+
+  it('finds and deletes an empty gap on a track', () => {
+    const t = { ...tl('track'), clips: [...tl().clips.filter((c) => c.trackId === 'm'),
+      { ...makeClip({ trackId: 'v', assetId: 'a', start: 1, duration: 2 }), id: 'a1' },
+      { ...makeClip({ trackId: 'v', assetId: 'a', start: 5, duration: 2 }), id: 'a2' }] };
+    expect(gapAt(t, 'v', 4)).toEqual([3, 5]);
+    expect(gapAt(t, 'v', 0.5)).toEqual([0, 1]);
+    expect(gapAt(t, 'v', 2)).toBeNull(); // trên clip
+    expect(gapAt(t, 'v', 9)).toBeNull(); // sau clip cuối
+    const d = deleteGap(t, 'v', 3, 5);
+    expect(spans(d, 'v')).toEqual([[1, 0, 2], [3, 0, 2]]);
+    expect(spans(d, 'm')).toEqual([[0, 0, 10]]); // ripple track: nhạc không đổi
+    expect(d.ripple).toBe('track');
+    expect(deleteGap({ ...t, ripple: 'off' }, 'v', 3, 5).ripple).toBe('off');
+    expect(spans(deleteGap({ ...t, ripple: 'all' }, 'v', 3, 5), 'm')).toEqual([[0, 0, 3], [3, 5, 5]]);
+  });
+
+  it('closes gaps and overlaps per track, keeping the first clip in place', () => {
+    const t = { ...tl(), clips: [
+      { ...makeClip({ trackId: 'v', assetId: 'a', start: 6, duration: 1 }), id: 'b' },
+      { ...makeClip({ trackId: 'v', assetId: 'a', start: 2, duration: 2 }), id: 'a' },
+      { ...makeClip({ trackId: 'v', assetId: 'a', start: 6.5, duration: 1 }), id: 'c' },
+      { ...makeClip({ trackId: 'm', assetId: 'b', start: 3, duration: 1 }), id: 'm1' },
+      { ...makeClip({ trackId: 'm', assetId: 'b', start: 9, duration: 1 }), id: 'm2' },
+    ] };
+    const c = closeGaps(t);
+    expect(spans(c, 'v').map((x) => x[0])).toEqual([2, 4, 5]);
+    expect(spans(c, 'm').map((x) => x[0])).toEqual([3, 4]);
+    expect(spans(closeGaps(t, ['v']), 'm').map((x) => x[0])).toEqual([3, 9]);
+    expect(closeGaps(c)).toBe(c);
   });
 });

@@ -25,6 +25,8 @@ const toStats = (s: RealtimeWire): RealtimeStats => ({
 export class HttpEngine implements EngineClient {
   readonly mode = 'sidecar' as const;
   private listeners = new Set<(ev: EngineEvent) => void>();
+  /** Bản job mới nhất nhận qua WebSocket — để báo job đã mất khi engine không còn biết nó. */
+  private lastJobs = new Map<string, Job>();
   private ws: WebSocket | null = null;
   private retry = 0;
   private closed = false;
@@ -112,7 +114,10 @@ export class HttpEngine implements EngineClient {
     ws.onopen = () => { this.retry = 0; };
     ws.onmessage = (m) => {
       const ev = JSON.parse(m.data as string);
-      if (ev.type === 'job') this.emit({ type: 'job', job: ev.job as Job });
+      if (ev.type === 'job') {
+        this.lastJobs.set(ev.job.id, ev.job as Job);
+        this.emit({ type: 'job', job: ev.job as Job });
+      }
       else if (ev.type === 'voices') this.emit({ type: 'voices', voices: ev.voices as Profile[] });
       else if (ev.type === 'realtime') this.emit({ type: 'realtime', stats: toStats(ev.stats as RealtimeWire) });
     };
@@ -252,7 +257,16 @@ export class HttpEngine implements EngineClient {
   downloadFile = async (fileId: string) => this.download(`/files/${fileId}`, { download: 'true' });
 
   // ---------- jobs ----------
-  cancelJob = async (id: string) => { await this.req('DELETE', `/jobs/${id}`); };
+  cancelJob = async (id: string) => {
+    try {
+      await this.req('DELETE', `/jobs/${id}`);
+    } catch (err) {
+      // Engine đã khởi động lại nên không còn job này: coi như đã dừng thay vì kẹt ở "đang chạy".
+      const last = this.lastJobs.get(id);
+      if (!(err instanceof EngineError && err.code === 'NOT_FOUND') || !last) throw err;
+      this.emit({ type: 'job', job: { ...last, status: 'cancelled' } });
+    }
+  };
   resumeJob = async (id: string) => { await this.req('POST', `/jobs/${id}/resume`); };
 
   // ---------- real-time (Phase 4) ----------

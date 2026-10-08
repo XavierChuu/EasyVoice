@@ -38,6 +38,9 @@ export const useEngine = create<EngineState>((set, get) => ({
     });
     platform.onEngineStatus((info) => {
       connectEngine(info); // sidecar khởi động lại với port/token mới
+      // Engine chết giữa chừng thì job của nó mất theo: đừng để UI kẹt ở "đang chạy" (job train được engine khôi phục
+      // và gửi lại qua WebSocket khi kết nối lại).
+      if (info.status === 'restarting') set({ jobs: dropLiveJobs(get().jobs) });
       set({ info });
       if (info.status === 'online') void refresh();
     });
@@ -58,6 +61,14 @@ export const useEngine = create<EngineState>((set, get) => ({
     await refresh();
   },
 }));
+
+function dropLiveJobs(jobs: Record<string, Job>): Record<string, Job> {
+  const out: Record<string, Job> = {};
+  for (const [id, j] of Object.entries(jobs)) {
+    out[id] = j.status === 'running' || j.status === 'queued' ? { ...j, status: 'failed', error: 'ENGINE_RESTARTED' } : j;
+  }
+  return out;
+}
 
 /** Job GPU nặng đang chạy (train / TTS / STS). */
 export const runningJob = (jobs: Record<string, Job>) =>
