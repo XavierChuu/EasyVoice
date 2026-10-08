@@ -1,15 +1,20 @@
 // Runtime Python cho bản cài đặt (spec mục 8 / Phase 6): lần chạy đầu tự tải uv → uv cài Python (python-build-standalone)
 // → tạo venv → cài torch đúng bản (CUDA / MPS / CPU) → cài thư viện engine. Tất cả nằm trong <thư mục dữ liệu>/runtime,
 // người dùng không phải tự cài Python hay CUDA toolkit. App cập nhật mà danh sách thư viện đổi → chỉ cài bù phần đổi.
+// [Mac Intel] PyPI không còn torch mới cho x86_64 → Python + torch lấy từ conda-forge qua micromamba, uv cài phần còn lại.
+// Mọi chỗ riêng cho Mac Intel đánh dấu [Mac Intel] và chỉ chạy khi usesConda(); Windows / Mac Apple Silicon giữ luồng uv cũ.
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync, createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync,
+} from 'node:fs';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 export const UV_VERSION = '0.8.22';
 export const PYTHON_VERSION = '3.11';
+export const MICROMAMBA_VERSION = '2.9.0-0';
 
 export type TorchFlavor = 'cuda' | 'mps' | 'cpu';
 export type RuntimeStep = 'uv' | 'python' | 'venv' | 'torch' | 'packages' | 'done';
@@ -67,6 +72,12 @@ export function uvAsset(platform: string, arch: string): string {
 
 export const uvUrl = (asset: string) => `https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/${asset}`;
 
+/** [Mac Intel] torch trên PyPI dừng ở 2.2.2 → môi trường conda-forge (requirements/mac-x64-conda.txt).
+ * Chỉ đúng với darwin-x64: đổi điều kiện này là đổi cách cài của nền tảng khác. */
+export const usesConda = (platform = process.platform, arch = process.arch) => platform === 'darwin' && arch === 'x64';
+export const micromambaUrl = () =>
+  `https://github.com/mamba-org/micromamba-releases/releases/download/${MICROMAMBA_VERSION}/micromamba-osx-64`;
+
 /** Windows có GPU NVIDIA (nvidia-smi chạy được) → torch CUDA; Mac Apple Silicon → bản mặc định (MPS); còn lại CPU. */
 export function detectTorch(platform = process.platform, arch = process.arch): TorchFlavor {
   if (process.env.EASYVOICE_TORCH === 'cuda' || process.env.EASYVOICE_TORCH === 'mps' || process.env.EASYVOICE_TORCH === 'cpu') {
@@ -80,16 +91,20 @@ export function detectTorch(platform = process.platform, arch = process.arch): T
   return 'cpu';
 }
 
-export function requirementFiles(engineDir: string, torch: TorchFlavor) {
+export function requirementFiles(engineDir: string, torch: TorchFlavor, conda = usesConda()) {
   const req = path.join(engineDir, 'requirements');
-  return { torch: path.join(req, `${torch}.txt`), packages: process.env.EASYVOICE_RUNTIME_REQS ?? path.join(req, 'runtime.txt') };
+  return {
+    torch: path.join(req, conda ? 'mac-x64-conda.txt' : `${torch}.txt`),
+    packages: process.env.EASYVOICE_RUNTIME_REQS ?? path.join(req, 'runtime.txt'),
+    overrides: conda ? path.join(req, 'mac-x64-overrides.txt') : null, // [Mac Intel]; null → lệnh cài như cũ
+  };
 }
 
 /** Dấu vân tay của danh sách thư viện: đổi (app cập nhật) thì cài lại. */
-export function requirementsHash(engineDir: string, torch: TorchFlavor): string {
-  const f = requirementFiles(engineDir, torch);
+export function requirementsHash(engineDir: string, torch: TorchFlavor, conda = usesConda()): string {
+  const f = requirementFiles(engineDir, torch, conda);
   const h = createHash('sha256');
-  for (const p of [f.torch, f.packages]) h.update(existsSync(p) ? readFileSync(p) : Buffer.from(p));
+  for (const p of [f.torch, f.packages, f.overrides]) if (p) h.update(existsSync(p) ? readFileSync(p) : Buffer.from(p));
   return `${torch}:${h.digest('hex').slice(0, 16)}`;
 }
 
@@ -172,6 +187,15 @@ export async function ensureRuntime(engineDir: string, dirs: RuntimeDirs, torch:
     uv = findFile(dirs.uvDir, exe);
     if (!uv) throw new Error('không tìm thấy uv sau khi giải nén');
   }
+  const conda = usesConda();
+  const mamba = path.join(dirs.root, 'micromamba', 'micromamba');
+  if (conda && !existsSync(mamba)) { // [Mac Intel]
+    emit('uv', 1, `micromamba ${MICROMAMBA_VERSION}`, 0);
+    mkdirSync(path.dirname(mamba), { recursive: true });
+    await download(micromambaUrl(), `${mamba}.part`, opts.fetcher ?? fetch, (f) => emit('uv', 1, `micromamba ${MICROMAMBA_VERSION}`, f));
+    chmodSync(`${mamba}.part`, 0o755);
+    renameSync(`${mamba}.part`, mamba);
+  }
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     UV_CACHE_DIR: dirs.cache,
@@ -181,20 +205,34 @@ export async function ensureRuntime(engineDir: string, dirs: RuntimeDirs, torch:
     UV_NO_PROGRESS: '1',
   };
   const step = (s: RuntimeStep, i: number) => (l: string) => emit(s, i, l);
-  emit('python', 2, `Python ${PYTHON_VERSION}`);
-  await run(uv, ['python', 'install', PYTHON_VERSION], env, step('python', 2), opts.signal);
-  if (!existsSync(dirs.python)) {
+  const req = requirementFiles(engineDir, torch, conda);
+  if (conda) {
+    // [Mac Intel] Python + venv + torch là một môi trường conda. venv dở dang của uv (bản cũ) thì micromamba không nhận → tạo lại.
+    const menv = { ...env, MAMBA_ROOT_PREFIX: path.join(dirs.root, 'mamba') };
+    const spec = ['-y', '-p', dirs.venv, '-c', 'conda-forge', '--override-channels', '--file', req.torch];
+    const fresh = !existsSync(path.join(dirs.venv, 'conda-meta'));
+    emit('python', 2, `Python ${PYTHON_VERSION} (conda-forge)`);
     emit('venv', 3, dirs.venv);
-    await run(uv, ['venv', '--python', PYTHON_VERSION, dirs.venv], env, step('venv', 3), opts.signal);
+    if (fresh) rmSync(dirs.venv, { recursive: true, force: true });
+    emit('torch', 4, `PyTorch (${torch}, conda-forge)`);
+    await run(mamba, [fresh ? 'create' : 'install', ...spec], menv, step('torch', 4), opts.signal);
+    await run(mamba, ['clean', '--all', '--yes'], menv, step('torch', 4), opts.signal); // bỏ ~2 GB gói nén đã giải ra env
+  } else { // Windows / Mac Apple Silicon: luồng uv gốc
+    emit('python', 2, `Python ${PYTHON_VERSION}`);
+    await run(uv, ['python', 'install', PYTHON_VERSION], env, step('python', 2), opts.signal);
+    if (!existsSync(dirs.python)) {
+      emit('venv', 3, dirs.venv);
+      await run(uv, ['venv', '--python', PYTHON_VERSION, dirs.venv], env, step('venv', 3), opts.signal);
+    }
+    emit('torch', 4, `PyTorch (${torch})`);
+    await run(uv, ['pip', 'install', '--python', dirs.python, '-r', req.torch], env, step('torch', 4), opts.signal);
   }
-  const req = requirementFiles(engineDir, torch);
-  emit('torch', 4, `PyTorch (${torch})`);
-  await run(uv, ['pip', 'install', '--python', dirs.python, '-r', req.torch], env, step('torch', 4), opts.signal);
   emit('packages', 5, 'EasyVoice engine');
-  await run(uv, ['pip', 'install', '--python', dirs.python, '-r', req.packages], env, step('packages', 5), opts.signal);
+  const overrides = req.overrides ? ['--override', req.overrides] : [];
+  await run(uv, ['pip', 'install', '--python', dirs.python, ...overrides, '-r', req.packages], env, step('packages', 5), opts.signal);
   writeFileSync(dirs.marker, JSON.stringify({
-    requirements: requirementsHash(engineDir, torch), torch, uv: UV_VERSION, python: PYTHON_VERSION,
-    installedAt: new Date().toISOString(),
+    requirements: requirementsHash(engineDir, torch, conda), torch, uv: UV_VERSION, python: PYTHON_VERSION,
+    ...(conda ? { micromamba: MICROMAMBA_VERSION } : {}), installedAt: new Date().toISOString(),
   }, null, 2));
   emit('done', 5, 'OK', 1);
   return dirs.python;

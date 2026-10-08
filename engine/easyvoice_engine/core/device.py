@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import platform
 import shutil
 from dataclasses import dataclass
 from functools import lru_cache
@@ -16,6 +17,14 @@ def torch_available() -> bool:
     return True
 
 
+def _mps() -> bool:
+    """[Mac Intel] MPS chỉ dùng trên Apple Silicon (Apple Silicon / CUDA không đổi). torch conda-forge cho Mac Intel (GPU AMD/Intel) cũng bật MPS nhưng chưa được
+    kiểm chứng với các model của app → Mac Intel chạy CPU, khớp với bản runtime "cpu" của first-run."""
+    import torch
+
+    return platform.machine() == "arm64" and torch.backends.mps.is_available()
+
+
 def pick_device(pref: str = "auto") -> str:
     if pref == "cpu" or not torch_available():
         return "cpu"
@@ -23,7 +32,7 @@ def pick_device(pref: str = "auto") -> str:
 
     if torch.cuda.is_available():
         return "cuda:0"
-    if torch.backends.mps.is_available():
+    if _mps():
         return "mps"
     return "cpu"
 
@@ -36,7 +45,7 @@ def gpu_name() -> str:
 
     if torch.cuda.is_available():
         return torch.cuda.get_device_name(0)
-    if torch.backends.mps.is_available():
+    if _mps():
         return "Apple Silicon (MPS)"
     return "CPU"
 

@@ -35,4 +35,17 @@ describe('RuntimeSetupModal', () => {
     expect(v.getByText('uv pip lỗi (mã 2)')).toBeTruthy();
     expect(v.getByRole('button', { name: /↻/ }).hasAttribute('disabled')).toBe(false);
   });
+
+  it('explains the CPU runtime on Intel Macs instead of asking for an NVIDIA GPU', async () => {
+    void i18n.changeLanguage('en');
+    (window as { easyvoice?: unknown }).easyvoice = {
+      platform: 'darwin',
+      runtimeInfo: async () => ({ torch: 'cpu', sizeGb: 1.4, dir: '/Users/x/EasyVoice/runtime', installing: false }),
+      installRuntime: vi.fn(),
+      onRuntimeProgress: () => () => {},
+    };
+    const v = render(<RuntimeSetupModal />);
+    expect(await v.findByText('Intel Mac: runs on CPU')).toBeTruthy();
+    expect(v.queryByText('No NVIDIA GPU found')).toBeNull();
+  });
 });

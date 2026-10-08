@@ -1,0 +1,14 @@
+# [Mac Intel] Chỉ dùng trên darwin-x64 (usesConda trong electron/runtime.ts); Windows / Apple Silicon không đọc file này.
+# `uv pip install --override` khi cài runtime.txt vào môi trường conda (mac-x64-conda.txt).
+# torch conda-forge 2.8.0 chạy được, nhưng demucs 4.1 chỉ khai torch<2.3 / numpy<2 cho Mac Intel (vì PyPI không có
+# bản mới hơn) → ghi đè, không thì uv lùi về demucs 4.0.1 (torch.load lỗi weights_only).
+torch==2.8.0
+torchaudio==2.8.0
+numpy<2.4
+# Bản mới đã bỏ wheel macOS x86_64: ghim bản cuối còn wheel để máy người dùng không phải tự build (Rust, LLVM).
+llvmlite<=0.45.1
+numba<=0.62.1
+cryptography<=48.0.1
+# Không có wheel Mac Intel và engine không dùng tới (f5-tts khai torchcodec, demucs.api dùng sphn): bỏ hẳn.
+torchcodec; sys_platform == "never"
+sphn; sys_platform == "never"

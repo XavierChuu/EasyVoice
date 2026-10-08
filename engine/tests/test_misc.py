@@ -191,3 +191,17 @@ def test_runtime_requirements_match_pyproject():
     torch_pins = {x for x in (root / "requirements" / "base.txt").read_text().splitlines() if x.startswith("torch")}
     assert torch_pins <= have and torch_pins <= set((root / "requirements" / "cpu.txt").read_text().splitlines())
     assert not any(re.match(r"-e\b", x) for x in have)
+
+
+def test_mac_x64_runtime_pins_match_base():
+    """Mac Intel lấy torch từ conda-forge (mac-x64-conda.txt) và ghi đè pin của gói khác (mac-x64-overrides.txt):
+    phải cùng bản torch/torchaudio với base.txt, không thì hai nền tảng chạy hai phiên bản torch khác nhau."""
+    import re
+    from pathlib import Path
+
+    req = Path(__file__).resolve().parents[1] / "requirements"
+    lines = lambda f: [x.strip() for x in (req / f).read_text(encoding="utf-8").splitlines() if x.strip() and not x.startswith("#")]
+    base = {x.split("==")[0]: x.split("==")[1] for x in lines("base.txt") if x.startswith("torch")}
+    conda = {x.split("=")[0].replace("pytorch", "torch"): x.split("=")[1] for x in lines("mac-x64-conda.txt") if "torch" in x}
+    over = {x.split("==")[0]: x.split("==")[1] for x in lines("mac-x64-overrides.txt") if re.match(r"torch(audio)?==", x)}
+    assert base == conda == over, (base, conda, over)

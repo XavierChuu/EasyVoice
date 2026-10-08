@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Alert, Btn, KvRows, Modal, Progress } from '../../components/ui';
-import { platform, type RuntimeInfo, type RuntimeProgress } from '../../lib/platform';
+import { osName, platform, type RuntimeInfo, type RuntimeProgress } from '../../lib/platform';
 
 export function RuntimeSetupModal() {
   const { t } = useTranslation();
@@ -46,7 +46,9 @@ export function RuntimeSetupModal() {
         { k: 'PyTorch', v: info ? t(`runtime.torch.${info.torch}`) : '—', bad: info?.torch === 'cpu' },
         { k: t('runtime.dir'), v: <span className="break-all">{info?.dir ?? '—'}</span> },
       ]} />
-      {info?.torch === 'cpu' && <Alert tone="line" title={t('runtime.cpuTitle')}>{t('runtime.cpuBody')}</Alert>}
+      {info?.torch === 'cpu' && (osName() === 'mac' // [Mac Intel] (Apple Silicon luôn là MPS, Windows giữ thông báo NVIDIA)
+        ? <Alert tone="line" title={t('runtime.cpuTitleMac')}>{t('runtime.cpuBodyMac')}</Alert>
+        : <Alert tone="line" title={t('runtime.cpuTitle')}>{t('runtime.cpuBody')}</Alert>)}
       {(running || prog) && !error && (
         <div className="flex flex-col gap-2">
           <div className="flex justify-between gap-3 font-mono text-[12px]">

@@ -28,7 +28,8 @@ extraResources:
   # services/models.py tìm manifest ở thư mục cha của engine/ → resources/models.manifest.json
   - from: ../../models.manifest.json
     to: models.manifest.json
-  # FFmpeg LGPL (npm run fetch:ffmpeg); thư mục trống thì engine dùng FFmpeg trong PATH.
+  # FFmpeg LGPL: Windows `npm run fetch:ffmpeg`, macOS (arm64 + x64) `scripts/build-ffmpeg-mac.sh`; thư mục trống thì
+  # engine dùng FFmpeg trong PATH (app mở từ Finder không thấy FFmpeg của Homebrew).
   - from: vendor/ffmpeg/${platform}-${arch}
     to: ffmpeg
     filter:

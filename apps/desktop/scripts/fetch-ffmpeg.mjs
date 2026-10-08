@@ -1,7 +1,7 @@
 // Chuẩn bị FFmpeg đóng kèm bộ cài (electron-builder extraResources: vendor/ffmpeg/<platform>-<arch> → resources/ffmpeg).
 // Chỉ dùng bản LGPL (không --enable-gpl / nonfree) để phân phối cùng app (spec: giấy phép bên thứ ba).
 //   Windows: tải bản LGPL dựng sẵn của BtbN/FFmpeg-Builds.
-//   macOS / khác: chép từ --from <đường dẫn ffmpeg> (tự dựng LGPL, ví dụ ./configure --disable-gpl --disable-nonfree).
+//   macOS / khác: chép từ --from <đường dẫn ffmpeg> (tự dựng LGPL; macOS dùng scripts/build-ffmpeg-mac.sh).
 // Dùng: node scripts/fetch-ffmpeg.mjs [--platform win32] [--arch x64] [--from /path/to/ffmpeg]
 import { execFileSync } from 'node:child_process';
 import { copyFileSync, chmodSync, createWriteStream, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';

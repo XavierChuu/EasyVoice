@@ -928,6 +928,8 @@
     },
     "cpuTitle": "Không tìm thấy GPU NVIDIA",
     "cpuBody": "App vẫn chạy được trên CPU nhưng chậm, và đổi giọng trực tiếp sẽ không dùng được. Nếu máy có GPU NVIDIA, hãy cập nhật driver rồi mở lại app.",
+    "cpuTitleMac": "Mac Intel: chạy bằng CPU",
+    "cpuBodyMac": "Mac chip Intel không có bản PyTorch dùng GPU nên app chạy trên CPU: tạo giọng và tách giọng chậm hơn nhiều so với Mac Apple Silicon, đổi giọng trực tiếp và huấn luyện giọng có thể không theo kịp.",
     "step": {
       "uv": "Tải trình cài đặt",
       "python": "Cài Python",

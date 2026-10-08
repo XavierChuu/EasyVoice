@@ -1,0 +1,7 @@
+# [Mac Intel] Chỉ dùng trên darwin-x64 (usesConda trong electron/runtime.ts); Windows / Apple Silicon không đọc file này.
+# PyTorch trên PyPI dừng ở 2.2.2 (không còn wheel macOS x86_64) mà F5-TTS / transformers cần torch mới
+# → Python + torch lấy từ conda-forge qua micromamba (electron/runtime.ts). Cài TRƯỚC runtime.txt, giữ khớp base.txt.
+python=3.11
+pytorch=2.8.0
+torchaudio=2.8.0
+numpy<2.4
