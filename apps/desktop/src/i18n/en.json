@@ -571,7 +571,9 @@
     "rerunSetup": "Re-run first-time setup",
     "restartTitle": "Engine restart needed",
     "restartBody": "The new folder is used after restarting the engine. Existing data is not moved automatically: copy models / voices over if you want to keep them.",
-    "inUse": "In use"
+    "inUse": "In use",
+    "about": "ABOUT",
+    "aboutHint": "Made by"
   },
   "licenses": {
     "code": "LICENSES",

@@ -97,6 +97,15 @@ export function SettingsPage() {
             <Btn variant="ghost" disabled={info.status === 'mock'} onClick={() => void platform.restartEngine()}>{t('engineBanner.restart')}</Btn>
           </div>
         </Row>
+        <Row label={t('settings.about')} hint={t('settings.aboutHint')}>
+          <span className="font-mono text-[12px] flex gap-x-3 gap-y-1 flex-wrap items-center">
+            <span>Xavier Chu</span>
+            <span className="text-mute">·</span>
+            <Btn variant="link" onClick={() => void platform.openExternal('https://xcmotion.net')}>xcmotion.net ↗</Btn>
+            <span className="text-mute">·</span>
+            <Btn variant="link" onClick={() => void platform.openExternal('mailto:xc.232192@gmail.com')}>xc.232192@gmail.com</Btn>
+          </span>
+        </Row>
       </div>
     </div>
   );

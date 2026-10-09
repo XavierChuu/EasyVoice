@@ -85,7 +85,7 @@ ipcMain.handle('dialog:pickFolder', async (_e, title?: string) => {
 });
 ipcMain.handle('shell:showInFolder', (_e, p: string) => shell.showItemInFolder(p));
 ipcMain.handle('shell:openExternal', (_e, url: string) => {
-  if (/^https:\/\//.test(url)) return shell.openExternal(url);
+  if (/^(https:\/\/|mailto:)/.test(url)) return shell.openExternal(url);
 });
 ipcMain.handle('fs:readPicked', (_e, p: string) => {
   if (!picked.has(p) || statSync(p).size > MAX_READ) throw new Error('not allowed');

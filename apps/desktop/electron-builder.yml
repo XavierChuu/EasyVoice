@@ -3,7 +3,7 @@
 # (Windows) hoặc CSC_NAME + APPLE_ID/APPLE_APP_SPECIFIC_PASSWORD/APPLE_TEAM_ID (macOS) trong môi trường build.
 appId: app.easyvoice.desktop
 productName: Evoice
-copyright: Copyright © Evoice
+copyright: Copyright © 2026 Xavier Chu
 directories:
   output: release
   buildResources: build # icon.png (1024 px) → .ico / .icns tự sinh khi build

@@ -3,6 +3,12 @@
   "private": true,
   "version": "0.1.0",
   "description": "EasyVoice desktop app shell (Electron + React)",
+  "author": {
+    "name": "Xavier Chu",
+    "email": "xc.232192@gmail.com",
+    "url": "https://xcmotion.net"
+  },
+  "homepage": "https://xcmotion.net",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",

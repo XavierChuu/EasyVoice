@@ -569,7 +569,9 @@
     "rerunSetup": "Chạy lại thiết lập ban đầu",
     "restartTitle": "Cần khởi động lại engine",
     "restartBody": "Thư mục mới sẽ được dùng sau khi khởi động lại engine. Dữ liệu ở thư mục cũ không tự chuyển sang: hãy chép model / giọng sang thư mục mới nếu muốn dùng tiếp.",
-    "inUse": "Đang dùng"
+    "inUse": "Đang dùng",
+    "about": "THÔNG TIN",
+    "aboutHint": "Phát triển bởi"
   },
   "licenses": {
     "code": "GIẤY PHÉP",
