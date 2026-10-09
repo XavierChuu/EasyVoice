@@ -1,0 +1,80 @@
+Evoice (EasyVoice)
+Copyright (C) 2026 Xavier Chu <xc.232192@gmail.com> - https://xcmotion.net
+
+Evoice's own source code is licensed under the GNU General Public License,
+version 3 or (at your option) any later version. See the LICENSE file.
+
+This file lists third-party components that are bundled with, vendored into, or
+downloaded by Evoice, and the licenses that apply to them. Each component keeps
+its own license; nothing here changes those terms.
+
+--------------------------------------------------------------------------------
+1. Code vendored into this repository (engine/third_party)
+--------------------------------------------------------------------------------
+
+- RVC v2 architecture and RMVPE pitch extractor (inference only)
+  Copyright (c) 2023 liujing04, 2023 Ftps and contributors - MIT License
+  Full text: engine/third_party/rvc/LICENSE.rvc
+- rvc-python
+  Copyright (c) 2023 Danil Boldyrev - MIT License
+  Full text: engine/third_party/rvc/LICENSE.rvc-python
+
+--------------------------------------------------------------------------------
+2. FFmpeg (bundled binary, LGPL)
+--------------------------------------------------------------------------------
+
+The Evoice installers include an FFmpeg executable built WITHOUT --enable-gpl and
+WITHOUT --enable-nonfree, so it is licensed under the GNU Lesser General Public
+License, version 2.1 or later (https://www.gnu.org/licenses/lgpl-2.1.html).
+The macOS build also statically links LAME (libmp3lame, LGPL).
+
+- Windows: prebuilt LGPL build from https://github.com/BtbN/FFmpeg-Builds
+  (scripts: apps/desktop/scripts/fetch-ffmpeg.mjs)
+- macOS (Apple Silicon and Intel): built from the official FFmpeg source release
+  with apps/desktop/scripts/build-ffmpeg-mac.sh (FFmpeg 8.0.1, LAME, LGPL
+  configuration only)
+- FFmpeg source code: https://ffmpeg.org/download.html
+  (the exact FFmpeg release used for macOS is set in build-ffmpeg-mac.sh)
+- FFmpeg is a trademark of Fabrice Bellard, originator of the FFmpeg project.
+
+You may replace the bundled FFmpeg: Evoice uses the ffmpeg executable found in
+the "ffmpeg" folder next to the app, and falls back to ffmpeg in your PATH.
+
+--------------------------------------------------------------------------------
+3. Main open-source libraries (installed from their package registries)
+--------------------------------------------------------------------------------
+
+Electron (MIT), React (MIT), Vite (MIT), Tailwind CSS (MIT), i18next (MIT),
+Zustand (MIT), electron-updater / electron-builder (MIT), uiohook-napi (MIT),
+FastAPI (MIT), PyTorch / torchaudio (BSD-3-Clause), F5-TTS code (MIT),
+Vocos (MIT), faster-whisper (MIT), Demucs (MIT).
+The complete, authoritative dependency lists are in apps/desktop/package.json
+and engine/requirements/ and engine/pyproject.toml; each package ships its own
+license.
+
+Fonts bundled in the app: Chakra Petch and JetBrains Mono, via @fontsource
+(SIL Open Font License 1.1).
+
+--------------------------------------------------------------------------------
+4. AI models (downloaded on first run - NOT part of this repository)
+--------------------------------------------------------------------------------
+
+Models are downloaded from their original sources according to
+models.manifest.json. Their licenses are separate from the license of Evoice's
+source code. Models marked non-commercial may only be used for personal,
+non-commercial purposes, and so may the audio generated with them.
+
+| Model | Role | License | Commercial use | Source |
+|---|---|---|---|---|
+| F5-TTS v1 Base (EN/ZH) | Text to Speech | CC-BY-NC-4.0 | **no (non-commercial)** | https://huggingface.co/SWivid/F5-TTS |
+| F5-TTS Vietnamese ViVoice (VI) | Text to Speech | CC-BY-NC-SA-4.0 | **no (non-commercial)** | https://huggingface.co/hynt/F5-TTS-Vietnamese-ViVoice |
+| Vocos mel 24 kHz | Vocoder | MIT | yes | https://huggingface.co/charactr/vocos-mel-24khz |
+| Whisper small (faster-whisper) | Transcript | MIT | yes | https://huggingface.co/Systran/faster-whisper-small |
+| ContentVec base | Voice Changer · encoder | MIT | yes | https://huggingface.co/lengyue233/content-vec-best |
+| RMVPE | Voice Changer · pitch | MIT | yes | https://huggingface.co/lj1995/VoiceConversionWebUI |
+| RVC v2 pretrained 40k (f0G/f0D) | Voice training | MIT | yes | https://huggingface.co/lj1995/VoiceConversionWebUI |
+| Demucs htdemucs | Music separation | MIT | yes | https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/955717e8-8726e21a.th |
+| WavLM Base+ SV (nhận diện người nói) | Speaker diarization | MIT | yes | https://huggingface.co/microsoft/wavlm-base-plus-sv |
+
+Please also respect the rights of the people whose voices you process. Only clone
+your own voice or a voice you have permission to use.

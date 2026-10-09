@@ -25,6 +25,11 @@ extraResources:
       - pyproject.toml
       - "!**/__pycache__/**"
       - "!**/*.pyc"
+  # Giấy phép của app + thông báo bên thứ ba (LGPL FFmpeg, giấy phép model) đi kèm bộ cài.
+  - from: ../../LICENSE
+    to: LICENSE
+  - from: ../../NOTICE
+    to: NOTICE
   # services/models.py tìm manifest ở thư mục cha của engine/ → resources/models.manifest.json
   - from: ../../models.manifest.json
     to: models.manifest.json

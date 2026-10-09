@@ -46,7 +46,7 @@ Get the latest installer from the **[Releases page](https://github.com/XavierChu
 
 - **Model licenses.** Some Text-to-Speech models (F5-TTS English/Chinese and the Vietnamese ViVoice model) are licensed **non-commercial** by their authors, so audio generated with them is for personal, non-commercial use. The other models are MIT-licensed. The full list is in the app under **Licenses** and in [`models.manifest.json`](models.manifest.json).
 - **Consent.** Only clone your own voice or a voice you have permission to use.
-- **Licensing of this repository:** the license for Evoice's own source code is being finalised. Third-party code keeps its own license (see [`engine/third_party`](engine/third_party)).
+- **License of the source code:** Evoice's own code is released under the **GNU GPL v3 or later** (see [License](#license)). This does not change the licenses of the AI models above.
 
 ## Build from source
 
@@ -75,6 +75,12 @@ models.manifest.json Official model list (url, sha256, size, license)
 ```
 
 Models and user data are never stored in this repository.
+
+<a id="license"></a>
+
+## License
+
+Copyright © 2026 Xavier Chu. Evoice's source code is licensed under the [GNU General Public License v3.0 or later](LICENSE) (`GPL-3.0-or-later`). Third-party code and bundled components (RVC, FFmpeg LGPL, libraries) keep their own licenses, and AI models are licensed separately by their authors: see [`NOTICE`](NOTICE).
 
 ## Author
 
@@ -123,7 +129,7 @@ Tải bộ cài mới nhất ở **[trang Releases](https://github.com/XavierChu
 
 - **Giấy phép model.** Một số model Đọc văn bản (F5-TTS Anh/Trung và ViVoice tiếng Việt) được tác giả cấp phép **phi thương mại**, nên audio tạo bằng chúng chỉ dùng cá nhân, không thương mại. Các model còn lại dùng giấy phép MIT. Danh sách đầy đủ ở mục **Giấy phép** trong app và trong [`models.manifest.json`](models.manifest.json).
 - **Sự đồng ý.** Chỉ nhân bản giọng của chính bạn hoặc giọng bạn được phép dùng.
-- **Giấy phép của repo này:** giấy phép cho mã nguồn của Evoice đang được chốt. Mã của bên thứ ba giữ giấy phép riêng (xem [`engine/third_party`](engine/third_party)).
+- **Giấy phép mã nguồn:** mã của Evoice được phát hành theo **GNU GPL v3 trở lên** (xem [Giấy phép](#giấy-phép)). Điều này không thay đổi giấy phép của các model AI nêu trên.
 
 ## Build từ mã nguồn
 
@@ -152,6 +158,12 @@ models.manifest.json Danh sách model chính thức (url, sha256, size, license)
 ```
 
 Model và dữ liệu người dùng không bao giờ nằm trong repo.
+
+<a id="giấy-phép"></a>
+
+## Giấy phép
+
+Bản quyền © 2026 Xavier Chu. Mã nguồn Evoice được cấp phép theo [GNU General Public License v3.0 trở lên](LICENSE) (`GPL-3.0-or-later`). Mã của bên thứ ba và các thành phần đóng kèm (RVC, FFmpeg LGPL, thư viện) giữ giấy phép riêng, còn model AI do tác giả của chúng cấp phép riêng: xem [`NOTICE`](NOTICE).
 
 ## Tác giả
 

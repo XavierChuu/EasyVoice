@@ -9,6 +9,7 @@
     "url": "https://xcmotion.net"
   },
   "homepage": "https://xcmotion.net",
+  "license": "GPL-3.0-or-later",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
