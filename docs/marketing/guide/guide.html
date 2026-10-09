@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Evoice — User Guide / Hướng dẫn sử dụng</title>
+<style>
+@font-face{font-family:"Chakra Petch";font-weight:500;src:url(fonts/chakra-petch-latin-500-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-weight:500;src:url(fonts/chakra-petch-latin-ext-500-normal.woff2) format("woff2");unicode-range:U+0100-02AF,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-weight:500;src:url(fonts/chakra-petch-vietnamese-500-normal.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}
+@font-face{font-family:"Chakra Petch";font-weight:700;src:url(fonts/chakra-petch-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Chakra Petch";font-weight:700;src:url(fonts/chakra-petch-latin-ext-700-normal.woff2) format("woff2");unicode-range:U+0100-02AF,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Chakra Petch";font-weight:700;src:url(fonts/chakra-petch-vietnamese-700-normal.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}
+@font-face{font-family:"JetBrains Mono";font-weight:400;src:url(fonts/jetbrains-mono-latin-400-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"JetBrains Mono";font-weight:400;src:url(fonts/jetbrains-mono-vietnamese-400-normal.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}
+@font-face{font-family:"JetBrains Mono";font-weight:700;src:url(fonts/jetbrains-mono-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"JetBrains Mono";font-weight:700;src:url(fonts/jetbrains-mono-vietnamese-700-normal.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}
+
+:root{--acc:#E96B34;--ink:#1b1b1b;--mute:#6b6b6b;--line:#dcdcdc;--soft:#f5f3f0;--dark:#0A0A0A}
+@page{size:A4;margin:18mm 17mm 20mm;
+  @bottom-left{content:"Evoice · User Guide / Hướng dẫn";font:8pt "JetBrains Mono",monospace;color:#8a8a8a}
+  @bottom-right{content:counter(page);font:8pt "JetBrains Mono",monospace;color:#8a8a8a}}
+@page cover{margin:0;background:#0A0A0A;@bottom-left{content:none}@bottom-right{content:none}}
+*{box-sizing:border-box}
+html{font:10pt/1.55 "Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0}
+h1,h2,h3{font-family:"Chakra Petch","Segoe UI",sans-serif;line-height:1.2;margin:0}
+h1{font-size:24pt;font-weight:700;letter-spacing:-.01em}
+h2{font-size:15pt;font-weight:700;margin:20pt 0 6pt;padding-top:8pt;border-top:2px solid var(--ink);break-after:avoid}
+h3{font-size:11.5pt;font-weight:700;margin:13pt 0 4pt;break-after:avoid}
+.kicker{font:700 8.5pt "JetBrains Mono",monospace;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;margin-bottom:4pt}
+p{margin:0 0 7pt}
+ul,ol{margin:0 0 8pt;padding-left:17pt}
+li{margin:0 0 3pt}
+code,kbd,.k{font:400 8.8pt "JetBrains Mono",monospace;background:var(--soft);border:1px solid var(--line);border-radius:3px;padding:0 3.5px;white-space:nowrap}
+kbd{border-bottom-width:2px}
+b,strong{font-weight:700}
+.ui{font-weight:700;color:#8a3512}
+a{color:var(--acc);text-decoration:none}
+table{border-collapse:collapse;width:100%;margin:6pt 0 10pt;font-size:9.3pt;break-inside:avoid}
+th,td{border:1px solid var(--line);padding:4.5pt 7pt;text-align:left;vertical-align:top}
+th{background:var(--soft);font:700 8pt "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+figure{margin:8pt 0 12pt;break-inside:avoid}
+figure img{display:block;width:80%;margin:0 auto;border:1px solid #2a2a2a;border-radius:3px}
+figure.half img{width:62%}
+figcaption{text-align:center;font:400 8pt "JetBrains Mono",monospace;color:var(--mute);margin-top:4pt}
+.box{border-left:4px solid var(--acc);background:var(--soft);padding:7pt 10pt;margin:8pt 0 11pt;break-inside:avoid}
+.box.warn{border-color:#b3261e;background:#fbf0ef}
+.box .t{font:700 8pt "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2pt;color:var(--acc)}
+.box.warn .t{color:#b3261e}
+.box p:last-child{margin:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9pt;margin:8pt 0 10pt}
+.card{border:1px solid var(--line);padding:8pt 10pt;break-inside:avoid}
+.card h3{margin:0 0 3pt;font-size:11pt}
+.card p{margin:0;font-size:9.3pt;color:#333}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps>li{counter-increment:s;position:relative;padding-left:26pt;margin-bottom:6pt}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:17pt;height:17pt;border-radius:50%;background:var(--ink);color:#fff;font:700 8.5pt/17pt "JetBrains Mono",monospace;text-align:center}
+.part{break-before:page}
+.part-title{background:var(--dark);color:#fff;margin:0 -17mm 14pt;padding:11mm 17mm 9mm;break-after:avoid}
+.part-title h1{color:#fff;font-size:30pt}
+.part-title .kicker{color:var(--acc)}
+.part-title p{color:#bdbdbd;margin:6pt 0 0;max-width:120mm}
+.toc{columns:2;column-gap:14mm;margin:8pt 0}
+.toc div{margin:0 0 3pt;font-size:9.5pt}
+.toc b{font-family:"JetBrains Mono",monospace;color:var(--acc);margin-right:6pt}
+.cover-slot{height:1px;overflow:hidden;break-after:page}
+.cover{page:cover;box-sizing:content-box;height:245mm;width:166mm;background:var(--dark);color:#fff;padding:26mm 22mm;display:flex;flex-direction:column;justify-content:space-between}
+.cover img.logo{height:30mm;filter:invert(0)}
+.cover h1{font-size:40pt;color:#fff;line-height:1.05;margin:0 0 6pt}
+.cover h1 span{color:var(--acc)}
+.cover .sub{font:400 11pt "JetBrains Mono",monospace;color:#bdbdbd;letter-spacing:.04em}
+.cover .tags{display:flex;gap:8pt;flex-wrap:wrap;margin-top:14pt}
+.cover .tags span{border:1px solid #444;padding:3pt 8pt;font:400 8.5pt "JetBrains Mono",monospace;color:#d8d8d8}
+.cover .by{font:400 9.5pt "JetBrains Mono",monospace;color:#9a9a9a;line-height:1.7}
+.cover .by b{color:#fff}
+.mono{font-family:"JetBrains Mono",monospace}
+.steps ul{list-style:disc;padding-left:16pt;margin:3pt 0 0}.steps ul li{padding-left:0;margin:0 0 2pt}
+html,body{background:#fff}
+</style>
+</head>
+<body>
+
+<!-- Page 1 is the cover: guide/cover.html is printed separately and merged in by build-guide.sh -->
+<div class="cover-slot">&nbsp;</div>
+
+<!-- ============================ ENGLISH ============================ -->
+<section class="part" lang="en" id="en" style="break-before:auto">
+  <div class="part-title">
+    <div class="kicker">Part 1 · English</div>
+    <h1>Evoice User Guide</h1>
+    <p>Everything you need to clone a voice, read text aloud, change your voice live and edit audio. 100% on your own computer.</p>
+  </div>
+
+  <div class="toc">
+    <div><b>1</b>Welcome</div>
+    <div><b>2</b>Install &amp; first run</div>
+    <div><b>3</b>A tour of the window</div>
+    <div><b>4</b>My Voices: create, share, import</div>
+    <div><b>5</b>Text to Speech</div>
+    <div><b>6</b>Voice Changer (file &amp; live)</div>
+    <div><b>7</b>Edit Audio</div>
+    <div><b>8</b>Settings &amp; Licenses</div>
+    <div><b>9</b>Troubleshooting</div>
+    <div><b>10</b>Use it responsibly &amp; support</div>
+  </div>
+
+  <h2>1 · Welcome</h2>
+  <p>Evoice is a desktop voice studio. You create a <b>voice</b> once, then use it in four places:</p>
+  <div class="grid2">
+    <div class="card"><h3>01 · My Voices</h3><p>Create, organise, share and import voices. A voice can have emotion <i>variants</i>.</p></div>
+    <div class="card"><h3>02 · Text to Speech</h3><p>Paste text, pick a voice, press <b>Read aloud</b>. Vietnamese first, English supported.</p></div>
+    <div class="card"><h3>03 · Voice Changer</h3><p>Turn a recording — or your microphone, live — into one of your trained voices.</p></div>
+    <div class="card"><h3>04 · Edit Audio</h3><p>Multitrack editor with transcription, filters, music separation and text-based editing.</p></div>
+  </div>
+  <p><b>Private by design.</b> All AI runs on your computer. Nothing leaves it except the one-time model download; telemetry is off. After setup, Evoice works offline.</p>
+
+  <h2>2 · Install &amp; first run</h2>
+  <h3>System requirements</h3>
+  <table>
+    <tr><th>Platform</th><th>What you need</th></tr>
+    <tr><td>Windows</td><td>Windows 10 / 11 (64-bit), an <b>NVIDIA GPU</b> with CUDA and a recent driver. Without a GPU the app falls back to CPU, which is very slow and has no real-time voice changing.</td></tr>
+    <tr><td>macOS</td><td>macOS 13 or newer. Apple Silicon recommended; Intel Macs work but are much slower.</td></tr>
+    <tr><td>Disk &amp; internet</td><td>Several GB of free space (the models alone are several GB; the Vietnamese voice model is ~5.4 GB) and an internet connection for the first-run download.</td></tr>
+  </table>
+  <h3>Steps</h3>
+  <ol class="steps">
+    <li><b>Run the installer</b> and follow the prompts. If Windows SmartScreen shows a warning for a new app, click <span class="ui">More info → Run anyway</span>.</li>
+    <li><b>Open Evoice.</b> On first launch it prepares its AI runtime (a one-time download of a few GB). Wait for it to finish.</li>
+    <li><b>Welcome screen — system check.</b> It shows your GPU driver and free disk. If the driver says “Too old”, update your NVIDIA driver first.</li>
+    <li><b>Download the models.</b> Press <span class="ui">Download … GB</span>. Models are grouped: <i>Text to Speech</i>, <i>Voice Changer + training</i>, and <i>Extras</i> (music separation, auto transcript). If the connection drops, the download resumes where it stopped; use <span class="ui">Retry</span>.</li>
+    <li>Press <span class="ui">Start using Evoice</span>. You can re-open this screen any time from <span class="ui">Settings → Re-run first-time setup</span>.</li>
+  </ol>
+  <div class="box"><div class="t">Tip</div><p>Short on space? Choose a different drive for models in <span class="ui">Settings → Models folder</span> before downloading. Choose <span class="ui">Skip for now</span> to download only later what you need.</p></div>
+
+  <h2>3 · A tour of the window</h2>
+  <figure><img src="img/en-voices.jpg" alt=""><figcaption>Fig. 1 — My Voices. Left: the four modules, Settings and Licenses, and a live hardware panel.</figcaption></figure>
+  <ul>
+    <li><b>Left sidebar</b> — switch between <i>My Voices</i>, <i>Text to Speech</i>, <i>Voice Changer</i>, <i>Edit Audio</i>, <i>Settings</i> and <i>Licenses</i>. Below it you see your GPU, backend and VRAM usage, and the training / render queue.</li>
+    <li><b>Top bar</b> — engine status and the <span class="k">VI</span> / <span class="k">EN</span> switch to change the interface language instantly.</li>
+    <li><b>Bottom bar</b> — device, VRAM, live latency and number of voices.</li>
+    <li><b>Engine banner</b> — if the AI engine stops, a banner appears with a <span class="ui">Restart engine</span> button.</li>
+  </ul>
+
+  <h2>4 · My Voices: create, share, import</h2>
+  <p>Press <span class="ui">+ New voice</span>. Pick how to build the voice:</p>
+  <table>
+    <tr><th>Type</th><th>Audio needed</th><th>Works for</th><th>Time</th></tr>
+    <tr><td><b>Quick</b> (zero-shot)</td><td>One clean clip, <b>5–12 seconds</b></td><td>Text to Speech</td><td>Seconds, no training</td></tr>
+    <tr><td><b>High quality</b> (fine-tune)</td><td><b>10–30 minutes</b> of one speaker</td><td>Text to Speech <i>and</i> Voice Changer</td><td>GPU training in the background; pause / resume any time</td></tr>
+  </table>
+  <figure><img src="img/en-wizard.jpg" alt=""><figcaption>Fig. 2 — The New voice panel: choose Quick or High quality, then name, language, gender and accent.</figcaption></figure>
+
+  <h3>Creating a Quick voice</h3>
+  <ol class="steps">
+    <li>Choose <span class="ui">Quick</span>, type a <b>name</b>, pick the <b>language</b> (and optionally gender, country, region / accent — these become searchable tags).</li>
+    <li>Drop one audio file (WAV / MP3 / M4A) or press <span class="ui">● Record now</span> and read the sample sentence in your normal voice.</li>
+    <li>Check the <b>transcript</b>. Press <span class="ui">Auto · Whisper</span> to transcribe, then correct it. <b>The closer the transcript matches the clip, the closer the cloned voice.</b></li>
+    <li>Tick the consent box (it is your own voice or you have the speaker's permission) and press <span class="ui">Create</span>.</li>
+  </ol>
+  <div class="box"><div class="t">For the best clone</div><p>Quiet room, about a hand's width from the mic, no music or echo, 5–12 seconds. Evoice warns you about clips that are too short / long, noisy, clipping or have background music.</p></div>
+
+  <h3>Creating a High-quality voice</h3>
+  <ol class="steps">
+    <li>Choose <span class="ui">High quality</span> and add several audio <i>or video</i> files of the <b>same single speaker</b>. The app shows each file's length and the total.</li>
+    <li>Keep <span class="ui">Remove background music and denoise</span> on unless your files are already clean.</li>
+    <li>Pick a <b>training preset</b>: <i>Fast</i> (quick test), <i>Balanced</i> (recommended) or <i>Thorough</i> (slowest, most accurate).</li>
+    <li>Start. Training runs in the background — the stages are <i>Preprocess → Extract F0/features → Train → Build index</i>. Use <span class="ui">Pause</span> / <span class="ui">Resume</span>; progress is saved at the last checkpoint. You can keep using the app meanwhile.</li>
+  </ol>
+
+  <h3>Emotion variants</h3>
+  <p>On a voice card press <span class="ui">+ Variant</span> and add a 5–12 second clip of <i>the same person</i> speaking with another emotion (happy, angry, fearful, anxious, menacing, sad, calm, whisper — or your own name, e.g. “Ghost story”). In Text to Speech the voice then copies that delivery.</p>
+
+  <h3>Voice card actions</h3>
+  <ul>
+    <li><span class="ui">Play</span> — hear the preview. <span class="ui">Read</span> — open Text to Speech with this voice. <span class="ui">Convert</span> — open Voice Changer (only for fully trained voices).</li>
+    <li><span class="ui">⋯ menu</span> — edit name &amp; tags, training details, <b>Export voice</b>, <b>Delete</b>. Search and filter by name, variant, gender, country, region or capability (<code>TTS</code> / <code>STS</code>).</li>
+  </ul>
+
+  <h3>Share a voice (<code>.evoice</code>)</h3>
+  <p>Press the export (↑) button on a voice card. Choose what to include — the <b>RVC model + index</b> (so others can use it in Voice Changer, ~143 MB) and/or the <b>reference audio + transcript</b> (for Text to Speech; contains the real recording, so share only with people you trust). Choose a <b>license</b> — <i>Personal use</i>, <i>Commercial OK</i> or <i>No resharing</i> — add your name as <b>author</b> and press <span class="ui">Export .evoice</span>. Send the file to anyone who has Evoice.</p>
+  <h3>Import a voice</h3>
+  <p>Press <span class="ui">Import</span> and choose a <code>.evoice</code> file, or an RVC <code>.pth</code> + <code>.index</code> pair from the community. Evoice runs a <b>security scan</b> (format, checksums, safe load…). Files that contain executable code are <b>blocked</b> and nothing is imported. If it passes, review the author and license, agree to use the voice according to that license, and press <span class="ui">Import voice</span>.</p>
+
+  <h2>5 · Text to Speech</h2>
+  <figure><img src="img/en-tts.jpg" alt=""><figcaption>Fig. 3 — Text on the left; voice, variant, mode, speed and the Read aloud button on the right.</figcaption></figure>
+  <ol class="steps">
+    <li>Type or paste your text, or press <span class="ui">[Open .txt]</span>. Long text is split into sentences automatically (the counter shows characters and sentences).</li>
+    <li>Choose the <b>default voice</b> and, if it has variants, a <b>variant</b>.</li>
+    <li>Choose the <b>mode</b>:
+      <ul><li><b>Direct</b> — fast, keeps the emotion of the reference clip.</li>
+          <li><b>Via RVC</b> — closer and more stable voice, slightly slower. Only available for voices that have an RVC model (High quality voices).</li></ul></li>
+    <li>Set <b>speed</b>. Open <span class="ui">Advanced</span> for the <b>pause between sentences</b> (silence with a short crossfade) and the <b>seed</b> (same seed + same text = same result).</li>
+    <li>Press <span class="ui">Read aloud</span>. Each sentence shows its state: queued, rendering, done. Re-render any single sentence with <span class="ui">Redo</span>, or press play on one sentence.</li>
+    <li>Export the result as <b>WAV 24 kHz</b>, <b>MP3</b> or <b>FLAC</b> (default format: Settings).</li>
+  </ol>
+  <h3>Useful tools</h3>
+  <ul>
+    <li><b>Text normalization</b> — shows how numbers, percentages and abbreviations will be read (e.g. <code>10%</code> → “mười phần trăm”).</li>
+    <li><b>Dictionary</b> — add your own replacement rules for names, brands or words the model mispronounces.</li>
+    <li><b>Voice-assigned passages</b> — select part of the text, <b>right-click</b> and choose another voice / variant just for that passage (great for dialogue). <span class="ui">Clear all</span> resets them.</li>
+  </ul>
+  <div class="box warn"><div class="t">Check the language</div><p>If the text language and the voice language differ, the result may carry the other language's accent. If no installed model supports the text's language, Evoice tells you which model to download via <span class="ui">Settings → Re-run first-time setup</span>.</p></div>
+
+  <h2>6 · Voice Changer</h2>
+  <p>Only <b>fully trained</b> (High quality) voices appear as targets. The top-right switch selects <span class="ui">File · Quality</span> or <span class="ui">Live · Real-time</span>.</p>
+  <h3>File mode</h3>
+  <ol class="steps">
+    <li>Pick the <b>target voice</b>.</li>
+    <li>Set <b>Pitch</b> in semitones: male → female is usually <code>+12</code>, female → male <code>−12</code>.</li>
+    <li>Drop an audio or video file (or press <span class="ui">Choose file</span>). For songs or clips with music, enable <b>Separate background music, convert the voice, then remix with the original music</b>.</li>
+    <li>Optional fine-tuning: <b>Index rate</b> (higher = closer to the target, may add artifacts) and <b>Protect</b> (protects breaths and consonants; lower = stronger protection).</li>
+    <li>Press <span class="ui">Convert</span>, compare original vs processed, then <span class="ui">Export</span>.</li>
+  </ol>
+  <h3>Live mode</h3>
+  <figure><img src="img/en-vclive.jpg" alt=""><figcaption>Fig. 4 — Live mode: input mic, output device, latency preset, level meters, REC and voice hotkeys.</figcaption></figure>
+  <ol class="steps">
+    <li>Choose your <b>Input</b> microphone (press <span class="ui">Refresh</span> after plugging one in).</li>
+    <li>Choose the <b>Output</b>: your speakers/headphones, a <b>virtual audio device</b> (see below), or <i>No playback · record to file only</i>.</li>
+    <li>Pick a latency preset: <i>Low latency</i> (100 ms blocks), <i>Balanced</i> (160 ms, default) or <i>Quality</i> (250 ms). If you see <b>UNDERRUN</b> (audio dropouts), switch to Balanced or Quality.</li>
+    <li>Adjust <b>Pitch</b> and the <b>Noise gate</b> (sound quieter than this is muted).</li>
+    <li>Press <span class="ui">● Start</span>. The panel shows latency, status (Stable / Underrun) and input / output meters. Press <span class="ui">● REC</span> to record the converted voice straight to a WAV file — before starting, or while live. Recordings are listed under <i>Live recordings</i>.</li>
+  </ol>
+  <h3>Voice hotkeys — 1 to 9</h3>
+  <p>Assign up to nine voices to the number keys <b>before</b> going live. While live, <b>hold a number key as you speak</b> to switch to that voice; release to return to the default target voice. Top-row and numpad keys both work. Global hotkeys work even while you are in Discord, OBS or a game (the number key still types into that app as usual).</p>
+  <h3>Use the converted voice in Discord, OBS or Zoom</h3>
+  <p>You need a <b>virtual audio device</b>. Evoice does not install drivers itself — the in-app guide links to the official pages.</p>
+  <table>
+    <tr><th>Windows — VB-Cable</th><th>macOS — BlackHole</th></tr>
+    <tr><td><ol style="margin:0">
+      <li>Download VB-Cable from the official VB-Audio site and unzip.</li>
+      <li>Right-click <code>VBCABLE_Setup_x64.exe</code> → Run as administrator → Install Driver. Restart.</li>
+      <li>Evoice → Voice Changer → Live: Output = <b>CABLE Input (VB-Audio)</b>, then Start.</li>
+      <li>In Discord / OBS / Zoom set the microphone to <b>CABLE Output (VB-Audio)</b>.</li>
+      <li>To hear yourself: Windows Sound settings → enable “Listen to this device” for CABLE Output.</li></ol></td>
+    <td><ol style="margin:0">
+      <li>Download <b>BlackHole 2ch</b> from the official Existential Audio site and run the installer.</li>
+      <li>Evoice → Voice Changer → Live: Output = <b>BlackHole 2ch</b>, then Start.</li>
+      <li>In Discord / OBS / Zoom set the microphone to <b>BlackHole 2ch</b>.</li>
+      <li>To hear yourself too: in Audio MIDI Setup create a <b>Multi-Output Device</b> with your speakers + BlackHole.</li></ol></td></tr>
+  </table>
+  <div class="box"><div class="t">Note</div><p>Real-time conversion needs a GPU. With “CPU only”, live mode is not available.</p></div>
+
+  <h2>7 · Edit Audio</h2>
+  <p>A multitrack editor. Start a project by dropping an audio / video file, pressing <span class="ui">Import</span> or <span class="ui">● Record</span>, or by creating an <span class="ui">Empty project</span>. Projects save automatically and appear under <i>Recent projects</i>.</p>
+  <figure><img src="img/en-edit.jpg" alt=""><figcaption>Fig. 5 — The editor: transport and zoom, ripple mode, snap, timeline tracks, transcript and inspector.</figcaption></figure>
+  <h3>Basics</h3>
+  <table>
+    <tr><th>To…</th><th>Do this</th></tr>
+    <tr><td>Play / pause</td><td><kbd>Space</kbd></td></tr>
+    <tr><td>Split at the playhead</td><td><kbd>S</kbd> (or right-click → Split)</td></tr>
+    <tr><td>Delete selection, clip or gap</td><td><kbd>Del</kbd></td></tr>
+    <tr><td>Undo / redo</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td></tr>
+    <tr><td>Zoom the timeline</td><td><kbd>Ctrl</kbd> + mouse wheel, or the Zoom slider</td></tr>
+    <tr><td>Move / trim / select a clip</td><td>Drag the clip's <b>top bar</b> to move, its <b>edges</b> to trim, its <b>body</b> to select</td></tr>
+    <tr><td>Select an empty gap</td><td>Click the empty space between two clips</td></tr>
+    <tr><td>Quick actions</td><td><b>Right-click</b> a clip or the timeline: split, duplicate, volume, fades, import / record / read with a voice here, export clip or track</td></tr>
+  </table>
+  <p><b>Ripple</b> (<i>All / Track / Off</i>) decides what happens when you delete or insert: shift every track to stay in sync, shift only the edited track, or shift nothing. <b>Snap</b> snaps clips to other clips' edges and the playhead. <b>Close empty space</b> pulls clips together after each edit. Each track has volume, mute and solo; each clip has volume, fade in / out and a speaker label. Everything is non-destructive: the original is never touched.</p>
+  <h3>Transcribe and edit like text</h3>
+  <ol class="steps">
+    <li>Select a track and press <span class="ui">Transcribe</span>. The words appear in the <b>Transcript</b> panel.</li>
+    <li>Click a word to play from it; drag or <kbd>Shift</kbd>+click to select a range; press <kbd>Del</kbd> to cut that audio.</li>
+    <li>Press <span class="ui">Remove N fillers</span> to cut “um, uh…” in one click (they have a dotted underline).</li>
+    <li>Select words and choose <span class="ui">Edit words…</span>: type the new words and Evoice generates them <b>in the same voice</b>, blended with the surrounding audio. Select less than 15 seconds inside one clip; a few words or one short sentence blend best. Keep <i>Keep the original length</i> on when other tracks must stay in sync.</li>
+  </ol>
+  <h3>Process a selection</h3>
+  <p>Select a range, then use <span class="ui">Process selection</span>: <b>Filters…</b> (Denoise, Clear voice, High-pass, Compressor, Loudness, Normalize peak, Warm, Bright, Telephone — with an original / processed A-B preview), <b>RVC voice…</b> (convert the selection to a trained voice), <b>Read with a voice…</b> (text-to-speech inserted at the playhead or replacing the selection), and <b>Replace with file / recording…</b> (with <i>match original loudness</i>).</p>
+  <h3>Track tools</h3>
+  <ul>
+    <li><b>Separate music</b> — splits voice and music into separate tracks.</li>
+    <li><b>Detect speakers</b> — labels who is speaking; cut at speaker changes, or put each speaker on their own track. Rename and recolor speakers; the names are used in exported subtitles.</li>
+    <li><b>Trim silences…</b> — set the threshold and minimum length, press <span class="ui">Find</span>, then <b>review the markers</b> on the timeline (click a marker to skip it) before pressing <span class="ui">Cut</span>. “Keep before / after cut” padding stops words from being clipped.</li>
+    <li><b>Duck music…</b> — music gets quieter while someone talks and returns when they stop.</li>
+  </ul>
+  <h3>Export</h3>
+  <p>Press <span class="ui">Export</span>: choose the format (WAV / MP3 / FLAC) and a <b>loudness target</b> — <i>YouTube / TikTok</i>, <i>Podcast</i>, <i>EBU broadcast</i> or <i>Keep as is</i> (press <span class="ui">Measure</span> to check). Tick <b>Include .srt subtitles</b> to get subtitles from the transcript, with speaker names. To export just one clip or one track, right-click it → <span class="ui">Export this clip… / Export whole track…</span>.</p>
+
+  <h2>8 · Settings &amp; Licenses</h2>
+  <figure class="half"><img src="img/en-settings.jpg" alt=""><figcaption>Fig. 6 — Settings.</figcaption></figure>
+  <table>
+    <tr><th>Setting</th><th>What it does</th></tr>
+    <tr><td>Language</td><td>Interface in Tiếng Việt or English.</td></tr>
+    <tr><td>Models folder / Voices folder</td><td>Where models and your voice profiles are stored. Move them to a bigger drive if needed. The new folder is used after restarting the engine; existing data is <b>not</b> moved automatically — copy it over yourself.</td></tr>
+    <tr><td>Device</td><td><i>Auto</i> (GPU, fall back to CPU), <i>GPU</i>, or <i>CPU only</i>.</td></tr>
+    <tr><td>Default audio format</td><td>WAV 24 kHz, MP3 or FLAC for Text to Speech exports.</td></tr>
+    <tr><td>Privacy</td><td>Telemetry is off. Nothing leaves your computer except model downloads.</td></tr>
+    <tr><td>Engine</td><td>Shows the app version and engine status. <span class="ui">Re-run first-time setup</span> reopens the model download screen; <span class="ui">Restart engine</span> restarts the AI engine.</td></tr>
+  </table>
+  <p><b>Licenses</b> lists every AI model Evoice uses, its role, license, whether commercial use is allowed, its size and whether it is installed. <b>Some models are licensed for non-commercial use only — audio created with them must not be used in paid work.</b> You are responsible for following each model's license.</p>
+
+  <h2>9 · Troubleshooting</h2>
+  <table>
+    <tr><th>Problem</th><th>What to try</th></tr>
+    <tr><td>“The engine is not running” banner</td><td>Press <span class="ui">Restart engine</span> on the banner, or <span class="ui">Settings → Restart engine</span>.</td></tr>
+    <tr><td>Model download failed</td><td>Check your internet connection and free disk space, then press <span class="ui">Retry</span>. Finished models are kept; partial files resume. Details are in the log: <code>%APPDATA%\EasyVoice\logs\engine.log</code>.</td></tr>
+    <tr><td>Microphone blocked (Windows)</td><td>Settings → Privacy &amp; security → Microphone → turn on “Microphone access” and “Let desktop apps access your microphone”.</td></tr>
+    <tr><td>Microphone blocked (macOS)</td><td>System Settings → Privacy &amp; Security → Microphone → turn on Evoice, then restart the app.</td></tr>
+    <tr><td>“Microphone is in use”</td><td>Another app (Zoom, Discord, OBS…) holds the mic. Close it and retry.</td></tr>
+    <tr><td>Live voice stutters (Underrun)</td><td>Switch the preset to <i>Balanced</i> or <i>Quality</i>; close other GPU-heavy programs.</td></tr>
+    <tr><td>Quick voice sounds off</td><td>Use a 5–12 s clip, quiet room, no music, and a transcript that matches exactly. Try a High-quality voice for a closer result.</td></tr>
+    <tr><td>Everything is very slow</td><td>Check <span class="ui">Settings → Device</span>: “CPU only” is very slow. Choose Auto or GPU.</td></tr>
+    <tr><td>Import blocked</td><td>The file contains executable code, not just model weights. Do not import it.</td></tr>
+    <tr><td>Uninstalling</td><td>The uninstaller asks whether to delete your data (voices, models, runtime) or keep it for a later reinstall.</td></tr>
+  </table>
+  <p>Data lives in <code>%APPDATA%\EasyVoice</code> (Windows) or <code>~/Library/Application Support/EasyVoice</code> (macOS).</p>
+
+  <h2>10 · Use it responsibly &amp; support</h2>
+  <div class="box warn"><div class="t">Consent</div><p>Only clone your <b>own voice</b> or a voice whose owner has given you <b>permission</b>. Never use cloned voices to deceive, impersonate or harm anyone. Evoice asks you to confirm consent each time you create a voice, and you are responsible for how you use the results.</p></div>
+  <p><b>Need help?</b> Email <a href="mailto:xc.232192@gmail.com">xc.232192@gmail.com</a> and include your Evoice version (Settings → Engine), your OS and GPU, and — if it is a bug — the file <code>engine.log</code>.</p>
+  <p><b>Evoice</b> — made by <b>Xavier Chu</b> · <a href="https://xcmotion.net">xcmotion.net</a> · <a href="mailto:xc.232192@gmail.com">xc.232192@gmail.com</a></p>
+</section>
+
+<!-- ============================ VIETNAMESE ============================ -->
+<section class="part" lang="vi" id="vi">
+  <div class="part-title">
+    <div class="kicker">Phần 2 · Tiếng Việt</div>
+    <h1>Hướng dẫn sử dụng Evoice</h1>
+    <p>Mọi thứ bạn cần để nhân bản giọng, đọc văn bản, đổi giọng trực tiếp và chỉnh sửa audio. Chạy 100% trên máy của bạn.</p>
+  </div>
+
+  <div class="toc">
+    <div><b>1</b>Giới thiệu</div>
+    <div><b>2</b>Cài đặt &amp; chạy lần đầu</div>
+    <div><b>3</b>Làm quen giao diện</div>
+    <div><b>4</b>Giọng của tôi: tạo, chia sẻ, nhập</div>
+    <div><b>5</b>Đọc văn bản</div>
+    <div><b>6</b>Đổi giọng (file &amp; trực tiếp)</div>
+    <div><b>7</b>Edit Audio</div>
+    <div><b>8</b>Cài đặt &amp; Giấy phép</div>
+    <div><b>9</b>Xử lý sự cố</div>
+    <div><b>10</b>Dùng có trách nhiệm &amp; hỗ trợ</div>
+  </div>
+
+  <h2>1 · Giới thiệu</h2>
+  <p>Evoice là studio giọng nói trên máy tính. Bạn tạo một <b>giọng</b> một lần, rồi dùng nó ở bốn nơi:</p>
+  <div class="grid2">
+    <div class="card"><h3>01 · Giọng của tôi</h3><p>Tạo, sắp xếp, chia sẻ và nhập giọng. Mỗi giọng có thể có các <i>biến thể</i> cảm xúc.</p></div>
+    <div class="card"><h3>02 · Đọc văn bản</h3><p>Dán văn bản, chọn giọng, bấm <b>Đọc</b>. Ưu tiên tiếng Việt, hỗ trợ cả tiếng Anh.</p></div>
+    <div class="card"><h3>03 · Đổi giọng</h3><p>Biến một bản ghi — hoặc micro của bạn, trực tiếp — thành một trong các giọng đã huấn luyện.</p></div>
+    <div class="card"><h3>04 · Edit Audio</h3><p>Trình sửa nhiều track với chép lời, bộ lọc, tách nhạc và chỉnh sửa bằng văn bản.</p></div>
+  </div>
+  <p><b>Riêng tư ngay từ thiết kế.</b> Toàn bộ AI chạy trên máy bạn. Không có gì rời khỏi máy ngoài lần tải model đầu tiên; telemetry tắt. Sau khi cài xong, Evoice dùng được offline.</p>
+
+  <h2>2 · Cài đặt &amp; chạy lần đầu</h2>
+  <h3>Yêu cầu hệ thống</h3>
+  <table>
+    <tr><th>Nền tảng</th><th>Cần có</th></tr>
+    <tr><td>Windows</td><td>Windows 10 / 11 (64-bit), <b>card NVIDIA</b> có CUDA và driver mới. Không có GPU thì app chạy bằng CPU: rất chậm và không có đổi giọng thời gian thực.</td></tr>
+    <tr><td>macOS</td><td>macOS 13 trở lên. Khuyên dùng Apple Silicon; Mac Intel vẫn chạy nhưng chậm hơn nhiều.</td></tr>
+    <tr><td>Ổ đĩa &amp; Internet</td><td>Vài GB dung lượng trống (riêng các model đã vài GB; model giọng tiếng Việt ~5,4 GB) và kết nối Internet cho lần tải đầu tiên.</td></tr>
+  </table>
+  <h3>Các bước</h3>
+  <ol class="steps">
+    <li><b>Chạy file cài đặt</b> và làm theo hướng dẫn. Nếu Windows SmartScreen hiện cảnh báo với app mới, bấm <span class="ui">More info → Run anyway</span>.</li>
+    <li><b>Mở Evoice.</b> Lần đầu app chuẩn bị môi trường AI (tải một lần vài GB). Hãy đợi cho xong.</li>
+    <li><b>Màn hình chào — kiểm tra hệ thống.</b> Hiển thị driver GPU và ổ đĩa trống. Nếu driver báo “Quá cũ”, hãy cập nhật driver NVIDIA trước.</li>
+    <li><b>Tải model.</b> Bấm <span class="ui">Tải … GB</span>. Model chia theo nhóm: <i>Đọc văn bản</i>, <i>Đổi giọng + huấn luyện</i> và <i>Bổ sung</i> (tách nhạc nền, tự nhận dạng lời). Nếu rớt mạng, lần sau sẽ tải tiếp từ chỗ dừng; bấm <span class="ui">Thử lại</span>.</li>
+    <li>Bấm <span class="ui">Bắt đầu dùng Evoice</span>. Có thể mở lại màn hình này bất cứ lúc nào ở <span class="ui">Cài đặt → Chạy lại thiết lập ban đầu</span>.</li>
+  </ol>
+  <div class="box"><div class="t">Mẹo</div><p>Ổ đĩa hẹp? Hãy chọn ổ khác cho model ở <span class="ui">Cài đặt → Thư mục model</span> trước khi tải. Chọn <span class="ui">Để sau</span> nếu muốn chỉ tải sau những gì cần dùng.</p></div>
+
+  <h2>3 · Làm quen giao diện</h2>
+  <figure><img src="img/vi-voices.jpg" alt=""><figcaption>Hình 1 — Giọng của tôi. Bên trái: bốn chức năng, Cài đặt, Giấy phép và bảng phần cứng trực tiếp.</figcaption></figure>
+  <ul>
+    <li><b>Thanh bên trái</b> — chuyển giữa <i>Giọng của tôi</i>, <i>Đọc văn bản</i>, <i>Đổi giọng</i>, <i>Edit Audio</i>, <i>Cài đặt</i> và <i>Giấy phép</i>. Bên dưới là GPU, backend, mức dùng VRAM và hàng đợi huấn luyện / render.</li>
+    <li><b>Thanh trên cùng</b> — trạng thái engine và nút <span class="k">VI</span> / <span class="k">EN</span> để đổi ngôn ngữ giao diện ngay lập tức.</li>
+    <li><b>Thanh dưới cùng</b> — thiết bị, VRAM, độ trễ trực tiếp và số lượng giọng.</li>
+    <li><b>Banner engine</b> — nếu engine AI dừng, banner hiện ra kèm nút <span class="ui">Khởi động lại engine</span>.</li>
+  </ul>
+
+  <h2>4 · Giọng của tôi: tạo, chia sẻ, nhập</h2>
+  <p>Bấm <span class="ui">+ Giọng mới</span>. Chọn cách tạo giọng:</p>
+  <table>
+    <tr><th>Loại</th><th>Audio cần có</th><th>Dùng cho</th><th>Thời gian</th></tr>
+    <tr><td><b>Nhanh</b> (zero-shot)</td><td>Một đoạn sạch, <b>5–12 giây</b></td><td>Đọc văn bản</td><td>Vài giây, không cần train</td></tr>
+    <tr><td><b>Chất lượng cao</b> (fine-tune)</td><td><b>10–30 phút</b> của một người nói</td><td>Đọc văn bản <i>và</i> Đổi giọng</td><td>Train bằng GPU chạy nền; tạm dừng / tiếp tục bất cứ lúc nào</td></tr>
+  </table>
+  <figure><img src="img/vi-wizard.jpg" alt=""><figcaption>Hình 2 — Bảng Giọng mới: chọn Nhanh hoặc Chất lượng cao, rồi đặt tên, ngôn ngữ, giới tính và giọng vùng miền.</figcaption></figure>
+
+  <h3>Tạo giọng Nhanh</h3>
+  <ol class="steps">
+    <li>Chọn <span class="ui">Nhanh</span>, nhập <b>tên giọng</b>, chọn <b>ngôn ngữ</b> (và tùy chọn giới tính, quốc gia, vùng miền / giọng địa phương — đây là các thẻ để tìm kiếm).</li>
+    <li>Thả một file audio (WAV / MP3 / M4A) hoặc bấm <span class="ui">● Thu âm ngay</span> rồi đọc câu mẫu bằng giọng bình thường.</li>
+    <li>Kiểm tra <b>lời thoại</b>. Bấm <span class="ui">Auto · Whisper</span> để tự chép lời, rồi sửa lại cho đúng. <b>Lời thoại càng khớp với audio, giọng tạo ra càng giống.</b></li>
+    <li>Tick ô xác nhận (đây là giọng của bạn hoặc bạn được người nói cho phép) rồi bấm <span class="ui">Tạo</span>.</li>
+  </ol>
+  <div class="box"><div class="t">Để giọng giống nhất</div><p>Phòng yên tĩnh, cách micro khoảng một gang tay, không nhạc nền, không vang, dài 5–12 giây. Evoice sẽ cảnh báo nếu đoạn quá ngắn / dài, nhiều nhiễu, bị vỡ tiếng hoặc có nhạc nền.</p></div>
+
+  <h3>Tạo giọng Chất lượng cao</h3>
+  <ol class="steps">
+    <li>Chọn <span class="ui">Chất lượng cao</span> và thêm nhiều file audio <i>hoặc video</i> của <b>cùng một người nói</b>. App hiển thị thời lượng từng file và tổng thời lượng.</li>
+    <li>Giữ bật <span class="ui">Tách nhạc nền và khử nhiễu trước khi huấn luyện</span> trừ khi file đã thật sạch.</li>
+    <li>Chọn <b>chế độ huấn luyện</b>: <i>Nhanh</i> (thử nhanh), <i>Cân bằng</i> (khuyên dùng) hoặc <i>Kỹ</i> (chậm nhất, giống nhất).</li>
+    <li>Bắt đầu. Huấn luyện chạy nền — các giai đoạn: <i>Tiền xử lý → Trích đặc trưng → Huấn luyện → Tạo index</i>. Dùng <span class="ui">Tạm dừng</span> / <span class="ui">Tiếp tục</span>; tiến độ được lưu ở checkpoint gần nhất. Bạn vẫn dùng app bình thường trong lúc đó.</li>
+  </ol>
+
+  <h3>Biến thể cảm xúc</h3>
+  <p>Trên thẻ giọng bấm <span class="ui">+ Biến thể</span> và thêm đoạn 5–12 giây của <i>cùng một người</i> đọc với cảm xúc khác (vui vẻ, giận dữ, lo sợ, lo lắng, đe dọa, buồn, bình tĩnh, thì thầm — hoặc tự đặt tên, vd. “Kể chuyện ma”). Trong Đọc văn bản, giọng sẽ bắt chước ngữ điệu đó.</p>
+
+  <h3>Các thao tác trên thẻ giọng</h3>
+  <ul>
+    <li><span class="ui">Nghe</span> — nghe thử. <span class="ui">Đọc</span> — mở Đọc văn bản với giọng này. <span class="ui">Đổi giọng</span> — mở Đổi giọng (chỉ với giọng đã huấn luyện xong).</li>
+    <li><span class="ui">Menu ⋯</span> — sửa tên &amp; thẻ, chi tiết huấn luyện, <b>Xuất giọng</b>, <b>Xóa</b>. Tìm kiếm và lọc theo tên, biến thể, giới tính, quốc gia, vùng miền hoặc khả năng (<code>TTS</code> / <code>STS</code>).</li>
+  </ul>
+
+  <h3>Chia sẻ giọng (<code>.evoice</code>)</h3>
+  <p>Bấm nút xuất (↑) trên thẻ giọng. Chọn nội dung đưa vào — <b>model RVC + index</b> (để người khác dùng trong Đổi giọng, ~143 MB) và/hoặc <b>audio mẫu + lời thoại</b> (cho Đọc văn bản; có chứa bản ghi giọng thật nên chỉ chia sẻ với người bạn tin tưởng). Chọn <b>giấy phép</b> — <i>Dùng cá nhân</i>, <i>Cho phép thương mại</i> hoặc <i>Không chia sẻ lại</i> — điền tên bạn ở mục <b>tác giả</b> rồi bấm <span class="ui">Xuất .evoice</span>. Gửi file cho bất kỳ ai có Evoice.</p>
+  <h3>Nhập giọng</h3>
+  <p>Bấm <span class="ui">Nhập</span> rồi chọn file <code>.evoice</code>, hoặc cặp <code>.pth</code> + <code>.index</code> RVC từ cộng đồng. Evoice chạy <b>kiểm tra an toàn</b> (định dạng, checksum, load an toàn…). File chứa mã thực thi sẽ bị <b>chặn</b> và không có gì được nhập. Nếu hợp lệ, xem lại tác giả và giấy phép, đồng ý dùng giọng theo đúng giấy phép đó rồi bấm <span class="ui">Nhập giọng</span>.</p>
+
+  <h2>5 · Đọc văn bản</h2>
+  <figure><img src="img/vi-tts.jpg" alt=""><figcaption>Hình 3 — Văn bản ở bên trái; giọng, biến thể, chế độ, tốc độ và nút Đọc ở bên phải.</figcaption></figure>
+  <ol class="steps">
+    <li>Gõ hoặc dán văn bản, hoặc bấm <span class="ui">[Mở .txt]</span>. Văn bản dài được tự tách thành từng câu (bộ đếm hiện số ký tự và số câu).</li>
+    <li>Chọn <b>giọng mặc định</b> và, nếu giọng có biến thể, chọn <b>biến thể</b>.</li>
+    <li>Chọn <b>chế độ</b>:
+      <ul><li><b>Trực tiếp</b> — nhanh, giữ cảm xúc của đoạn mẫu.</li>
+          <li><b>Qua RVC</b> — giọng giống và ổn định hơn, chậm hơn một chút. Chỉ có với giọng đã có model RVC (giọng Chất lượng cao).</li></ul></li>
+    <li>Chỉnh <b>tốc độ</b>. Mở <span class="ui">Nâng cao</span> để chỉnh <b>độ nghỉ giữa các câu</b> (khoảng lặng có crossfade ngắn) và <b>seed</b> (cùng seed + cùng văn bản = cùng kết quả).</li>
+    <li>Bấm <span class="ui">Đọc</span>. Mỗi câu hiển thị trạng thái: đang chờ, đang render, xong. Đọc lại riêng từng câu bằng <span class="ui">Tạo lại</span>, hoặc bấm phát từng câu.</li>
+    <li>Xuất kết quả ra <b>WAV 24 kHz</b>, <b>MP3</b> hoặc <b>FLAC</b> (định dạng mặc định: Cài đặt).</li>
+  </ol>
+  <h3>Công cụ hữu ích</h3>
+  <ul>
+    <li><b>Chuẩn hóa văn bản</b> — cho thấy số, phần trăm và từ viết tắt sẽ được đọc ra sao (vd. <code>10%</code> → “mười phần trăm”).</li>
+    <li><b>Từ điển</b> — thêm quy tắc thay thế riêng cho tên riêng, thương hiệu hoặc từ mà model đọc sai.</li>
+    <li><b>Đoạn gán giọng</b> — bôi đen một đoạn văn bản, <b>bấm chuột phải</b> và chọn giọng / biến thể khác chỉ cho đoạn đó (rất hợp với hội thoại). <span class="ui">Bỏ hết</span> để đặt lại.</li>
+  </ul>
+  <div class="box warn"><div class="t">Chú ý ngôn ngữ</div><p>Nếu ngôn ngữ văn bản và ngôn ngữ của giọng khác nhau, kết quả có thể mang giọng của ngôn ngữ kia. Nếu chưa có model nào hỗ trợ ngôn ngữ của văn bản, Evoice sẽ báo model cần tải ở <span class="ui">Cài đặt → Chạy lại thiết lập ban đầu</span>.</p></div>
+
+  <h2>6 · Đổi giọng</h2>
+  <p>Chỉ các giọng <b>đã huấn luyện xong</b> (Chất lượng cao) mới hiện làm giọng đích. Nút ở góc phải trên chọn <span class="ui">File · Chất lượng</span> hoặc <span class="ui">Trực tiếp · Real-time</span>.</p>
+  <h3>Chế độ file</h3>
+  <ol class="steps">
+    <li>Chọn <b>giọng đích</b>.</li>
+    <li>Chỉnh <b>Cao độ</b> theo nửa cung: nam → nữ thường là <code>+12</code>, nữ → nam là <code>−12</code>.</li>
+    <li>Thả file audio hoặc video (hoặc bấm <span class="ui">Chọn file</span>). Với bài hát hoặc clip có nhạc, bật <b>Tách nhạc nền, đổi giọng, rồi trộn lại với nhạc nền gốc</b>.</li>
+    <li>Tinh chỉnh (tùy chọn): <b>Index rate</b> (cao hơn = giống giọng đích hơn, có thể sinh tạp âm) và <b>Protect</b> (giữ hơi thở và phụ âm; thấp hơn = bảo vệ mạnh hơn).</li>
+    <li>Bấm <span class="ui">Đổi giọng</span>, so sánh gốc với kết quả, rồi <span class="ui">Xuất file</span>.</li>
+  </ol>
+  <h3>Chế độ trực tiếp</h3>
+  <figure><img src="img/vi-vclive.jpg" alt=""><figcaption>Hình 4 — Chế độ trực tiếp: micro vào, thiết bị ra, mức độ trễ, thanh mức âm, GHI và phím tắt giọng.</figcaption></figure>
+  <ol class="steps">
+    <li>Chọn micro ở <b>Input</b> (bấm <span class="ui">Làm mới</span> sau khi cắm micro mới).</li>
+    <li>Chọn <b>Output</b>: loa / tai nghe, một <b>thiết bị âm thanh ảo</b> (xem bên dưới), hoặc <i>Không phát · chỉ ghi file</i>.</li>
+    <li>Chọn mức độ trễ: <i>Độ trễ thấp</i> (block 100 ms), <i>Cân bằng</i> (160 ms, mặc định) hoặc <i>Chất lượng</i> (250 ms). Nếu thấy <b>GIẬT TIẾNG</b> (underrun), chuyển sang Cân bằng hoặc Chất lượng.</li>
+    <li>Chỉnh <b>Cao độ</b> và <b>Lọc tiếng ồn</b> (âm thanh nhỏ hơn mức này bị tắt).</li>
+    <li>Bấm <span class="ui">● Bắt đầu</span>. Bảng hiển thị độ trễ, trạng thái (Ổn định / Giật tiếng) và thanh mức vào / ra. Bấm <span class="ui">● Ghi</span> để ghi giọng đã đổi thẳng ra file WAV — bấm trước khi bắt đầu hoặc khi đang chạy. Các bản ghi nằm ở mục <i>Bản ghi live</i>.</li>
+  </ol>
+  <h3>Phím tắt giọng — 1 đến 9</h3>
+  <p>Gán tối đa chín giọng cho các phím số <b>trước khi</b> chạy trực tiếp. Khi đang chạy, <b>giữ một phím số khi nói</b> để chuyển sang giọng đó; thả ra để quay về giọng đích mặc định. Phím số hàng trên và bàn phím số phụ đều dùng được. Phím tắt toàn cục hoạt động cả khi bạn đang ở Discord, OBS hoặc game (phím số vẫn gõ vào app đó như bình thường).</p>
+  <h3>Dùng giọng đã đổi trong Discord, OBS hoặc Zoom</h3>
+  <p>Bạn cần một <b>thiết bị âm thanh ảo</b>. Evoice không tự cài driver — phần hướng dẫn trong app có link tới trang chính thức.</p>
+  <table>
+    <tr><th>Windows — VB-Cable</th><th>macOS — BlackHole</th></tr>
+    <tr><td><ol style="margin:0">
+      <li>Tải VB-Cable từ trang chính thức của VB-Audio và giải nén.</li>
+      <li>Chuột phải <code>VBCABLE_Setup_x64.exe</code> → Run as administrator → Install Driver. Khởi động lại máy.</li>
+      <li>Evoice → Đổi giọng → Trực tiếp: Output = <b>CABLE Input (VB-Audio)</b>, rồi Bắt đầu.</li>
+      <li>Trong Discord / OBS / Zoom chọn micro là <b>CABLE Output (VB-Audio)</b>.</li>
+      <li>Muốn tự nghe giọng mình: cài đặt Sound của Windows → bật “Listen to this device” cho CABLE Output.</li></ol></td>
+    <td><ol style="margin:0">
+      <li>Tải <b>BlackHole 2ch</b> từ trang chính thức của Existential Audio và chạy trình cài.</li>
+      <li>Evoice → Đổi giọng → Trực tiếp: Output = <b>BlackHole 2ch</b>, rồi Bắt đầu.</li>
+      <li>Trong Discord / OBS / Zoom chọn micro là <b>BlackHole 2ch</b>.</li>
+      <li>Muốn tự nghe cả giọng mình: trong Audio MIDI Setup tạo một <b>Multi-Output Device</b> gồm loa + BlackHole.</li></ol></td></tr>
+  </table>
+  <div class="box"><div class="t">Lưu ý</div><p>Đổi giọng thời gian thực cần GPU. Ở chế độ “Chỉ CPU”, chế độ trực tiếp không khả dụng.</p></div>
+
+  <h2>7 · Edit Audio</h2>
+  <p>Trình sửa nhiều track. Bắt đầu dự án bằng cách thả file audio / video, bấm <span class="ui">Nhập file</span> hoặc <span class="ui">● Thu âm</span>, hoặc tạo <span class="ui">Dự án trống</span>. Dự án tự động lưu và xuất hiện ở mục <i>Dự án gần đây</i>.</p>
+  <figure><img src="img/vi-edit.jpg" alt=""><figcaption>Hình 5 — Trình chỉnh sửa: phát và zoom, chế độ Ripple, Snap, các track trên timeline, lời thoại và bảng thuộc tính.</figcaption></figure>
+  <h3>Thao tác cơ bản</h3>
+  <table>
+    <tr><th>Muốn…</th><th>Làm thế này</th></tr>
+    <tr><td>Phát / dừng</td><td><kbd>Space</kbd></td></tr>
+    <tr><td>Tách tại vị trí phát</td><td><kbd>S</kbd> (hoặc chuột phải → Tách)</td></tr>
+    <tr><td>Xóa vùng chọn, clip hoặc khoảng trống</td><td><kbd>Del</kbd></td></tr>
+    <tr><td>Hoàn tác / làm lại</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td></tr>
+    <tr><td>Zoom timeline</td><td><kbd>Ctrl</kbd> + con lăn chuột, hoặc thanh Zoom</td></tr>
+    <tr><td>Di chuyển / cắt bớt / chọn clip</td><td>Kéo <b>thanh trên</b> của clip để di chuyển, <b>mép</b> để cắt bớt, <b>thân</b> để chọn</td></tr>
+    <tr><td>Chọn khoảng trống</td><td>Bấm vào chỗ trống giữa hai clip</td></tr>
+    <tr><td>Lệnh nhanh</td><td><b>Chuột phải</b> vào clip hoặc timeline: tách, nhân đôi, âm lượng, fade, nhập / thu âm / đọc bằng giọng tại đây, xuất clip hoặc track</td></tr>
+  </table>
+  <p><b>Ripple</b> (<i>Tất cả / Track / Tắt</i>) quyết định điều gì xảy ra khi xóa hoặc chèn: dời mọi track để giữ đồng bộ, chỉ dời track đang sửa, hoặc không dời gì. <b>Snap</b> hút clip vào mép các clip khác và vị trí phát. <b>Đóng khoảng trống</b> kéo các clip sát lại sau mỗi thao tác. Mỗi track có âm lượng, mute và solo; mỗi clip có âm lượng, fade vào / ra và nhãn người nói. Mọi thao tác đều không phá hủy: bản gốc không bao giờ bị sửa.</p>
+  <h3>Chép lời và sửa như sửa văn bản</h3>
+  <ol class="steps">
+    <li>Chọn một track và bấm <span class="ui">Chép lời</span>. Các từ xuất hiện trong bảng <b>Lời thoại</b>.</li>
+    <li>Bấm vào một từ để phát từ đó; kéo hoặc <kbd>Shift</kbd>+bấm để chọn một đoạn; nhấn <kbd>Del</kbd> để cắt phần audio đó.</li>
+    <li>Bấm <span class="ui">Xóa N tiếng đệm</span> để cắt “ờ, ừm…” chỉ bằng một cú bấm (các từ này có gạch chân chấm).</li>
+    <li>Chọn các từ rồi chọn <span class="ui">Sửa lời…</span>: gõ chữ mới và Evoice tạo ra <b>bằng chính giọng đó</b>, hòa vào audio xung quanh. Chọn dưới 15 giây trong một clip; vài từ hoặc một câu ngắn là hòa tốt nhất. Giữ bật <i>Giữ đúng độ dài đoạn cũ</i> khi các track khác cần giữ đồng bộ.</li>
+  </ol>
+  <h3>Xử lý một vùng chọn</h3>
+  <p>Chọn một đoạn, rồi dùng <span class="ui">Xử lý vùng chọn</span>: <b>Lọc âm…</b> (Khử ồn, Giọng rõ, Lọc tần thấp, Nén dải động, Chuẩn loudness, Chuẩn đỉnh, Ấm, Sáng, Điện thoại — có nghe so sánh gốc / đã xử lý), <b>Đổi giọng RVC…</b> (đổi vùng chọn sang một giọng đã huấn luyện), <b>Đọc bằng giọng…</b> (đọc văn bản, chèn tại vị trí phát hoặc thay vùng chọn) và <b>Thay bằng file / thu âm…</b> (có <i>khớp âm lượng với đoạn cũ</i>).</p>
+  <h3>Công cụ cho track</h3>
+  <ul>
+    <li><b>Tách nhạc nền</b> — tách giọng và nhạc thành các track riêng.</li>
+    <li><b>Nhận diện người nói</b> — gán nhãn ai đang nói; cắt tại chỗ đổi người, hoặc đưa mỗi người sang một track riêng. Đổi tên và màu từng người; tên được dùng trong phụ đề xuất ra.</li>
+    <li><b>Dọn khoảng lặng…</b> — đặt ngưỡng và độ dài tối thiểu, bấm <span class="ui">Tìm</span>, rồi <b>xem lại các marker</b> trên timeline (bấm marker để bỏ qua) trước khi bấm <span class="ui">Cắt N khoảng</span>. Mục “Giữ trước / sau điểm cắt” giúp lời không bị cụt.</li>
+    <li><b>Hạ nhạc theo giọng…</b> — nhạc nhỏ đi khi có người nói và to lại khi họ dừng.</li>
+  </ul>
+  <h3>Xuất file</h3>
+  <p>Bấm <span class="ui">Xuất file</span>: chọn định dạng (WAV / MP3 / FLAC) và <b>mức âm lượng chuẩn</b> — <i>YouTube / TikTok</i>, <i>Podcast</i>, <i>EBU broadcast</i> hoặc <i>Giữ nguyên</i> (bấm <span class="ui">Đo</span> để kiểm tra). Tick <b>Kèm phụ đề .srt</b> để có phụ đề từ lời thoại, kèm tên người nói. Muốn xuất riêng một clip hoặc một track, bấm chuột phải → <span class="ui">Xuất clip này… / Xuất cả track…</span>.</p>
+
+  <h2>8 · Cài đặt &amp; Giấy phép</h2>
+  <figure class="half"><img src="img/vi-settings.jpg" alt=""><figcaption>Hình 6 — Cài đặt.</figcaption></figure>
+  <table>
+    <tr><th>Mục</th><th>Công dụng</th></tr>
+    <tr><td>Ngôn ngữ</td><td>Giao diện Tiếng Việt hoặc English.</td></tr>
+    <tr><td>Thư mục model / Thư mục giọng</td><td>Nơi lưu model và hồ sơ giọng. Chuyển sang ổ lớn hơn nếu cần. Thư mục mới được dùng sau khi khởi động lại engine; dữ liệu cũ <b>không</b> tự chuyển — hãy tự sao chép sang.</td></tr>
+    <tr><td>Thiết bị</td><td><i>Tự động</i> (GPU, không có thì chuyển sang CPU), <i>GPU</i>, hoặc <i>Chỉ CPU</i>.</td></tr>
+    <tr><td>Định dạng audio mặc định</td><td>WAV 24 kHz, MP3 hoặc FLAC khi xuất từ Đọc văn bản.</td></tr>
+    <tr><td>Quyền riêng tư</td><td>Telemetry tắt. Không có dữ liệu nào rời khỏi máy ngoài việc tải model.</td></tr>
+    <tr><td>Engine</td><td>Hiển thị phiên bản app và trạng thái engine. <span class="ui">Chạy lại thiết lập ban đầu</span> mở lại màn hình tải model; <span class="ui">Khởi động lại engine</span> khởi động lại engine AI.</td></tr>
+  </table>
+  <p><b>Giấy phép</b> liệt kê mọi model AI Evoice dùng: vai trò, giấy phép, có được dùng thương mại không, dung lượng và đã cài chưa. <b>Một số model chỉ được cấp phép phi thương mại — audio tạo bằng chúng không được dùng cho công việc có thu phí.</b> Bạn có trách nhiệm tuân thủ giấy phép của từng model.</p>
+
+  <h2>9 · Xử lý sự cố</h2>
+  <table>
+    <tr><th>Vấn đề</th><th>Cách xử lý</th></tr>
+    <tr><td>Banner “Engine không chạy”</td><td>Bấm <span class="ui">Khởi động lại engine</span> trên banner, hoặc <span class="ui">Cài đặt → Khởi động lại engine</span>.</td></tr>
+    <tr><td>Tải model bị lỗi</td><td>Kiểm tra kết nối Internet và dung lượng ổ đĩa, rồi bấm <span class="ui">Thử lại</span>. Model đã tải xong được giữ lại; phần dở sẽ tải tiếp. Chi tiết trong log: <code>%APPDATA%\EasyVoice\logs\engine.log</code>.</td></tr>
+    <tr><td>Micro bị chặn (Windows)</td><td>Settings → Privacy &amp; security → Microphone → bật “Microphone access” và “Let desktop apps access your microphone”.</td></tr>
+    <tr><td>Micro bị chặn (macOS)</td><td>System Settings → Privacy &amp; Security → Microphone → bật Evoice, rồi mở lại app.</td></tr>
+    <tr><td>“Micro đang được dùng”</td><td>Một app khác (Zoom, Discord, OBS…) đang giữ micro. Hãy đóng nó rồi thử lại.</td></tr>
+    <tr><td>Giọng trực tiếp bị giật (Underrun)</td><td>Chuyển sang <i>Cân bằng</i> hoặc <i>Chất lượng</i>; tắt các chương trình nặng GPU khác.</td></tr>
+    <tr><td>Giọng Nhanh nghe chưa giống</td><td>Dùng đoạn 5–12 giây, phòng yên tĩnh, không nhạc nền, lời thoại khớp chính xác. Thử giọng Chất lượng cao để giống hơn.</td></tr>
+    <tr><td>Mọi thứ rất chậm</td><td>Kiểm tra <span class="ui">Cài đặt → Thiết bị</span>: “Chỉ CPU” rất chậm. Hãy chọn Tự động hoặc GPU.</td></tr>
+    <tr><td>Nhập giọng bị chặn</td><td>File chứa mã thực thi, không chỉ là trọng số model. Đừng nhập file đó.</td></tr>
+    <tr><td>Gỡ cài đặt</td><td>Trình gỡ hỏi bạn có muốn xóa dữ liệu (giọng, model, runtime) hay giữ lại để cài lại sau.</td></tr>
+  </table>
+  <p>Dữ liệu nằm ở <code>%APPDATA%\EasyVoice</code> (Windows) hoặc <code>~/Library/Application Support/EasyVoice</code> (macOS).</p>
+
+  <h2>10 · Dùng có trách nhiệm &amp; hỗ trợ</h2>
+  <div class="box warn"><div class="t">Sự đồng ý</div><p>Chỉ nhân bản <b>giọng của chính bạn</b> hoặc giọng mà chủ nhân đã <b>cho phép</b>. Không bao giờ dùng giọng nhân bản để lừa dối, mạo danh hay gây hại cho người khác. Evoice yêu cầu bạn xác nhận sự đồng ý mỗi lần tạo giọng, và bạn chịu trách nhiệm về cách dùng kết quả.</p></div>
+  <p><b>Cần hỗ trợ?</b> Gửi email tới <a href="mailto:xc.232192@gmail.com">xc.232192@gmail.com</a> kèm phiên bản Evoice (Cài đặt → Engine), hệ điều hành, GPU và — nếu là lỗi — file <code>engine.log</code>.</p>
+  <p><b>Evoice</b> — phát triển bởi <b>Xavier Chu</b> · <a href="https://xcmotion.net">xcmotion.net</a> · <a href="mailto:xc.232192@gmail.com">xc.232192@gmail.com</a></p>
+</section>
+
+</body>
+</html>
