@@ -176,7 +176,12 @@ def convert(model: RvcModel, encoder: ContentEncoder, f0x: F0Extractor, index: I
                 pitchf = pitchf[:, -return_frames:]
         z = net.flow(z_p, x_mask, g=g, reverse=True)
         o = net.dec(z * x_mask, pitchf, g=g) if model.f0 == 1 else net.dec(z * x_mask, g=g)
-        return o[0, 0].float().cpu().numpy()
+        out = o[0, 0].float().cpu().numpy()
+        # NaN qua np.clip vẫn là NaN → file thành một khối nhiễu full-scale (hại tai khi realtime). Báo lỗi thay vì phát.
+        if not np.isfinite(out).all():
+            raise RuntimeError(f"Model trả về NaN trên {model.device}{' (fp16)' if model.half else ''} — "
+                               "thử đổi Thiết bị sang CPU trong Cài đặt")
+        return out
 
 
 def convert_long(model: RvcModel, encoder: ContentEncoder, f0x: F0Extractor, index: Index | None,

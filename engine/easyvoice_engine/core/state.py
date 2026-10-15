@@ -14,7 +14,7 @@ from .. import __version__
 from ..services.edit.store import EditStore
 from ..services.models import ModelCatalog
 from ..services.voices import VoiceStore
-from .device import pick_device
+from .device import fp16_ok, pick_device
 from .job_queue import Job, JobQueue
 from .model_manager import ModelManager
 from .paths import Paths
@@ -92,7 +92,7 @@ class EngineState:
         return pick_device(self.settings.device)
 
     def half(self) -> bool:
-        return self.device().startswith("cuda")
+        return fp16_ok(self.device())
 
     def register_file(self, path: Path, name: str) -> str:
         fid = uuid.uuid4().hex[:16]

@@ -50,6 +50,20 @@ def gpu_name() -> str:
     return "CPU"
 
 
+@lru_cache(maxsize=1)
+def fp16_ok(device: str) -> bool:
+    """fp16 chỉ bật trên CUDA đủ tin cậy. GTX 16xx (Turing TU116/TU117) chạy half ra NaN → audio thành một khối
+    trắng; Pascal (10xx, P40, P100) và cũ hơn không có fp16 nhanh. Cùng danh sách ép fp32 như config.py của RVC."""
+    if not device.startswith("cuda"):
+        return False
+    import torch
+
+    name = torch.cuda.get_device_name(0).upper()
+    if any(s in name for s in ("GTX 16", "P40", "P10", "1060", "1070", "1080")):
+        return False
+    return torch.cuda.get_device_capability(0) >= (7, 0)
+
+
 @dataclass
 class Memory:
     total_gb: float

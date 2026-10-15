@@ -12,6 +12,7 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
+from ....core.device import fp16_ok
 from .. import THIRD_PARTY  # noqa: F401
 from .config import TrainConfig
 from .data import TrainDataset, collate, list_items
@@ -81,7 +82,7 @@ def train(nets: TrainNets, cfg: TrainConfig, data_dir: Path, ckpt_dir: Path, tot
     opt_d = torch.optim.AdamW(net_d.parameters(), cfg.learning_rate, betas=cfg.betas, eps=cfg.eps)
     sched_g = torch.optim.lr_scheduler.ExponentialLR(opt_g, gamma=cfg.lr_decay)
     sched_d = torch.optim.lr_scheduler.ExponentialLR(opt_d, gamma=cfg.lr_decay)
-    use_amp = device.startswith("cuda")
+    use_amp = fp16_ok(device)
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     ckpt_path = ckpt_dir / "latest.pt"
     ckpt_dir.mkdir(parents=True, exist_ok=True)
