@@ -42,6 +42,7 @@ interface Bridge {
   readText(path: string): Promise<string>;
   showInFolder(path: string): Promise<void>;
   openExternal(url: string): Promise<void>;
+  openLogs?(): Promise<string>;
   engineInfo(): Promise<EngineInfo>;
   restartEngine(): Promise<void>;
   appPaths(): Promise<{ downloads: string; userData: string }>;
@@ -116,6 +117,9 @@ export const platform = {
     window.open(url, '_blank', 'noopener');
     return Promise.resolve();
   },
+  /** Mở thư mục chứa engine.log (Electron). Trình duyệt: không làm gì. */
+  openLogs: async () => { await bridge()?.openLogs?.(); },
+  canOpenLogs: () => !!bridge()?.openLogs,
   engineInfo: async (): Promise<EngineInfo> => (await bridge()?.engineInfo()) ?? { status: 'mock', restarts: 0 },
   restartEngine: () => bridge()?.restartEngine() ?? Promise.resolve(),
   appPaths: async () => (await bridge()?.appPaths()) ?? { downloads: '~/Downloads', userData: '~/.easyvoice' },

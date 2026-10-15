@@ -95,6 +95,7 @@ export function SettingsPage() {
           <div className="flex gap-2 flex-wrap">
             <Btn variant="ghost" onClick={() => st.set({ firstRunDone: false })}>{t('settings.rerunSetup')}</Btn>
             <Btn variant="ghost" disabled={info.status === 'mock'} onClick={() => void platform.restartEngine()}>{t('engineBanner.restart')}</Btn>
+            {platform.canOpenLogs() && <Btn variant="ghost" onClick={() => void platform.openLogs()}>{t('common.openLogs')}</Btn>}
           </div>
         </Row>
         <Row label={t('settings.about')} hint={t('settings.aboutHint')}>

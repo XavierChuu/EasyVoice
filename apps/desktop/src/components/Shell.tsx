@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { NEEDS_LOG } from '../lib/errors';
 import { platform } from '../lib/platform';
 import { pad2 } from '../lib/text';
 import { runningJob, useEngine } from '../stores/engine';
@@ -154,6 +155,9 @@ export function NoticeBar() {
     <div role="status" className="flex items-center gap-3 border border-acc px-3.5 py-1">
       <span className="font-mono font-bold text-acc">[!]</span>
       <span className="flex-grow">{notice}</span>
+      {NEEDS_LOG.test(notice) && platform.canOpenLogs() && (
+        <Btn variant="link" onClick={() => void platform.openLogs()}>{t('common.openLogs')}</Btn>
+      )}
       <CloseBtn onClick={() => setNotice('')} label={t('common.dismiss')} />
     </div>
   );
@@ -166,7 +170,12 @@ export function EngineBanner() {
   return (
     <Alert
       title={t(`engineBanner.${info.status}.title`)}
-      action={info.status === 'offline' ? <Btn variant="ghost" onClick={() => void platform.restartEngine()}>{t('engineBanner.restart')}</Btn> : undefined}
+      action={info.status === 'offline' ? (
+        <>
+          <Btn variant="ghost" onClick={() => void platform.restartEngine()}>{t('engineBanner.restart')}</Btn>
+          {platform.canOpenLogs() && <Btn variant="link" onClick={() => void platform.openLogs()}>{t('common.openLogs')}</Btn>}
+        </>
+      ) : undefined}
     >
       {t(`engineBanner.${info.status}.body`)}
       {info.lastError && <span className="block font-mono text-[11px] text-mute mt-1 break-all">{info.lastError}</span>}

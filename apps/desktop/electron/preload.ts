@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('easyvoice', {
   readText: (p: string) => ipcRenderer.invoke('fs:readText', p),
   showInFolder: (p: string) => ipcRenderer.invoke('shell:showInFolder', p),
   openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url),
+  openLogs: () => ipcRenderer.invoke('shell:openLogs'),
   engineInfo: () => ipcRenderer.invoke('engine:info'),
   restartEngine: () => ipcRenderer.invoke('engine:restart'),
   appPaths: () => ipcRenderer.invoke('app:paths'),

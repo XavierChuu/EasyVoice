@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain, net, session, shell, systemPreferences } from 'electron';
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 import { setupHotkeys } from './hotkeys';
@@ -84,6 +84,12 @@ ipcMain.handle('dialog:pickFolder', async (_e, title?: string) => {
   return r.canceled ? null : r.filePaths[0];
 });
 ipcMain.handle('shell:showInFolder', (_e, p: string) => shell.showItemInFolder(p));
+ipcMain.handle('shell:openLogs', () => {
+  // engine.log do engine ghi vào <thư mục dữ liệu>/logs (cùng gốc với runtime: %APPDATA%\EasyVoice trên Windows).
+  const dir = path.join(dataDir(app.getPath('appData')), 'logs');
+  mkdirSync(dir, { recursive: true });
+  return shell.openPath(dir);
+});
 ipcMain.handle('shell:openExternal', (_e, url: string) => {
   if (/^(https:\/\/|mailto:)/.test(url)) return shell.openExternal(url);
 });
